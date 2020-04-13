@@ -1,7 +1,9 @@
-(** The type [command] represents a player command that is decomposed
-    into a verb and possibly an object phrase. *)
+
+(** The type [word] represents the word that follows the command. *)
 type word = string
 
+(** The type [command] represents a player command that is decomposed
+    into a verb and possibly an object phrase. *)
 type command = 
   | Create of word
   | Quit
