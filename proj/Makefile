@@ -1,4 +1,4 @@
-MODULES=adventure command state main author
+MODULES=game command state main
 OBJECTS=$(MODULES:=.cmo)
 MLS=$(MODULES:=.ml)
 MLIS=$(MODULES:=.mli)
@@ -26,7 +26,7 @@ finalcheck: check
 	bash finalcheck.sh
 
 zip:
-	zip adventure.zip *.ml* *.json _tags Makefile
+	zip game.zip *.ml* *.json _tags Makefile
 	
 docs: docs-public docs-private
 	
