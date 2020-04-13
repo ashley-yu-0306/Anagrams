@@ -11,4 +11,4 @@ type letter = char
 
 (** [from_json j] is the game that [j] represents.
     Requires: [j] is a valid JSON game representation. *)
-(* val from_json : Yojson.Basic.t -> t *)
+val from_json : Yojson.Basic.t -> t
