@@ -2,10 +2,10 @@ open Yojson.Basic.Util
 (** The abstract type of values representing games. *)
 type t
 
-(** *)
+(** The type of the points that each letter is worth. *)
 type points = int
 
-(** *)
+(** The type of the letters. *)
 type letter = char
 
 

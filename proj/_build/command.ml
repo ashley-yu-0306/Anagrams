@@ -1,5 +1,3 @@
-
-
 type word = string
 
 type command = 
