@@ -1,3 +1,5 @@
+open Yojson.Basic.Util
+
 type points = int
 type letter = char
 
