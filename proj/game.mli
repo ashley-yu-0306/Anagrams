@@ -8,7 +8,8 @@ type points = int
 (** The type of the letters. *)
 type letter = char
 
+type alphabet
 
 (** [from_json j] is the game that [j] represents.
     Requires: [j] is a valid JSON game representation. *)
-val from_json : Yojson.Basic.t -> t
+val from_json : Yojson.Basic.t -> alphabet
