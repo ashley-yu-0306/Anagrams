@@ -3,11 +3,17 @@
 type word = string
 
 (** The type [command] represents a player command that is decomposed
-    into a verb and possibly an object phrase. *)
+    into a verb and possibly a word. *)
 type command = 
   | Create of word
   | Quit
   | Pass
+
+(** The type [check] represents a player command when checking other's words 
+    list that is decomposed into a verb and possibly a word. *)
+type check =
+  | Valid
+  | Invalid of word
 
 (** Raised when an empty command is parsed. *)
 exception Empty

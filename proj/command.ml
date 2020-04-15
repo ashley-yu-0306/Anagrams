@@ -9,6 +9,10 @@ exception Empty
 
 exception Malformed
 
+type check =
+  | Valid
+  | Invalid of word
+
 (** [remove x acc] removes elements from the given list if [x] equals the 
     element, returning a new list [acc] with elements not equal to [x]. *)
 let rec remove x acc = function

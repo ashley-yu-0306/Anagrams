@@ -16,8 +16,8 @@ type alphabet
     Requires: [j] is a valid JSON game representation. *)
 val from_json : Yojson.Basic.t -> alphabet
 
-(** [letter_set a] is the randomly picked letter set for the game. *)
-val letter_set: alphabet -> t
+(** [combo_set a] is the randomly picked letter set for the game. *)
+val combo_set: alphabet -> t
 
 (** [get_points l set] is the point that the letter [l] is worth. *)
 val get_points: letter -> t -> points
