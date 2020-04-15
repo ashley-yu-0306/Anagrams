@@ -28,6 +28,12 @@ let letter_set (a : alphabet) : t = {
                 (rand_l a.consonants 21); (rand_l a.consonants 21)];
 }
 
+(** For if t is not split up by vowels scenario: *)
+(* let letter_set a = 
+   [(rand_l a.vowels 5);(rand_l a.vowels 5); (rand_l a.consonants 21); 
+   (rand_l a.consonants 21); (rand_l a.consonants 21); (rand_l a.consonants 21)] *)
+
+
 let rec get_points l set = match set with 
   | [] -> failwith "not in letter set" (* can be changed when implementing legal/illegal inputs! *)
   | (l', p) :: t -> if l = l' then p else get_points l t
