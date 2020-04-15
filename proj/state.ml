@@ -1,15 +1,14 @@
 open Command
 
 type player = {   
-player_words:(Command.word * Game.points) list;
-total_points: Game.points;
+  player_words:(Command.word * Game.points) list;
+  total_points: Game.points;
 }
 
 type  t ={
-turns_left: int;
-player_list: player list
+  turns_left: int;
+  player_list: (int * player) list
 }
-
 
 let init_state game = failwith "unimplemented"
 let turns state = failwith "unimplemented"
