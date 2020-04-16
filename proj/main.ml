@@ -1,8 +1,16 @@
 open Game
-open State
 open Command
+open State
 
-let loopgame game st : unit = failwith "unimpl"
+let rec loopgame game st : unit = print_endline "Enter your word: ";
+  print_string "> ";
+  match parse (read_line()) with
+  | exception Empty -> print_endline "Filler"; loopgame game st
+  | exception Malformed -> print_endline "Filler"; loopgame game st
+  | your_command -> (match your_command with
+      | Quit -> print_endline "Bye!"; exit 0
+      | Pass -> print_endline "Filler"; exit 0
+      | Create w -> print_endline "Filler"; loopgame game (create w game st))
 
 (** [play_game j] starts the game with the letter set generated from the 
     alphabet in file [j]. *)
@@ -14,7 +22,9 @@ let play_game j =
   in 
   let our_game = combo_set (from_json json) in
   let initst = our_game |> init_state in
-  print_endline "Your 6 Letters: "; loopgame our_game initst
+  print_endline "Your 6 Letters: "; 
+  print_list our_game;
+  loopgame our_game initst
 
 (** [main ()] prompts for the game to play, then starts it. *)
 let main () = 

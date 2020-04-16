@@ -28,6 +28,9 @@ let combo_set a =
   [(rand_l a.vowels 5);(rand_l a.vowels 5); (rand_l a.consonants 21); 
    (rand_l a.consonants 21); (rand_l a.consonants 21); (rand_l a.consonants 21)]
 
+let print_list a = print_endline "Your Letters: "; 
+  List.iter (fun (k,v) -> print_string (k ^ ", worth "); 
+              print_int v; print_endline " points. ") a
 
 let rec get_points set l = match set with 
   | [] -> failwith "not in letter set"
