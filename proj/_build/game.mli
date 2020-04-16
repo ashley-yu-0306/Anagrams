@@ -19,5 +19,5 @@ val from_json : Yojson.Basic.t -> alphabet
 (** [combo_set a] is the randomly picked letter set for the game. *)
 val combo_set: alphabet -> t
 
-(** [get_points l set] is the point that the letter [l] is worth. *)
+(** [get_points set l] is the point that the letter [l] is worth. *)
 val get_points: letter -> t -> points

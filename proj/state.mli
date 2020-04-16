@@ -11,19 +11,22 @@ open Command
 type player
 type t
 
-(** [init_state game] is the initial state of [game]. The initial state
-has the combination of letters and the turns left in the game. *)
-val init_state : Game.t -> t
+(** [init_state set] is the initial state of the game. The initial state
+has the combination of letters [set], the turns left in the game, the
+current player, and the list of players. *)
+val init_state : set -> t
 
-(** [turns st] is the turns left in game state [st]. *)
+(** [turns state] is the turns left in game state [state]. *)
 val turns: t  -> int
 
-(** [create com game st] is the state [st] updated with the word created 
-by the player in [game] with command [com]. *)
+(** [calculate_word_points word set] is the points of [word] based on point
+values in [set]. *)
+val calculate_word_points: Command.word -> Game.points
+
+(** [create word game state] is the state [state] updated with the [word] created 
+by the player in [game]. *)
 val create: Command.word -> Game.t -> t -> t
 
-(** [current_player st] is the player whose turn is active in state [st]. *)
+(** [current_player state] is the player whose turn is active in state [st]. *)
 val current_player: t -> player
 
-(** [calculate_word_points w] is the points of the word [w]. *)
-val calculate_word_points: Command.word -> Game.points
