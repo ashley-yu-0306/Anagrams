@@ -4,9 +4,9 @@ ocamlfind ocamldep -package oUnit -package yojson -package ANSITerminal -modules
 # Target: game.cmi, tags: { package(ANSITerminal), package(oUnit), package(yojson), byte, compile, extension:mli, file:game.mli, interf, ocaml, quiet, traverse }
 ocamlfind ocamlc -c -package oUnit -package yojson -package ANSITerminal -o game.cmi game.mli # cached
 # Target: game.ml.depends, tags: { package(ANSITerminal), package(oUnit), package(yojson), extension:ml, file:game.ml, ocaml, ocamldep, quiet, traverse }
-ocamlfind ocamldep -package oUnit -package yojson -package ANSITerminal -modules game.ml > game.ml.depends
+ocamlfind ocamldep -package oUnit -package yojson -package ANSITerminal -modules game.ml > game.ml.depends # cached
 # Target: game.cmo, tags: { package(ANSITerminal), package(oUnit), package(yojson), byte, compile, extension:cmo, extension:ml, file:game.cmo, file:game.ml, implem, ocaml, quiet, traverse }
-ocamlfind ocamlc -c -package oUnit -package yojson -package ANSITerminal -o game.cmo game.ml
+ocamlfind ocamlc -c -package oUnit -package yojson -package ANSITerminal -o game.cmo game.ml # cached
 # Target: command.mli.depends, tags: { package(ANSITerminal), package(oUnit), package(yojson), extension:mli, file:command.mli, ocaml, ocamldep, quiet, traverse }
 ocamlfind ocamldep -package oUnit -package yojson -package ANSITerminal -modules command.mli > command.mli.depends # cached
 # Target: command.cmi, tags: { package(ANSITerminal), package(oUnit), package(yojson), byte, compile, extension:mli, file:command.mli, interf, ocaml, quiet, traverse }
@@ -19,10 +19,16 @@ ocamlfind ocamlc -c -package oUnit -package yojson -package ANSITerminal -o comm
 ocamlfind ocamldep -package oUnit -package yojson -package ANSITerminal -modules state.mli > state.mli.depends
 # Target: state.cmi, tags: { package(ANSITerminal), package(oUnit), package(yojson), byte, compile, extension:mli, file:state.mli, interf, ocaml, quiet, traverse }
 ocamlfind ocamlc -c -package oUnit -package yojson -package ANSITerminal -o state.cmi state.mli
-+ ocamlfind ocamlc -c -package oUnit -package yojson -package ANSITerminal -o state.cmi state.mli
-File "state.mli", line 17, characters 17-20:
-17 | val init_state : set -> t
-                      ^^^
-Error: Unbound type constructor set
+# Target: state.ml.depends, tags: { package(ANSITerminal), package(oUnit), package(yojson), extension:ml, file:state.ml, ocaml, ocamldep, quiet, traverse }
+ocamlfind ocamldep -package oUnit -package yojson -package ANSITerminal -modules state.ml > state.ml.depends # cached
+# Target: state.cmo, tags: { package(ANSITerminal), package(oUnit), package(yojson), byte, compile, extension:cmo, extension:ml, file:state.cmo, file:state.ml, implem, ocaml, quiet, traverse }
+ocamlfind ocamlc -c -package oUnit -package yojson -package ANSITerminal -o state.cmo state.ml
++ ocamlfind ocamlc -c -package oUnit -package yojson -package ANSITerminal -o state.cmo state.ml
+File "state.ml", line 35, characters 52-82:
+35 |   let seq = word |> String.to_seq |> List.of_seq |> List.map (Game.get_points set) in 
+                                                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Error: This expression has type Game.letter list -> Game.points list
+       but an expression was expected of type char list -> 'a
+       Type Game.letter = string is not compatible with type char 
 Command exited with code 2.
 # Compilation unsuccessful.

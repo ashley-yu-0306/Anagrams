@@ -21,7 +21,7 @@ val turns: t  -> int
 
 (** [calculate_word_points word set] is the points of [word] based on point
     values in [set]. *)
-val calculate_word_points: Command.word -> Game.points
+val calculate_word_points: Command.word -> Game.t -> Game.points
 
 (** [create word game state] is the state [state] updated with the [word] created 
     by the player in [game]. *)

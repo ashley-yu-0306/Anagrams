@@ -23,4 +23,5 @@ val combo_set: alphabet -> t
 (* <<<<<<< HEAD
    val get_points: letter -> t -> points
    ======= *)
+val get_points: t -> letter -> points
 
