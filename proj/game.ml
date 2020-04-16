@@ -32,8 +32,4 @@ let combo_set a =
 let rec get_points set l = match set with 
   | [] -> failwith "not in letter set"
   (* can be changed when implementing legal/illegal inputs! *)
-<<<<<<< HEAD
   | (l', p) :: t -> if l = l' then p else get_points t l 
-=======
-  | (l', p) :: t -> if l = l' then p else get_points t l
->>>>>>> fc8b14695fdf2ab5d51eb863e1ae84743f5acb17
