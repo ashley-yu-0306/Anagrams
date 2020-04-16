@@ -20,4 +20,8 @@ val from_json : Yojson.Basic.t -> alphabet
 val combo_set: alphabet -> t
 
 (** [get_points set l] is the point that the letter [l] is worth. *)
+<<<<<<< HEAD
 val get_points: letter -> t -> points
+=======
+val get_points: t -> letter -> points
+>>>>>>> fc8b14695fdf2ab5d51eb863e1ae84743f5acb17
