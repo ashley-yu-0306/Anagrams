@@ -24,19 +24,12 @@ let from_json j : alphabet = {
     index between 0 (inclusive) and the bound [b] (exclusive). *)
 let rand_l a b = (List.nth a (Random.int b))
 
-(* let letter_set (a : alphabet) : t = {
-   vowels = [(rand_l a.vowels 5);(rand_l a.vowels 5)];
-   consonants = [(rand_l a.consonants 21); (rand_l a.consonants 21); 
-                (rand_l a.consonants 21); (rand_l a.consonants 21)];
-   } *)
-
-(** For if t is not split up by vowels scenario: *)
 let combo_set a = 
   [(rand_l a.vowels 5);(rand_l a.vowels 5); (rand_l a.consonants 21); 
    (rand_l a.consonants 21); (rand_l a.consonants 21); (rand_l a.consonants 21)]
 
 
-let rec get_points l set = match set with 
+let rec get_points set l = match set with 
   | [] -> failwith "not in letter set"
   (* can be changed when implementing legal/illegal inputs! *)
-  | (l', p) :: t -> if l = l' then p else get_points l t
+  | (l', p) :: t -> if l = l' then p else get_points t l
