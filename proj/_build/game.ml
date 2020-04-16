@@ -22,7 +22,7 @@ let from_json j : alphabet = {
 
 (** [rand_l a b] returns a random letter in the list [a], with 
     index between 0 (inclusive) and the bound [b] (exclusive). *)
-let rand_l a b = (List.nth a (Random.int b))
+let rand_l a b = (List.nth a (Random.self_init(); Random.int b))
 
 let combo_set a = 
   [(rand_l a.vowels 5);(rand_l a.vowels 5); (rand_l a.consonants 21); 
