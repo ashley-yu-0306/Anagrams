@@ -15,6 +15,8 @@ type  t = {
   set: Game.t;
 }
 
+type result = Legal of t | Illegal
+
 (** [init_player] initializes a player *)
 let init_player = {
   player_words = [];
@@ -58,16 +60,33 @@ let rec update_player_list state players word id  =
       } in (k,player)::(update_player_list state t word id)
     else (k,v)::(update_player_list state t word id)
 
+(**[remove l lst acc] is [lst] with the first occurance of [l] removed. *)
+let rec remove l lst acc = match lst with
+  | [] -> acc
+  | h :: t -> if l = h then acc @ t else remove l t (h :: acc)
+
+(**[check_illegal ll combo_l] is [true] iff [ll] contains letter(s) that is not
+   in the combo or more occurances of some letter offered in the combo. *)
+let rec check_illegal ll combo_l = 
+  match ll with 
+  | [] -> false
+  | h :: t -> if not (List.mem h combo_l) then true 
+    else check_illegal t (remove h combo_l [])
+
+
 let create word game state = 
-  let player = state.current_player in 
-  let player_l = state.player_list in 
-  let new_player_l = update_player_list state player_l word player in
-  {
-    turns_left = state.turns_left - 1;
-    player_list = new_player_l;
-    current_player = if player = 2 then 1 else player + 1;
-    set= state.set;
-  } 
+  if word = "" || check_illegal (word |> word_to_cl |> cl_to_ll) 
+       (Game.get_letters game) then Illegal
+  else
+    let player = state.current_player in 
+    let player_l = state.player_list in 
+    let new_player_l = update_player_list state player_l word player in
+    Legal {
+      turns_left = state.turns_left - 1;
+      player_list = new_player_l;
+      current_player = if player = 2 then 1 else player + 1;
+      set= state.set;
+    } 
 
 let current_player state = 
   state.current_player

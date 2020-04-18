@@ -36,3 +36,5 @@ let rec get_points set l = match set with
   | [] -> failwith "not in letter set"
   (* can be changed when implementing legal/illegal inputs! *)
   | (l', p) :: t -> if l = l' then p else get_points t l 
+
+let get_letters game = List.map fst (combo_set game)

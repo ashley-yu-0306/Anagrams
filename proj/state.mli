@@ -10,6 +10,7 @@ open Command
 (** The abstract types representing the state of the player and the game. *)
 type player
 type t
+type result = Legal of t | Illegal
 
 (** [init_state set] is the initial state of the game. The initial state
     has the combination of letters [set], the turns left in the game, the
@@ -23,9 +24,9 @@ val turns: t  -> int
     values in [set]. *)
 val calculate_word_points: Command.word -> Game.t -> Game.points
 
-(** [create word game state] is the state [state] updated with the [word] created 
-    by the player in [game]. *)
-val create: Command.word -> Game.t -> t -> t
+(** [create word game state] is the result after the player in [game] attempts
+    to create the [word]. *)
+val create: Command.word -> Game.t -> t -> result
 
 (** [current_player state] is the player whose turn is active in state [st]. *)
 (* val current_player: t -> player *)
