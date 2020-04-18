@@ -13,7 +13,7 @@ type command =
     list that is decomposed into a verb and possibly a word. *)
 type check =
   | Valid
-  | Invalid of word
+  | Invalid of word list
 
 (** Raised when an empty command is parsed. *)
 exception Empty

@@ -94,7 +94,43 @@ let create word game state =
 let current_player state = 
   state.current_player
 
+
 let current_player_wordlist state =  
   (List.assoc state.current_player state.player_list).player_words
 
 (** =====Below is for check phase====== *)
+(** case sensitivity?*)
+(** [remove_invalid next_player inv_words state] is a player with all invalid 
+    words removed from his words list*)
+let rec remove_invalid next_player inv_words state = 
+  match inv_words with
+  | [] -> next_player
+  | h :: t -> (if List.mem_assoc h (next_player.player_words) 
+               then (let new_next_pwlst = List.remove_assoc h (next_player.player_words) in 
+                     remove_invalid ({player_words = new_next_pwlst; 
+                                      total_points = 
+                                        next_player.total_points - 
+                                        calculate_word_points h state.set}) 
+                       t state)
+               else remove_invalid next_player t state)
+
+(** [update_player_list2 state word_lst id ] is the new player list with player 
+    [id]'s words list checked as valid.*)
+let update_player_list2 state word_lst id = 
+  let new_next_player = 
+    remove_invalid (List.assoc id state.player_list) word_lst state in 
+  (id, new_next_player) :: (List.remove_assoc id state.player_list)
+
+
+(** [invalid word_lst game state] is the updated state where the next player's 
+    words list is checked as valid.*)
+let invalid word_lst game state =
+  let next_id = 
+    if state.current_player = 2 then 1 else state.current_player + 1 in 
+  let new_player_l = update_player_list2 state word_lst next_id in
+  {
+    turns_left = 0;
+    player_list = new_player_l;
+    current_player = next_id;
+    set= state.set;
+  } 

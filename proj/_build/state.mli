@@ -38,3 +38,6 @@ val current_player: t -> int
     current player.*)
 val current_player_wordlist: t -> (Command.word * Game.points) list
 
+(**[invalid word_lst game state] is the updated state where the next player's 
+    words list is checked as valid. *)
+val invalid: Command.word list -> Game.t -> t -> t
