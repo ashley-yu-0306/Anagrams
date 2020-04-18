@@ -11,7 +11,7 @@ exception Malformed
 
 type check =
   | Valid
-  | Invalid of word
+  | Invalid of word list
 
 (** [remove x acc] removes elements from the given list if [x] equals the 
     element, returning a new list [acc] with elements not equal to [x]. *)
@@ -29,4 +29,14 @@ let parse str =
     then Quit
     else if List.nth lst 0 = "pass" && List.length lst = 1
     then Pass
+    else raise Malformed
+
+let parse_check str = 
+  match List.rev (String.split_on_char ' ' str |> remove "" []) with
+  | [] -> raise Empty 
+  | h :: t -> 
+    if h = "invalid" && t != []
+    then Invalid t
+    else if h = "valid" && t = []
+    then Valid
     else raise Malformed

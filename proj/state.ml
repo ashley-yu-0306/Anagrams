@@ -24,7 +24,7 @@ let init_player = {
 }
 
 let init_state set = {
-  turns_left= 10;
+  turns_left= 4;
   player_list= [(1,init_player);(2,init_player)];
   current_player = 1;
   set= set;
@@ -96,3 +96,5 @@ let current_player state =
 
 let current_player_wordlist state =  
   (List.assoc state.current_player state.player_list).player_words
+
+(** =====Below is for check phase====== *)
