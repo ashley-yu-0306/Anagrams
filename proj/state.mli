@@ -34,3 +34,7 @@ val create: Command.word -> Game.t -> t -> result
 (** [current_player state] is the player_id whose turn is active in state [st]. *)
 val current_player: t -> int
 
+(** [current_player_wordlist state] is the current word-points list of the 
+    current player.*)
+val current_player_wordlist: t -> (Command.word * Game.points) list
+

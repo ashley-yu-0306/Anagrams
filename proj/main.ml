@@ -10,7 +10,14 @@ let rec loopgame game st : unit = print_endline "Enter your word: ";
   | your_command -> (match your_command with
       | Quit -> print_endline "Bye!"; exit 0
       | Pass -> print_endline "Filler"; exit 0
-      | Create w -> print_endline "Filler"; loopgame game (create w game st))
+      | Create w -> 
+        if List.mem_assoc w (State.current_player_wordlist st) 
+        then (print_endline "this word has already been created"; 
+              loopgame game st) 
+        else (match create w game st with
+            | Illegal -> print_endline "can't create such word"; 
+              loopgame game st
+            | Legal st' -> loopgame game st'))
 
 (** [play_game j] starts the game with the letter set generated from the 
     alphabet in file [j]. *)
