@@ -12,6 +12,7 @@ type  t = {
   turns_left: int;
   player_list: (player_id  * player) list;
   current_player: player_id;
+  total_players: int;
   set: Game.t;
 }
 
@@ -24,14 +25,29 @@ let init_player = {
 }
 
 let init_state set = {
-  turns_left= 2;
+  turns_left= 4; (*hard coded // change with config implementation*)
   player_list= [(1,init_player);(2,init_player)];
   current_player = 1;
+  total_players = 2; (*hard coded // change with config implementation*)
   set= set;
 }
 
 let turns state = 
   state.turns_left
+
+let current_player state = 
+  state.current_player
+
+let current_player_wordlist state =  
+  (List.assoc state.current_player state.player_list).player_words
+
+let current_player_points state = 
+  (List.assoc state.current_player state.player_list).total_points
+
+let next_player state = 
+  if (not (state.current_player = state.total_players))
+  then state.current_player + 1 
+  else 1
 
 (**[word_to_cl n] is a char list of the input [word].*)
 let word_to_cl n = List.init (String.length n) (String.get n)
@@ -76,7 +92,6 @@ let rec check_illegal ll combo_l =
   | h :: t -> if not (List.mem h combo_l) then true 
     else check_illegal t (remove h combo_l [])
 
-
 let create word game state = 
   if word = "" || check_illegal (word |> word_to_cl |> cl_to_ll) 
        (Game.get_letters game) then Illegal
@@ -87,20 +102,42 @@ let create word game state =
     Legal {
       turns_left = state.turns_left - 1;
       player_list = new_player_l;
-      current_player = if player = 2 then 1 else player + 1;
-      set= state.set;
+      current_player = next_player state;
+      total_players = state.total_players;
+      set = state.set;
     } 
 
-let current_player state = 
-  state.current_player
+let pass game state = 
+  Legal { 
+    turns_left = state.turns_left - 1;
+    player_list = state.player_list;
+    current_player = next_player state;
+    total_players = state.total_players;
+    set = state.set;
+  }
 
-let current_player_wordlist state =  
-  (List.assoc state.current_player state.player_list).player_words
+let player_count state = 
+  state.total_players
 
-let player_count state = List.length state.player_list
+let rec winner_check_helper players winners winner_p = 
+  match players with 
+  | [] -> (winners,winner_p)
+  | (id,p)::t -> if p.total_points > winner_p 
+    then winner_check_helper t (id::[]) p.total_points
+    else if p.total_points = winner_p && (not (List.mem id winners))
+    then winner_check_helper t (id::winners) winner_p 
+    else winner_check_helper t winners winner_p 
+
+let winner_check state =
+  let state' = {state with current_player = 1;} in
+  let p_list = state.player_list in 
+  let win_id = state'.current_player in 
+  let win_p = (List.assoc win_id p_list).total_points in
+  winner_check_helper p_list (win_id::[]) win_p
 
 (** =====Below is for check phase====== *)
 (** case sensitivity?*)
+
 (** [remove_invalid next_player inv_words state] is a player with all invalid 
     words removed from his words list*)
 let rec remove_invalid next_player inv_words state = 
@@ -124,19 +161,18 @@ let update_player_list2 state word_lst id =
 
 
 let invalid word_lst game state =
-  let next_id = 
-    if state.current_player = 2 then 1 else 2 in 
-  let new_player_l = update_player_list2 state word_lst next_id in
+  let new_player_l = update_player_list2 state word_lst (next_player state) in
   {
     turns_left = 0;
     player_list = new_player_l;
     current_player = state.current_player;
+    total_players = state.total_players;
     set= state.set;
   } 
 
 let valid game state = 
-  {state with current_player = state.current_player + 1;}
+  {state with current_player = state.current_player + 1}
 
 let print_player_word_list state id = 
-let wl = (List.assoc id state.player_list).player_words in
-List.iter (fun (k,v)-> print_string k; print_newline ();) wl
+  let wl = (List.assoc id state.player_list).player_words in
+  List.iter (fun (k,v)-> print_string k; print_newline ();) wl
