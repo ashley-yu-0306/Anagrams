@@ -40,5 +40,8 @@ exception Malformed
     or if the verb is "create" and there is no word following. *)
 val parse : string -> command
 
-(** [parse_check] is similar to [parse]; parses commands in check phase.*)
+(** [parse_number] is similar to [parse]; parses number of players at start. *)
+val parse_number : string -> int
+
+(** [parse_check] is similar to [parse]; parses commands in check phase. *)
 val parse_check : string -> check

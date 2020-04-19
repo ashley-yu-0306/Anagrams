@@ -97,6 +97,17 @@ let rec loopgame game st : unit =
 
   )
 
+
+let rec ask_players() = 
+  print_endline "How many players: "; 
+  print_string "> "; 
+  match parse_number (read_line()) with
+  | 0 -> print_endline "ERROR. Enter a valid number of players: "; 
+    ask_players()
+  | x -> x
+
+
+
 (** [play_game j] starts the game with the letter set generated from the 
     alphabet in file [j]. *)
 let play_game j = 
@@ -106,9 +117,8 @@ let play_game j =
     | _ -> Yojson.Basic.from_file j
   in 
   let our_game = combo_set (from_json json) in
-  let initst = our_game |> init_state in
-  (* print_endline "Your 6 Letters: "; 
-     print_list our_game; *) (* moved to be printed each turn, move back if needed *)
+  let num_players = ask_players() in
+  let initst = init_state our_game num_players in 
   loopgame our_game initst
 
 (** [main ()] prompts for the game to play, then starts it. *)

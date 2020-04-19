@@ -19,6 +19,12 @@ let rec remove x acc = function
   | [] -> acc
   | h::t -> if h = x then remove x acc t else remove x (h::acc) t
 
+let parse_number str = 
+  match int_of_string str with
+  | exception (Failure s) -> 0
+  | x -> x
+
+
 let parse str = 
   if String.length str = 0 then raise Empty
   else let lst = List.rev (String.split_on_char ' ' str |> remove "" []) in

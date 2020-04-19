@@ -24,11 +24,12 @@ let init_player = {
   total_points = 0;
 }
 
-let init_state set = {
-  turns_left= 4; (*hard coded // change with config implementation*)
-  player_list= [(1,init_player);(2,init_player)];
+let init_state set num = {
+  turns_left= 5 * num; (*hard coded // change with config implementation*)
+  (* player_list= [(1,init_player);(2,init_player)]; *)
+  player_list = List.init num (fun i -> ((i + 1), init_player));
   current_player = 1;
-  total_players = 2; (*hard coded // change with config implementation*)
+  total_players = num; (*hard coded // change with config implementation*)
   set= set;
 }
 
