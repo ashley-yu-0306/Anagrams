@@ -24,7 +24,7 @@ let init_player = {
 }
 
 let init_state set = {
-  turns_left= 4;
+  turns_left= 2;
   player_list= [(1,init_player);(2,init_player)];
   current_player = 1;
   set= set;
@@ -94,9 +94,10 @@ let create word game state =
 let current_player state = 
   state.current_player
 
-
 let current_player_wordlist state =  
   (List.assoc state.current_player state.player_list).player_words
+
+let player_count state = List.length state.player_list
 
 (** =====Below is for check phase====== *)
 (** case sensitivity?*)
@@ -122,15 +123,20 @@ let update_player_list2 state word_lst id =
   (id, new_next_player) :: (List.remove_assoc id state.player_list)
 
 
-(** [invalid word_lst game state] is the updated state where the next player's 
-    words list is checked as valid.*)
 let invalid word_lst game state =
   let next_id = 
-    if state.current_player = 2 then 1 else state.current_player + 1 in 
+    if state.current_player = 2 then 1 else 2 in 
   let new_player_l = update_player_list2 state word_lst next_id in
   {
     turns_left = 0;
     player_list = new_player_l;
-    current_player = next_id;
+    current_player = state.current_player;
     set= state.set;
   } 
+
+let valid game state = 
+  {state with current_player = state.current_player + 1;}
+
+let print_player_word_list state id = 
+let wl = (List.assoc id state.player_list).player_words in
+List.iter (fun (k,v)-> print_string k; print_newline ();) wl

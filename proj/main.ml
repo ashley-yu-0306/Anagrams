@@ -5,9 +5,19 @@ open State
 (** [check_phase game st] is the check phase of [game] with the final state 
     [st], where players check each other's word lists. *)
 let rec check_phase game st = 
-  print_endline ("(Player " ^ (State.current_player st |> string_of_int)
-                 ^ ") " ^ "Check your next player's word list:");
-  print_string "> "
+  if current_player st > State.player_count st 
+  then (print_endline "calculate winner and stuff"; exit 0)
+  else (
+    print_endline ("(Player " ^ (State.current_player st |> string_of_int)
+                   ^ ") " ^ "Check your next player's word list:");
+    State.print_player_word_list st (if State.current_player st = 1 then 2 else 1);
+    (match parse_check (read_line()) with
+     | exception Empty -> print_endline "Filler"; check_phase game st
+     | exception Malformed -> print_endline "Filler"; check_phase game st
+     | your_command -> (match your_command with
+         | Valid -> State.valid game st |> check_phase game
+         | Invalid wl -> State.invalid wl game st |> check_phase game))
+  )
 
 
 (** [loopgame game st] is the [game] with updating states [st]. *)

@@ -11,6 +11,7 @@ open Command
 type player
 type t
 type result = Legal of t | Illegal
+type player_id = int
 
 (** [init_state set] is the initial state of the game. The initial state
     has the combination of letters [set], the turns left in the game, the
@@ -38,6 +39,16 @@ val current_player: t -> int
     current player.*)
 val current_player_wordlist: t -> (Command.word * Game.points) list
 
+(** [player_count] is the number of players in the game.*)
+val player_count: t -> int
+
 (**[invalid word_lst game state] is the updated state where the next player's 
     words list is checked as valid. *)
 val invalid: Command.word list -> Game.t -> t -> t
+
+(** [invalid word_lst game state] is the updated state where the next player's 
+    words list is already valid.*)
+val valid : Game.t -> t -> t
+
+(** [print_player_word_list state id] prints player[id]'s word list.*)
+val print_player_word_list: t -> player_id -> unit

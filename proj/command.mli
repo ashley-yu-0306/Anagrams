@@ -39,3 +39,6 @@ exception Malformed
     or if the verb is "quit" or "pass" and there is a word following,
     or if the verb is "create" and there is no word following. *)
 val parse : string -> command
+
+(** [parse_check] is similar to [parse]; parses commands in check phase.*)
+val parse_check : string -> check
