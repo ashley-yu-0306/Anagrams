@@ -31,6 +31,8 @@ let rec end_phase game st =
     [st], where players check each other's word lists. *)
 let rec check_phase game st = 
   print_endline "Turns completed! Entering check phase."; 
+  print_endline "If everything looks good, enter 'valid', or
+  if any words look wrong, enter 'invalid (the word here)'. "; 
   if current_player st > State.player_count st 
   then (ignore(Sys.command "clear"); end_phase game st)
   else (
