@@ -29,8 +29,8 @@ val calculate_word_points: Command.word -> Game.t -> Game.points
     to create the [word]. *)
 val create: Command.word -> Game.t -> t -> result
 
-(** [current_player state] is the player whose turn is active in state [st]. *)
-(* val current_player: t -> player *)
+(** [pass game state] is the result after the player in [game] passes their turn.*)
+val pass: Game.t -> t -> result
 
 (** [current_player state] is the player_id whose turn is active in state [st]. *)
 val current_player: t -> int
