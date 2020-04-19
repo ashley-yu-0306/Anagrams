@@ -37,6 +37,7 @@ let rec check_phase game st =
     print_endline ("(Player " ^ (State.current_player st |> string_of_int)
                    ^ ") " ^ "Check your next player's word list:");
     State.print_player_word_list st (next_player st);
+    print_string "> ";
     (match parse_check (read_line()) with
      | exception Empty -> print_endline "Please enter a command."; 
        check_phase game st
