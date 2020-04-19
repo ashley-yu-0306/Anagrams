@@ -65,15 +65,16 @@ let cl_to_ll cl = List.map (fun x -> Char.escaped x) cl
 let calculate_word_points word set = List.fold_left 
     (fun x y -> x + Game.get_points set y) 0 (word |> word_to_cl |> cl_to_ll)
 
-(** [update_player_list state players word id] updates the state of the player with
-    player_id [id] in [players] by adding points gained in entering [word]. Points are
-    calculated with the letter combination set in [state].*)
+(** [update_player_list state players word id] updates the state of the player
+    with player_id [id] in [players] by adding points gained in entering [word]. 
+    Points are calculated with the letter combination set in [state].*)
 let rec update_player_list state players word id  = 
   match players with
   | [] -> [] 
   | (k,v)::t -> if k = id 
     then let points = calculate_word_points word state.set in 
-      let words = List.append (v.player_words) [(word,points)] in 
+      let words = List.append (v.player_words) 
+          [(String.uppercase_ascii word,points)] in 
       let player = {
         player_words = words;
         total_points = v.total_points + points;
@@ -137,7 +138,7 @@ let winner_check state =
   winner_check_helper p_list (win_id::[]) win_p
 
 (** =====Below is for check phase====== *)
-(** case sensitivity?*)
+
 
 (** [remove_invalid next_player inv_words state] is a player with all invalid 
     words removed from his words list*)
@@ -145,7 +146,8 @@ let rec remove_invalid next_player inv_words state =
   match inv_words with
   | [] -> next_player
   | h :: t -> (if List.mem_assoc h (next_player.player_words) 
-               then (let new_next_pwlst = List.remove_assoc h (next_player.player_words) in 
+               then (let new_next_pwlst = 
+                       List.remove_assoc h (next_player.player_words) in 
                      remove_invalid ({player_words = new_next_pwlst; 
                                       total_points = 
                                         next_player.total_points - 
@@ -162,7 +164,9 @@ let update_player_list2 state word_lst id =
 
 
 let invalid word_lst game state =
-  let new_player_l = update_player_list2 state word_lst (next_player state) in
+  let new_player_l = 
+    update_player_list2 state (List.map String.uppercase_ascii word_lst) 
+      (next_player state) in
   {
     turns_left = 0;
     player_list = new_player_l;

@@ -85,7 +85,8 @@ let rec loopgame game st : unit =
             | Illegal -> loopgame game st
           end
         | Create w -> 
-          if List.mem_assoc w (State.current_player_wordlist st) 
+          if List.mem_assoc (String.uppercase_ascii w) 
+              (State.current_player_wordlist st) 
           then (print_endline "This word has already been created."; 
                 loopgame game st) 
           else 
