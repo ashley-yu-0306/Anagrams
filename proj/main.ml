@@ -20,19 +20,22 @@ let rec end_phase game st =
     let p_text = points |> string_of_int in 
     if List.length winners > 1 
     then let w_text = print (List.rev winners) "" in 
-      print_endline ("Players " ^ w_text ^ " have tied with " ^ p_text ^
-                     " points! Congratulations!" ); exit 0
+      ANSITerminal.(print_string [red] ("Players " ^ w_text ^ 
+                                        " have tied with " ^ p_text ^ 
+                                        " points! Congratulations!\n")); exit 0
     else let w_text = List.hd winners |> string_of_int in 
-      print_endline ("Player " ^ w_text ^ " has won the game with " ^
-                     p_text ^ " points! Congratulations!"); exit 0 
+      ANSITerminal.(print_string [red] ("Player " ^ w_text ^ 
+                                        " has won the game with " ^ p_text 
+                                        ^ " points! Congratulations!\n")); 
+      exit 0 
 
 
 (** [check_phase game st] is the check phase of [game] with the final state 
     [st], where players check each other's word lists. *)
 let rec check_phase game st = 
-  print_endline "Turns completed! Entering check phase."; 
-  print_endline "If everything looks good, enter 'valid', or
-  if any words look wrong, enter 'invalid (the word here)'. "; 
+  print_endline 
+    "If everything looks good, enter 'valid', or if any words look wrong, enter 
+  'invalid (the word or words separated with space)'. "; 
   if current_player st > State.player_count st 
   then (ignore(Sys.command "clear"); end_phase game st)
   else (
@@ -57,6 +60,8 @@ let rec loopgame game st : unit =
   if turns_left = 0 
   then (
     ignore(Sys.command "clear");
+    ANSITerminal.(print_string [green] 
+                    "Turns completed! Entering check phase... \n \n"); 
     check_phase game st)
   else (
     let points = State.current_player_points st |> string_of_int in
@@ -66,13 +71,15 @@ let rec loopgame game st : unit =
     print_endline ("(Player " ^ (State.current_player st |> string_of_int)
                    ^ "), you currently have " ^ points 
                    ^ " points. Enter your word: ");
+    ANSITerminal.(print_string [yellow] 
+                    "Available commands: 'create', 'pass', 'quit'.\n");
     print_string "> ";
     match parse (read_line()) with
     | exception Empty -> print_endline "Please enter a command."; 
       loopgame game st
     | exception Malformed -> 
       print_endline 
-        "Malformed command. Available commands: 'create', 'pass', 'quit'"; 
+        "Malformed command. Available commands: 'create', 'pass', 'quit'."; 
       loopgame game st
     | your_command -> (match your_command with
         | Quit -> print_endline "Bye!"; exit 0
@@ -127,10 +134,11 @@ let play_game j =
 
 (** [main ()] prompts for the game to play, then starts it. *)
 let main () = 
-  ignore(Sys.command "resize -s 30 80");
+  ignore(Sys.command "echo resize -s 30 90");
+  ignore(Sys.command "clear");
   ANSITerminal.(print_string [red]
                   "\n\nWelcome to ANAGRAMS.\n");
-  print_endline 
+  print_endline
     "Please enter the name of the game alphabet file you want to load.\n";
   (** I think we could also automatically load an alphabet file by random,
       or by number of turns, time limit, etc. *)

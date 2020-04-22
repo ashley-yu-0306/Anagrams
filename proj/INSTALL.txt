@@ -1,0 +1,6 @@
+To run and play the game:
+
+Open terminal under file "proj".
+Run $make play	to start the game.
+When prompted, enter filename "alphabet1.json" (without quotation marks).
+Follow the instructions prompted throughout the game.
