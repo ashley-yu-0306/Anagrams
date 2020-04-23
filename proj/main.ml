@@ -108,7 +108,8 @@ let rec loopgame game st : unit =
 
   )
 
-
+(** [ask_players] prompts the player for the number of players, and returns
+    that number to the initial state. *)
 let rec ask_players() = 
   print_endline "How many players: "; 
   print_string "> "; 

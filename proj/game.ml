@@ -28,9 +28,15 @@ let combo_set a =
   [(rand_l a.vowels 5);(rand_l a.vowels 5); (rand_l a.consonants 21); 
    (rand_l a.consonants 21); (rand_l a.consonants 21); (rand_l a.consonants 21)]
 
-let print_list a = print_endline "Your Letters: "; 
+let print_list2 a = print_endline "Your Letters: "; 
   List.iter (fun (k,v) -> print_string (k ^ ", worth "); 
               print_int v; print_endline " points. ") a
+
+let print_list a = print_endline "\nYour Letters: \n"; 
+  List.iter (fun (k,v) -> ANSITerminal.(print_string [Bold;blue] ("     " ^ k ^ "     "))) a;
+  print_string "\n-------------------------------------------------------------------\n";
+  List.iter (fun (k,v) -> print_string "   "; print_int v; print_string " pts   ") a;
+  print_endline "\n"
 
 let rec get_points set l = match set with 
   | [] -> failwith "not in letter set"

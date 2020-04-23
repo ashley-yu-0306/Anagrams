@@ -1,4 +1,4 @@
-MODULES=game command state main
+MODULES=game command state main authors
 OBJECTS=$(MODULES:=.cmo)
 MLS=$(MODULES:=.ml)
 MLIS=$(MODULES:=.mli)
@@ -17,13 +17,6 @@ test:
 
 play:
 	$(OCAMLBUILD) $(MAIN) && ./$(MAIN)
-
-check:
-	bash checkenv.sh && bash checktypes.sh
-	
-finalcheck: check
-	bash checkzip.sh
-	bash finalcheck.sh
 
 zip:
 	zip game.zip *.ml* *.json _tags Makefile
