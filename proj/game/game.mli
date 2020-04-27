@@ -16,10 +16,6 @@ type alphabet
     Requires: [j] is a valid JSON game representation. *)
 val from_json : Yojson.Basic.t -> alphabet
 
-
-(** [combo_set_var a lim] is the randomly picked letter set for the game. *)
-val combo_set_var: alphabet -> int -> t
-
 (** [combo_set a] is the randomly picked letter set for the game. *)
 val combo_set: alphabet -> t
 

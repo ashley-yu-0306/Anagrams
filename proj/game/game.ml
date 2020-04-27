@@ -24,15 +24,6 @@ let from_json j : alphabet = {
     index between 0 (inclusive) and the bound [b] (exclusive). *)
 let rand_l a b = (List.nth a (Random.self_init(); Random.int b))
 
-let combo_set_var a lim =  
-  let vow_num = ((lim + 1) / 3) in
-  let vow_lst = List.init vow_num (fun x -> rand_l a.vowels 5) in
-  let cons_num = lim - vow_num in
-  let cons_lst = List.init cons_num (fun x -> if x < 4 then 
-                                        rand_l a.consonants 21 
-                                      else rand_l a.consonants 18) in
-  vow_lst @ cons_lst
-
 let combo_set a = 
   [(rand_l a.vowels 5);(rand_l a.vowels 5); (rand_l a.consonants 21); 
    (rand_l a.consonants 21); (rand_l a.consonants 21); (rand_l a.consonants 21)]
@@ -42,9 +33,9 @@ let print_list2 a = print_endline "Your Letters: ";
               print_int v; print_endline " points. ") a
 
 let print_list a = print_endline "\nYour Letters: \n"; 
-  List.iter (fun (k,v) -> ANSITerminal.(print_string [Bold;blue] ("  " ^ k ^ "     "))) a;
+  List.iter (fun (k,v) -> ANSITerminal.(print_string [Bold;blue] ("     " ^ k ^ "     "))) a;
   print_string "\n-------------------------------------------------------------------\n";
-  List.iter (fun (k,v) -> print_string ""; print_int v; print_string " pts   ") a;
+  List.iter (fun (k,v) -> print_string "   "; print_int v; print_string " pts   ") a;
   print_endline "\n"
 
 let rec get_points set l = match set with 

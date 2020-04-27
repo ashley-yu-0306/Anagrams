@@ -108,16 +108,6 @@ let rec loopgame game st : unit =
 
   )
 
-let rec ask_configure() = 
-  print_endline "Would you like to configure your game? (answer yes or no)"; 
-  print_string "> "; 
-  match read_line() with
-  | "yes" -> true
-  | "no" -> false
-  | _ -> print_endline "ERROR. Enter 'yes' or 'no' "; 
-    ask_configure()
-
-
 (** [ask_players] prompts the player for the number of players, and returns
     that number to the initial state. *)
 let rec ask_players() = 
@@ -128,14 +118,7 @@ let rec ask_players() =
     ask_players()
   | x -> x
 
-let rec ask_num_letters() = 
-  print_endline "How many letters (max 10): "; 
-  print_string "> "; 
-  match parse_number (read_line()) with
-  | 0 -> print_endline "ERROR. Enter a valid number: "; 
-    ask_num_letters()
-  | x -> if x > 10 then 
-      ask_num_letters() else x
+
 
 (** [play_game j] starts the game with the letter set generated from the 
     alphabet in file [j]. *)
@@ -144,20 +127,11 @@ let play_game j =
     | exception Sys_error s -> failwith ("Your input failed. " 
                                          ^ s ^ "\n Start the game over. ")
     | _ -> Yojson.Basic.from_file j
-  in print_endline "The default settings for the game are: ";
-  print_endline "-> 6 letters, 2 players <-";
-  let config = ask_configure() in
-  if config then
-    let num_words = ask_num_letters() in
-    let our_game = combo_set_var (from_json json) num_words in
-    let num_players = ask_players() in
-    let initst = init_state our_game num_players in 
-    loopgame our_game initst
-  else
-    let our_game = combo_set_var (from_json json) 6 in
-    let initst = init_state our_game 2 in
-    loopgame our_game initst
-
+  in 
+  let our_game = combo_set (from_json json) in
+  let num_players = ask_players() in
+  let initst = init_state our_game num_players in 
+  loopgame our_game initst
 
 (** [main ()] prompts for the game to play, then starts it. *)
 let main () = 
