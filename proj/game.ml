@@ -37,6 +37,13 @@ let combo_set a =
   [(rand_l a.vowels 5);(rand_l a.vowels 5); (rand_l a.consonants 21); 
    (rand_l a.consonants 21); (rand_l a.consonants 21); (rand_l a.consonants 21)]
 
+let swap_letter a g l = let input = String.uppercase_ascii l in 
+  if List.mem_assoc input a.vowels then 
+    rand_l (List.remove_assoc input a.vowels) 4 else 
+    rand_l (List.remove_assoc input a.consonants) 20
+
+let generate_new_set l swappair set = swappair :: (List.remove_assoc l set)
+
 let print_list2 a = print_endline "Your Letters: "; 
   List.iter (fun (k,v) -> print_string (k ^ ", worth "); 
               print_int v; print_endline " points. ") a

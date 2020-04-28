@@ -1,7 +1,8 @@
 # assignment
 doc.public
 doc.private
-proj.zip
+game.zip
+game
 
 # ocaml
 *.cmo

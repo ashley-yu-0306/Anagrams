@@ -32,6 +32,9 @@ val current_player_wordlist: t -> (Command.word * Game.points) list
     [state]. *)
 val current_player_points: t -> Game.points
 
+(** [current_player_letter_set state] is the current player's letter set. *)
+val current_player_letter_set: t -> Game.t
+
 (** [next_player state] gives the [id] of the player whose turn is next. *)
 val next_player: t -> player_id
 

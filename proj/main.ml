@@ -72,14 +72,14 @@ let rec loopgame game st : unit =
                    ^ "), you currently have " ^ points 
                    ^ " points. Enter your word: ");
     ANSITerminal.(print_string [yellow] 
-                    "Available commands: 'create', 'pass', 'quit'.\n");
+                    "Available commands: 'create', 'pass', 'quit', 'swap'.\n");
     print_string "> ";
     match parse (read_line()) with
     | exception Empty -> print_endline "Please enter a command."; 
       loopgame game st
     | exception Malformed -> 
       print_endline 
-        "Malformed command. Available commands: 'create', 'pass', 'quit'."; 
+        "Malformed command. Available commands: 'create', 'pass', 'quit', 'swap'."; 
       loopgame game st
     | your_command -> (match your_command with
         | Quit -> print_endline "Bye!"; exit 0
@@ -104,6 +104,12 @@ let rec loopgame game st : unit =
                 loopgame game st
               | Legal st' -> ignore(Sys.command "clear"); loopgame game st'
             end
+        | Swap l -> let target = String.uppercase_ascii l in 
+          if List.mem target (State.current_player_letter_set st 
+                              |> Game.get_letters) then 
+            failwith "call swap function in state" else 
+            (print_endline "This letter is not in your letter set."; 
+             loopgame game st) 
       )
 
   )

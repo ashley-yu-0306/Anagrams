@@ -8,6 +8,7 @@ type command =
   | Create of word
   | Quit
   | Pass
+  | Swap of Game.letter
 
 (** The type [check] represents a player command when checking other's words 
     list that is decomposed into a verb and possibly a word. *)

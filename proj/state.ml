@@ -4,6 +4,7 @@ open Command
 type player = {   
   player_words:(Command.word * Game.points) list;
   total_points: Game.points;
+  player_letter_set: Game.t
 }
 
 type player_id = int
@@ -19,15 +20,16 @@ type  t = {
 type result = Legal of t | Illegal
 
 (** [init_player] initializes a player *)
-let init_player = {
+let init_player set = {
   player_words = [];
   total_points = 0;
+  player_letter_set = set
 }
 
 let init_state set num = {
   turns_left= 5 * num; (*hard coded // change with config implementation*)
   (* player_list= [(1,init_player);(2,init_player)]; *)
-  player_list = List.init num (fun i -> ((i + 1), init_player));
+  player_list = List.init num (fun i -> ((i + 1), init_player set));
   current_player = 1;
   total_players = num; (*hard coded // change with config implementation*)
   set= set;
@@ -44,6 +46,9 @@ let current_player_wordlist state =
 
 let current_player_points state = 
   (List.assoc state.current_player state.player_list).total_points
+
+let current_player_letter_set state =
+(List.assoc state.current_player state.player_list).player_letter_set
 
 let next_player state = 
   if (not (state.current_player = state.total_players))
@@ -78,6 +83,7 @@ let rec update_player_list state players word id  =
       let player = {
         player_words = words;
         total_points = v.total_points + points;
+        player_letter_set = v.player_letter_set
       } in (k,player)::(update_player_list state t word id)
     else (k,v)::(update_player_list state t word id)
 
@@ -151,7 +157,8 @@ let rec remove_invalid next_player inv_words state =
                      remove_invalid ({player_words = new_next_pwlst; 
                                       total_points = 
                                         next_player.total_points - 
-                                        calculate_word_points h state.set}) 
+                                        calculate_word_points h state.set;
+                                        player_letter_set = next_player.player_letter_set}) 
                        t state)
                else remove_invalid next_player t state)
 

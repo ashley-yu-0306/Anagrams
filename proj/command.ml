@@ -4,6 +4,7 @@ type command =
   | Create of word
   | Quit
   | Pass
+  | Swap of Game.letter
 
 exception Empty
 
@@ -35,6 +36,8 @@ let parse str =
     then Quit
     else if List.nth lst 0 = "pass" && List.length lst = 1
     then Pass
+    else if List.nth lst 0 = "swap" && List.length lst = 2
+    then Swap (List.nth lst 1)
     else raise Malformed
 
 let parse_check str = 
