@@ -2,7 +2,7 @@ open Game
 open Command
 open State
 (* open Lwt
-open Lwt_unix *)
+   open Lwt_unix *)
 
 let rec print winners text = 
   print_endline text;
@@ -57,12 +57,12 @@ let rec check_phase game st =
   )
 
 
-(** [loopgame game st] is the [game] with updating states [st]. *)
-let rec loopgame game st : unit = 
+(** [loopgame game st json] is the [game] with updating states [st]. *)
+let rec loopgame game st json : unit = 
   (* let timer () =  (Lwt.bind (Lwt_unix.sleep 3.) 
                      (fun () -> print_endline "Time's up!"; 
-                       Lwt.return(loopgame game st))) in 
-  Lwt.async(fun () -> timer ()); *)
+                       Lwt.return(loopgame game st json))) in 
+     Lwt.async(fun () -> timer ()); *)
   let turns_left = State.turns st in 
   if turns_left = 0 
   then (
@@ -72,7 +72,7 @@ let rec loopgame game st : unit =
     check_phase game st)
   else (
     let points = State.current_player_points st |> string_of_int in
-    print_list game;
+    print_list (State.current_player_letter_set st);
     print_endline ("There are " ^ (turns_left |> string_of_int) 
                    ^ " turns left in the game.");
     print_endline ("(Player " ^ (State.current_player st |> string_of_int)
@@ -83,11 +83,11 @@ let rec loopgame game st : unit =
     print_string "> ";
     match parse (read_line()) with
     | exception Empty -> print_endline "Please enter a command."; 
-      loopgame game st
+      loopgame game st json
     | exception Malformed -> 
       print_endline 
         "Malformed command. Available commands: 'create', 'pass', 'quit', 'swap'."; 
-      loopgame game st
+      loopgame game st json
     | your_command ->  (match your_command with
         | Quit -> print_endline "Bye!"; exit 0
         | Pass -> 
@@ -95,28 +95,33 @@ let rec loopgame game st : unit =
           print_endline ("Player " ^ (State.current_player st |> string_of_int) 
                          ^ " has passed."); 
           begin match pass game st with 
-            | Legal st' -> loopgame game st'
-            | Illegal -> loopgame game st
+            | Legal st' -> loopgame game st' json
+            | Illegal -> loopgame game st json
           end
         | Create w -> 
           if List.mem_assoc (String.uppercase_ascii w) 
               (State.current_player_wordlist st) 
           then (print_endline "This word has already been created."; 
-                loopgame game st) 
+                loopgame game st json) 
           else 
             begin match create w game st with
               | Illegal -> 
                 print_endline 
                   "This word cannot be created with your letter set."; 
-                loopgame game st
-              | Legal st' -> ignore(Sys.command "clear"); loopgame game st'
+                loopgame game st json
+              | Legal st' -> ignore(Sys.command "clear"); loopgame game st' json
             end
         | Swap l -> let target = String.uppercase_ascii l in 
           if List.mem target (State.current_player_letter_set st 
                               |> Game.get_letters) then 
-            failwith "call swap function in state" else 
-            (print_endline "This letter is not in your letter set."; 
-             loopgame game st) 
+            match swap l st json with 
+            | Illegal -> print_endline "Illegal"; loopgame game st json;
+            | Legal st' -> 
+              print_endline "Your letter has been swapped. You've lost 5 points.";
+              ignore(Sys.command "clear");
+              loopgame game st' json else 
+            (print_endline "This letter is not in your letter set. Please try again."; 
+             loopgame game st json) 
       )
 
   )
@@ -151,6 +156,15 @@ let rec ask_num_letters() =
   | x -> if x > 10 then 
       ask_num_letters() else x
 
+let rec ask_mode() = 
+  print_endline "Which game mode (normal, speed): "; 
+  print_string "> "; 
+  match read_line() with
+  | "normal" -> "normal"
+  | "speed" -> "speed"
+  | _ -> print_endline "ERROR. Enter a valid game mode: ";
+    ask_mode()
+
 (** [play_game j] starts the game with the letter set generated from the 
     alphabet in file [j]. *)
 let play_game j = 
@@ -159,18 +173,19 @@ let play_game j =
                                          ^ s ^ ". Start the game over. ")
     | _ -> Yojson.Basic.from_file j
   in print_endline "The default settings for the game are: ";
-  print_endline "-> 6 letters, 2 players <-";
+  print_endline "-> 6 letters, 2 players, normal mode <-";
   let config = ask_configure() in
   if config then
     let num_words = ask_num_letters() in
     let our_game = combo_set_var (from_json json) num_words in
     let num_players = ask_players() in
-    let initst = init_state our_game num_players in 
-    loopgame our_game initst
+    let game_mode = ask_mode() in
+    let initst = init_state our_game num_players game_mode in 
+    loopgame our_game initst json
   else
     let our_game = combo_set_var (from_json json) 6 in
-    let initst = init_state our_game 2 in
-    loopgame our_game initst
+    let initst = init_state our_game 2 "normal" in
+    loopgame our_game initst json
 
 
 (** [main ()] prompts for the game to play, then starts it. *)

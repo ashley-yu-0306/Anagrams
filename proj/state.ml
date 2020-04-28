@@ -1,5 +1,5 @@
 open Command
-
+open Game
 
 type player = {   
   player_words:(Command.word * Game.points) list;
@@ -14,6 +14,7 @@ type  t = {
   player_list: (player_id  * player) list;
   current_player: player_id;
   total_players: int;
+  mode: string;
   set: Game.t;
 }
 
@@ -26,12 +27,13 @@ let init_player set = {
   player_letter_set = set
 }
 
-let init_state set num = {
+let init_state set num mode = {
   turns_left= 5 * num; (*hard coded // change with config implementation*)
   (* player_list= [(1,init_player);(2,init_player)]; *)
   player_list = List.init num (fun i -> ((i + 1), init_player set));
   current_player = 1;
   total_players = num; (*hard coded // change with config implementation*)
+  mode = mode;
   set= set;
 }
 
@@ -48,7 +50,7 @@ let current_player_points state =
   (List.assoc state.current_player state.player_list).total_points
 
 let current_player_letter_set state =
-(List.assoc state.current_player state.player_list).player_letter_set
+  (List.assoc state.current_player state.player_list).player_letter_set
 
 let next_player state = 
   if (not (state.current_player = state.total_players))
@@ -67,8 +69,14 @@ let cl_to_ll cl = List.map (fun x -> Char.escaped x) cl
 (* let calculate_word_points word set = 
    let seq = word |> String.to_seq |> List.of_seq |> List.map (Game.get_points set) in 
    List.fold_right (+) seq 0 *)
-let calculate_word_points word set = List.fold_left 
-    (fun x y -> x + Game.get_points set y) 0 (word |> word_to_cl |> cl_to_ll)
+let calculate_word_points word set = let base = List.fold_left 
+                                         (fun x y -> x + Game.get_points set y) 0 (word |> word_to_cl |> cl_to_ll) in 
+  let length = String.length word in 
+  if length >= 3 && length < 5 
+  then base |> float_of_int |> (fun x -> x*. 1.2) |> int_of_float
+  else if length >= 5 
+  then base |> float_of_int |> (fun x -> x*. 1.5) |> int_of_float
+  else base
 
 (** [update_player_list state players word id] updates the state of the player
     with player_id [id] in [players] by adding points gained in entering [word]. 
@@ -102,7 +110,7 @@ let rec check_illegal ll combo_l =
 
 let create word game state = 
   if word = "" || check_illegal (word |> word_to_cl |> cl_to_ll) 
-       (Game.get_letters game) then Illegal
+       (Game.get_letters (current_player_letter_set state)) then Illegal
   else
     let player = state.current_player in 
     let player_l = state.player_list in 
@@ -112,6 +120,7 @@ let create word game state =
       player_list = new_player_l;
       current_player = next_player state;
       total_players = state.total_players;
+      mode = state.mode;
       set = state.set;
     } 
 
@@ -121,6 +130,35 @@ let pass game state =
     player_list = state.player_list;
     current_player = next_player state;
     total_players = state.total_players;
+    mode = state.mode;
+    set = state.set;
+  }
+
+(** [update_player_list3 players ns id] is the list of [players] with 
+    the player whose id is [id] updated with a new letter set [ns].*)
+let rec update_player_list3 players ns id = 
+  match players with
+  | [] -> []
+  | (k,v)::t -> if k = id 
+    then 
+      let player = {
+        player_words = v.player_words;
+        total_points = v.total_points - 5;
+        player_letter_set = ns;
+      } in (k,player)::(update_player_list3 t ns id)
+    else (k,v)::(update_player_list3 t ns id)
+
+let swap l state json = 
+  let alphabet = from_json json in 
+  let id = state.current_player in 
+  let player = List.assoc id state.player_list in 
+  let new_set = swap_letter alphabet l (current_player_letter_set state) in
+  Legal {
+    turns_left = state.turns_left - 1;
+    player_list = update_player_list3 state.player_list new_set id;
+    current_player = next_player state;
+    total_players = state.total_players;
+    mode = state.mode;
     set = state.set;
   }
 
@@ -158,7 +196,7 @@ let rec remove_invalid next_player inv_words state =
                                       total_points = 
                                         next_player.total_points - 
                                         calculate_word_points h state.set;
-                                        player_letter_set = next_player.player_letter_set}) 
+                                      player_letter_set = next_player.player_letter_set}) 
                        t state)
                else remove_invalid next_player t state)
 
@@ -179,6 +217,7 @@ let invalid word_lst game state =
     player_list = new_player_l;
     current_player = state.current_player;
     total_players = state.total_players;
+    mode = state.mode;
     set= state.set;
   } 
 

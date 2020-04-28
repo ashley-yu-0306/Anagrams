@@ -16,7 +16,7 @@ type player_id = int
 (** [init_state set] is the initial state of the game. The initial state
     has the combination of letters [set], the turns left in the game, the
     current player, and the list of players. *)
-val init_state : Game.t -> int -> t
+val init_state : Game.t -> int -> string -> t
 
 (** [turns state] is the turns left in game state [state]. *)
 val turns: t  -> int
@@ -48,6 +48,10 @@ val create: Command.word -> Game.t -> t -> result
 
 (** [pass game state] is the result after the player in [game] passes their turn.*)
 val pass: Game.t -> t -> result
+
+(** [swap game state] is the result after the player in [game] swaps their letter
+[l]. *)
+val swap: Game.letter -> t -> Yojson.Basic.t -> result
 
 (** [player_count state] is the number of players in the game.*)
 val player_count: t -> int

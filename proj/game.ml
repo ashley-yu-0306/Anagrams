@@ -33,14 +33,29 @@ let combo_set_var a lim =
                                       else rand_l a.consonants 18) in
   vow_lst @ cons_lst
 
+(** [to_list a] returns the keys of the association list [a].*)
+let rec to_list a  = 
+  match a with 
+  | [] -> []
+  | (char, point)::t -> (char)::to_list t 
+
+let swap_letter a l set = 
+  let ul = String.uppercase_ascii l in 
+  if List.mem_assoc ul a.vowels 
+  then 
+    let new_a = to_list a.vowels in
+    let l' = rand_l new_a (List.length new_a) in 
+    let points = List.assoc l' a.vowels in
+    let new_set = List.remove_assoc ul set in ((l',points)::new_set)
+  else 
+    let new_a = to_list a.consonants in 
+    let l' = rand_l new_a (List.length new_a) in 
+    let points = List.assoc l' a.consonants in 
+    let new_set = List.remove_assoc ul set in ((l',points)::new_set)
+
 let combo_set a = 
   [(rand_l a.vowels 5);(rand_l a.vowels 5); (rand_l a.consonants 21); 
    (rand_l a.consonants 21); (rand_l a.consonants 21); (rand_l a.consonants 21)]
-
-let swap_letter a g l = let input = String.uppercase_ascii l in 
-  if List.mem_assoc input a.vowels then 
-    rand_l (List.remove_assoc input a.vowels) 4 else 
-    rand_l (List.remove_assoc input a.consonants) 20
 
 let generate_new_set l swappair set = swappair :: (List.remove_assoc l set)
 
@@ -50,7 +65,7 @@ let print_list2 a = print_endline "Your Letters: ";
 
 let print_list a = print_endline "\nYour Letters: \n"; 
   List.iter (fun (k,v) -> ANSITerminal.(print_string [Bold;blue] ("  " ^ k ^ "     "))) a;
-  print_string "\n-------------------------------------------------------------------\n";
+  print_string "\n------------------------------------------------------------------------\n";
   List.iter (fun (k,v) -> print_string ""; print_int v; print_string " pts   ") a;
   print_endline "\n"
 

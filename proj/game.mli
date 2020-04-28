@@ -19,6 +19,10 @@ val from_json : Yojson.Basic.t -> alphabet
 (** [combo_set_var a lim] is the randomly picked letter set for the game. *)
 val combo_set_var: alphabet -> int -> t
 
+(** [swap_letter a l set] is the [set] of letters with [l] replaced with
+    a letter from [a]. *)
+val swap_letter: alphabet -> letter -> t -> t 
+
 (** [combo_set a] is the randomly picked letter set for the game. *)
 val combo_set: alphabet -> t
 
@@ -30,7 +34,7 @@ val print_list : t -> unit
 val get_points: t -> letter -> points
 
 (** [get_letters game acc] is a list of letters in the combo set [game].
-Required: all uppercase. *)
+    Required: all uppercase. *)
 val get_letters: t -> letter list
 
 (** [swap_letter a game letter] is the letter-points pair to be swapped with 
@@ -38,6 +42,6 @@ val get_letters: t -> letter list
 val swap_letter: alphabet -> t -> letter -> (letter * points)
 
 (** [generate_new_set l swappair set] is the new combo set after the letter [l] 
-is swapped to the [swappair]. *)
+    is swapped to the [swappair]. *)
 val generate_new_set: letter -> (letter * points) -> t -> t
 
