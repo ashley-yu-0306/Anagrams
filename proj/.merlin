@@ -3,4 +3,3 @@ PKG oUnit
 PKG yojson
 PKG ANSITerminal
 PKG lwt
-PKG lwt.unix
