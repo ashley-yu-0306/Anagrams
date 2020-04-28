@@ -33,25 +33,27 @@ let combo_set_var a lim =
                                       else rand_l a.consonants 18) in
   vow_lst @ cons_lst
 
-(** [to_list a] returns the keys of the association list [a].*)
-let rec to_list a  = 
+(** [to_list a] returns the keys of the association list [a] except for key [k].*)
+let rec to_list a k  = 
   match a with 
   | [] -> []
-  | (char, point)::t -> (char)::to_list t 
+  | (char, point)::t -> if char != k then (char)::to_list t k else to_list t k
 
 let swap_letter a l set = 
   let ul = String.uppercase_ascii l in 
-  if List.mem_assoc ul a.vowels 
-  then 
-    let new_a = to_list a.vowels in
-    let l' = rand_l new_a (List.length new_a) in 
-    let points = List.assoc l' a.vowels in
-    let new_set = List.remove_assoc ul set in ((l',points)::new_set)
-  else 
-    let new_a = to_list a.consonants in 
-    let l' = rand_l new_a (List.length new_a) in 
-    let points = List.assoc l' a.consonants in 
-    let new_set = List.remove_assoc ul set in ((l',points)::new_set)
+  let new_a_v = to_list a.vowels l in
+  let new_a_c = to_list a.consonants l in 
+  let new_a = new_a_v @ new_a_c in
+  let l' = rand_l new_a (List.length new_a) in 
+  let points = try List.assoc l' a.consonants with 
+    | Not_found -> List.assoc l' a.vowels in 
+  let new_set = List.remove_assoc ul set in 
+  ((l',points)::new_set)
+
+let rec print_letters s = 
+  match s with 
+  | [] -> ()
+  | (k,v)::t -> print_endline k; print_letters t
 
 let combo_set a = 
   [(rand_l a.vowels 5);(rand_l a.vowels 5); (rand_l a.consonants 21); 
@@ -65,7 +67,7 @@ let print_list2 a = print_endline "Your Letters: ";
 
 let print_list a = print_endline "\nYour Letters: \n"; 
   List.iter (fun (k,v) -> ANSITerminal.(print_string [Bold;blue] ("  " ^ k ^ "     "))) a;
-  print_string "\n------------------------------------------------------------------------\n";
+  print_string "\n-----------------------------------------------------------------------------\n";
   List.iter (fun (k,v) -> print_string ""; print_int v; print_string " pts   ") a;
   print_endline "\n"
 

@@ -27,8 +27,8 @@ let init_player set = {
   player_letter_set = set
 }
 
-let init_state set num mode = {
-  turns_left= 5 * num; (*hard coded // change with config implementation*)
+let init_state set num turn mode = {
+  turns_left= turn * num; (*hard coded // change with config implementation*)
   (* player_list= [(1,init_player);(2,init_player)]; *)
   player_list = List.init num (fun i -> ((i + 1), init_player set));
   current_player = 1;
@@ -69,8 +69,10 @@ let cl_to_ll cl = List.map (fun x -> Char.escaped x) cl
 (* let calculate_word_points word set = 
    let seq = word |> String.to_seq |> List.of_seq |> List.map (Game.get_points set) in 
    List.fold_right (+) seq 0 *)
-let calculate_word_points word set = let base = List.fold_left 
-                                         (fun x y -> x + Game.get_points set y) 0 (word |> word_to_cl |> cl_to_ll) in 
+let calculate_word_points word st = 
+  let set = current_player_letter_set st in
+  let base = List.fold_left 
+      (fun x y -> x + Game.get_points set y) 0 (word |> word_to_cl |> cl_to_ll) in 
   let length = String.length word in 
   if length >= 3 && length < 5 
   then base |> float_of_int |> (fun x -> x*. 1.2) |> int_of_float
@@ -85,7 +87,7 @@ let rec update_player_list state players word id  =
   match players with
   | [] -> [] 
   | (k,v)::t -> if k = id 
-    then let points = calculate_word_points word state.set in 
+    then let points = calculate_word_points word state in 
       let words = List.append (v.player_words) 
           [(String.uppercase_ascii word,points)] in 
       let player = {
@@ -151,8 +153,11 @@ let rec update_player_list3 players ns id =
 let swap l state json = 
   let alphabet = from_json json in 
   let id = state.current_player in 
-  let player = List.assoc id state.player_list in 
-  let new_set = swap_letter alphabet l (current_player_letter_set state) in
+  let set = current_player_letter_set state in
+  let () = print_letters set in
+  let () = print_endline("pass set") in
+  let new_set = swap_letter alphabet l set in
+  let () = print_endline("pass new set") in
   Legal {
     turns_left = state.turns_left - 1;
     player_list = update_player_list3 state.player_list new_set id;
@@ -195,7 +200,7 @@ let rec remove_invalid next_player inv_words state =
                      remove_invalid ({player_words = new_next_pwlst; 
                                       total_points = 
                                         next_player.total_points - 
-                                        calculate_word_points h state.set;
+                                        calculate_word_points h state;
                                       player_letter_set = next_player.player_letter_set}) 
                        t state)
                else remove_invalid next_player t state)

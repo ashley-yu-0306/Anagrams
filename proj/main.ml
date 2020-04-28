@@ -72,7 +72,9 @@ let rec loopgame game st json : unit =
     check_phase game st)
   else (
     let points = State.current_player_points st |> string_of_int in
-    print_list (State.current_player_letter_set st);
+    let set = State.current_player_letter_set st in 
+    let () = print_letters set in
+    print_list (set);
     print_endline ("There are " ^ (turns_left |> string_of_int) 
                    ^ " turns left in the game.");
     print_endline ("(Player " ^ (State.current_player st |> string_of_int)
@@ -104,7 +106,7 @@ let rec loopgame game st json : unit =
           then (print_endline "This word has already been created."; 
                 loopgame game st json) 
           else 
-            begin match create w game st with
+            begin match create w set st with
               | Illegal -> 
                 print_endline 
                   "This word cannot be created with your letter set."; 
@@ -112,8 +114,7 @@ let rec loopgame game st json : unit =
               | Legal st' -> ignore(Sys.command "clear"); loopgame game st' json
             end
         | Swap l -> let target = String.uppercase_ascii l in 
-          if List.mem target (State.current_player_letter_set st 
-                              |> Game.get_letters) then 
+          if List.mem target (set |> Game.get_letters) then 
             match swap l st json with 
             | Illegal -> print_endline "Illegal"; loopgame game st json;
             | Legal st' -> 
@@ -156,6 +157,14 @@ let rec ask_num_letters() =
   | x -> if x > 10 then 
       ask_num_letters() else x
 
+let rec ask_turns() = 
+  print_endline "How many turns: "; 
+  print_string "> "; 
+  match parse_number (read_line()) with
+  | 0 -> print_endline "ERROR. Enter a valid number: "; 
+    ask_num_letters()
+  | x -> x
+
 let rec ask_mode() = 
   print_endline "Which game mode (normal, speed): "; 
   print_string "> "; 
@@ -173,18 +182,19 @@ let play_game j =
                                          ^ s ^ ". Start the game over. ")
     | _ -> Yojson.Basic.from_file j
   in print_endline "The default settings for the game are: ";
-  print_endline "-> 6 letters, 2 players, normal mode <-";
+  print_endline "-> 6 letters, 2 players, 5 turns per player, normal mode <-";
   let config = ask_configure() in
   if config then
     let num_words = ask_num_letters() in
     let our_game = combo_set_var (from_json json) num_words in
     let num_players = ask_players() in
+    let num_turns = ask_turns() in 
     let game_mode = ask_mode() in
-    let initst = init_state our_game num_players game_mode in 
+    let initst = init_state our_game num_players num_turns game_mode in 
     loopgame our_game initst json
   else
     let our_game = combo_set_var (from_json json) 6 in
-    let initst = init_state our_game 2 "normal" in
+    let initst = init_state our_game 2 5 "normal" in
     loopgame our_game initst json
 
 
