@@ -73,7 +73,6 @@ let rec loopgame game st json : unit =
   else (
     let points = State.current_player_points st |> string_of_int in
     let set = State.current_player_letter_set st in 
-    let () = print_letters set in
     print_list (set);
     print_endline ("There are " ^ (turns_left |> string_of_int) 
                    ^ " turns left in the game.");
