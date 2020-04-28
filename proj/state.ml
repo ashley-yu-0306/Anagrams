@@ -154,10 +154,7 @@ let swap l state json =
   let alphabet = from_json json in 
   let id = state.current_player in 
   let set = current_player_letter_set state in
-  let () = print_letters set in
-  let () = print_endline("pass set") in
   let new_set = swap_letter alphabet l set in
-  let () = print_endline("pass new set") in
   Legal {
     turns_left = state.turns_left - 1;
     player_list = update_player_list3 state.player_list new_set id;
