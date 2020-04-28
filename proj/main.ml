@@ -1,6 +1,8 @@
 open Game
 open Command
 open State
+(* open Lwt
+open Lwt_unix *)
 
 let rec print winners text = 
   print_endline text;
@@ -54,8 +56,13 @@ let rec check_phase game st =
          | Invalid wl -> State.invalid wl game st |> check_phase game))
   )
 
+
 (** [loopgame game st] is the [game] with updating states [st]. *)
 let rec loopgame game st : unit = 
+  (* let timer () =  (Lwt.bind (Lwt_unix.sleep 3.) 
+                     (fun () -> print_endline "Time's up!"; 
+                       Lwt.return(loopgame game st))) in 
+  Lwt.async(fun () -> timer ()); *)
   let turns_left = State.turns st in 
   if turns_left = 0 
   then (
@@ -81,7 +88,7 @@ let rec loopgame game st : unit =
       print_endline 
         "Malformed command. Available commands: 'create', 'pass', 'quit', 'swap'."; 
       loopgame game st
-    | your_command -> (match your_command with
+    | your_command ->  (match your_command with
         | Quit -> print_endline "Bye!"; exit 0
         | Pass -> 
           ignore(Sys.command "clear");
@@ -113,6 +120,7 @@ let rec loopgame game st : unit =
       )
 
   )
+
 
 let rec ask_configure() = 
   print_endline "Would you like to configure your game? (answer yes or no)"; 
@@ -148,7 +156,7 @@ let rec ask_num_letters() =
 let play_game j = 
   let json = match Yojson.Basic.from_file j with
     | exception Sys_error s -> failwith ("Your input failed. " 
-                                         ^ s ^ "\n Start the game over. ")
+                                         ^ s ^ ". Start the game over. ")
     | _ -> Yojson.Basic.from_file j
   in print_endline "The default settings for the game are: ";
   print_endline "-> 6 letters, 2 players <-";

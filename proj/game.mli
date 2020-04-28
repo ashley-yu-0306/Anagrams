@@ -29,8 +29,8 @@ val print_list : t -> unit
 (** [get_points set l] is the point that the letter [l] is worth. *)
 val get_points: t -> letter -> points
 
-(** [get_letters game acc] is a list of letters in the combo set, all uppercase 
-    by default fron json. *)
+(** [get_letters game acc] is a list of letters in the combo set [game].
+Required: all uppercase. *)
 val get_letters: t -> letter list
 
 (** [swap_letter a game letter] is the letter-points pair to be swapped with 
