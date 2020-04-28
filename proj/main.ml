@@ -1,8 +1,8 @@
 open Game
 open Command
 open State
-(* open Lwt
-   open Lwt_unix *)
+open Lwt
+   (* open Lwt_unix *)
 
 let rec print winners text = 
   print_endline text;
@@ -59,10 +59,10 @@ let rec check_phase game st =
 
 (** [loopgame game st json] is the [game] with updating states [st]. *)
 let rec loopgame game st json : unit = 
-  (* let timer () =  (Lwt.bind (Lwt_unix.sleep 3.) 
+  let timer () =  (Lwt.bind (Unix.sleep 3; Lwt.return ()) 
                      (fun () -> print_endline "Time's up!"; 
-                       Lwt.return(loopgame game st json))) in 
-     Lwt.async(fun () -> timer ()); *)
+                       Lwt.return())) in 
+     Lwt.async(timer);
   let turns_left = State.turns st in 
   if turns_left = 0 
   then (
@@ -119,6 +119,7 @@ let rec loopgame game st json : unit =
             | Illegal -> print_endline "Illegal"; loopgame game st json;
             | Legal st' -> 
               print_endline "Your letter has been swapped. You've lost 5 points.";
+              ignore(Unix.sleep 3);
               ignore(Sys.command "clear");
               loopgame game st' json else 
             (print_endline "This letter is not in your letter set. Please try again."; 
