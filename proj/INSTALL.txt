@@ -1,6 +1,14 @@
 To run and play the game:
 
+0. Install packages:
+Update to the latest opam version. (Type in 'opam update' in terminal.)
+	a. Anthill
+Type 'opam install anthill' in terminal.
+
 1. Open terminal under file 'game'.
+
 2. Type 'make play' to build and start the game.
+
 3. When prompted, enter filename 'alphabet1.json'.
+
 4. Follow the instructions prompted throughout the game.

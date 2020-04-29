@@ -16,7 +16,7 @@ type player_id = int
 (** [init_state set num turn mode] is the initial state of the game. The initial state
     has the combination of letters [set], the turns left in the game, the
     current player, and the list of players. *)
-val init_state : Game.t -> int -> int -> string -> t
+val init_state : Game.t -> int -> int -> string -> bool -> t
 
 (** [turns state] is the turns left in game state [state]. *)
 val turns: t  -> int
@@ -70,3 +70,7 @@ val valid : Game.t -> t -> t
 
 (** [print_player_word_list state id] prints player[id]'s word list.*)
 val print_player_word_list: t -> player_id -> unit
+
+(**[get_check_mode st] is [true] if the game is checked by dictionary or 
+   [false] if it is check by players.*)
+val get_check_mode: t -> bool

@@ -16,6 +16,7 @@ type  t = {
   total_players: int;
   mode: string;
   set: Game.t;
+  check: bool
 }
 
 type result = Legal of t | Illegal
@@ -27,7 +28,7 @@ let init_player set = {
   player_letter_set = set
 }
 
-let init_state set num turn mode = {
+let init_state set num turn mode check = {
   turns_left= turn * num; (*hard coded // change with config implementation*)
   (* player_list= [(1,init_player);(2,init_player)]; *)
   player_list = List.init num (fun i -> ((i + 1), init_player set));
@@ -35,6 +36,7 @@ let init_state set num turn mode = {
   total_players = num; (*hard coded // change with config implementation*)
   mode = mode;
   set= set;
+  check = check
 }
 
 let turns state = 
@@ -117,24 +119,17 @@ let create word game state =
     let player = state.current_player in 
     let player_l = state.player_list in 
     let new_player_l = update_player_list state player_l word player in
-    Legal {
-      turns_left = state.turns_left - 1;
-      player_list = new_player_l;
-      current_player = next_player state;
-      total_players = state.total_players;
-      mode = state.mode;
-      set = state.set;
-    } 
+    Legal { state with
+            turns_left = state.turns_left - 1;
+            player_list = new_player_l;
+            current_player = next_player state;
+          } 
 
 let pass game state = 
-  Legal { 
-    turns_left = state.turns_left - 1;
-    player_list = state.player_list;
-    current_player = next_player state;
-    total_players = state.total_players;
-    mode = state.mode;
-    set = state.set;
-  }
+  Legal { state with
+          turns_left = state.turns_left - 1;
+          current_player = next_player state;
+        }
 
 (** [update_player_list3 players ns id] is the list of [players] with 
     the player whose id is [id] updated with a new letter set [ns].*)
@@ -155,14 +150,11 @@ let swap l state json =
   let id = state.current_player in 
   let set = current_player_letter_set state in
   let new_set = swap_letter alphabet l set in
-  Legal {
-    turns_left = state.turns_left - 1;
-    player_list = update_player_list3 state.player_list new_set id;
-    current_player = next_player state;
-    total_players = state.total_players;
-    mode = state.mode;
-    set = state.set;
-  }
+  Legal { state with
+          turns_left = state.turns_left - 1;
+          player_list = update_player_list3 state.player_list new_set id;
+          current_player = next_player state;
+        }
 
 let player_count state = 
   state.total_players
@@ -214,13 +206,9 @@ let invalid word_lst game state =
   let new_player_l = 
     update_player_list2 state (List.map String.uppercase_ascii word_lst) 
       (next_player state) in
-  {
+  { state with
     turns_left = 0;
     player_list = new_player_l;
-    current_player = state.current_player;
-    total_players = state.total_players;
-    mode = state.mode;
-    set= state.set;
   } 
 
 let valid game state = 
@@ -229,3 +217,5 @@ let valid game state =
 let print_player_word_list state id = 
   let wl = (List.assoc id state.player_list).player_words in
   List.iter (fun (k,v)-> print_string k; print_newline ();) wl
+
+let get_check_mode st = st.check

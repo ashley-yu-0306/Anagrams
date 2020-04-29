@@ -1,8 +1,8 @@
 open Game
 open Command
 open State
-open Lwt
-   (* open Lwt_unix *)
+open Anthill
+
 
 let rec print winners text = 
   print_endline text;
@@ -35,34 +35,38 @@ let rec end_phase game st =
 (** [check_phase game st] is the check phase of [game] with the final state 
     [st], where players check each other's word lists. *)
 let rec check_phase game st = 
-  print_endline 
-    "If everything looks good, enter 'valid', or if any words look wrong, enter 
-  'invalid (the word or words separated with space)'. "; 
-  if current_player st > State.player_count st 
-  then (ignore(Sys.command "clear"); end_phase game st)
-  else (
-    print_endline ("(Player " ^ (State.current_player st |> string_of_int)
-                   ^ ") " ^ "Check your next player's word list:");
-    State.print_player_word_list st (next_player st);
-    print_string "> ";
-    (match parse_check (read_line()) with
-     | exception Empty -> print_endline "Please enter a command."; 
-       check_phase game st
-     | exception Malformed -> 
-       print_endline "Malformed command. Available commands: 'valid', 'invalid'"; 
-       check_phase game st
-     | your_command -> (match your_command with
-         | Valid -> State.valid game st |> check_phase game
-         | Invalid wl -> State.invalid wl game st |> check_phase game))
-  )
+  if State.get_check_mode st then
+    failwith "use library"
+  else begin
+    print_endline 
+      "If everything looks good, enter 'valid', or if any words look wrong, 
+      enter 'invalid (the word or words separated with space)'. "; 
+    if current_player st > State.player_count st 
+    then (ignore(Sys.command "clear"); end_phase game st)
+    else (
+      print_endline ("(Player " ^ (State.current_player st |> string_of_int)
+                     ^ ") " ^ "Check your next player's word list:");
+      State.print_player_word_list st (next_player st);
+      print_string "> ";
+      (match parse_check (read_line()) with
+       | exception Empty -> print_endline "Please enter a command."; 
+         check_phase game st
+       | exception Malformed -> 
+         print_endline "Malformed command. Available commands: 'valid', 'invalid'"; 
+         check_phase game st
+       | your_command -> (match your_command with
+           | Valid -> State.valid game st |> check_phase game
+           | Invalid wl -> State.invalid wl game st |> check_phase game))
+    )
+  end
 
 
 (** [loopgame game st json] is the [game] with updating states [st]. *)
 let rec loopgame game st json : unit = 
-  let timer () =  (Lwt.bind (Unix.sleep 3; Lwt.return ()) 
+  (* let timer () =  (Lwt.bind (Unix.sleep 3; Lwt.return ()) 
                      (fun () -> print_endline "Time's up!"; 
                        Lwt.return())) in 
-     Lwt.async(timer);
+     Lwt.async(timer); *)
   let turns_left = State.turns st in 
   if turns_left = 0 
   then (
@@ -174,6 +178,16 @@ let rec ask_mode() =
   | _ -> print_endline "ERROR. Enter a valid game mode: ";
     ask_mode()
 
+
+let rec ask_check() = 
+  print_endline "Which check mode (human, dictionary): "; 
+  print_string "> "; 
+  match read_line() with
+  | "human" -> false
+  | "dictionary" -> true
+  | _ -> print_endline "ERROR. Enter a valid check mode: ";
+    ask_check()
+
 (** [play_game j] starts the game with the letter set generated from the 
     alphabet in file [j]. *)
 let play_game j = 
@@ -190,11 +204,12 @@ let play_game j =
     let num_players = ask_players() in
     let num_turns = ask_turns() in 
     let game_mode = ask_mode() in
-    let initst = init_state our_game num_players num_turns game_mode in 
+    let check_mode = ask_check() in
+    let initst = init_state our_game num_players num_turns game_mode check_mode in 
     loopgame our_game initst json
   else
     let our_game = combo_set_var (from_json json) 6 in
-    let initst = init_state our_game 2 5 "normal" in
+    let initst = init_state our_game 2 5 "normal" false in
     loopgame our_game initst json
 
 
