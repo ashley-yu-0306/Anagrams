@@ -166,7 +166,7 @@ let create word state =
 let create_p word state = 
   if word = "" || not(check_letter_used state word) || 
      check_illegal (word |> word_to_cl |> cl_to_ll) 
-       ((current_player_letter state)::(Game.get_letters (current_player_letter_set state)))
+       ((current_player_letter state)::(Game.get_letters (get_pool state)))
   then Illegal
   else
     let player = state.current_player in 
