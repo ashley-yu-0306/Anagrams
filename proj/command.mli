@@ -9,6 +9,7 @@ type command =
   | Quit
   | Pass
   | Swap of Game.letter
+  | Steal of int * word * word
 
 (** The type [check] represents a player command when checking other's words 
     list that is decomposed into a verb and possibly a word. *)

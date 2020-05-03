@@ -5,6 +5,7 @@ type command =
   | Quit
   | Pass
   | Swap of Game.letter
+  | Steal of int * word * word
 
 exception Empty
 
@@ -25,20 +26,23 @@ let parse_number str =
   | exception (Failure s) -> 0
   | x -> x
 
+(** [check_str s] is [true] if the string [s] is an integer.*)
+let check_int s = 
+  try (int_of_string s |> string_of_int) = s
+  with Failure _ -> false
 
-let parse str = 
-  if String.length str = 0 then raise Empty
-  else let lst = List.rev (String.split_on_char ' ' str |> remove "" []) in
-    if List.length lst = 0 then raise Empty 
-    else if List.nth lst 0 = "create" && List.length lst = 2 
-    then Create (List.nth lst 1)
-    else if List.nth lst 0 = "quit" && List.length lst = 1 
-    then Quit
-    else if List.nth lst 0 = "pass" && List.length lst = 1
-    then Pass
-    else if List.nth lst 0 = "swap" && List.length lst = 2
-    then Swap (List.nth lst 1)
-    else raise Malformed
+let parse str = match List.rev (String.split_on_char ' ' str |> remove "" []) with
+  | [] -> raise(Empty)
+  | h :: t -> 
+    if h = "quit" && t = [] then Quit else 
+    if h = "create" && List.length t = 1 then Create (List.hd t) else 
+    if h = "pass" && t = [] then Pass else
+    if h = "swap" && List.length t = 1 then Swap (List.hd t) else
+    if h = "steal" && List.length t = 3 && check_int (List.hd t) then 
+      let id = int_of_string (List.hd t) in 
+      Steal (id, List.nth t 1, List.nth t 2)
+    else
+      raise Malformed 
 
 let parse_check str = 
   match List.rev (String.split_on_char ' ' str |> remove "" []) with
