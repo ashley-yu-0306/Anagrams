@@ -23,8 +23,6 @@ val combo_set_var: alphabet -> int -> t
     a letter from [a]. *)
 val swap_letter: alphabet -> letter -> t -> t 
 
-val print_letters: t -> unit
-
 (** [combo_set a] is the randomly picked letter set for the game. *)
 val combo_set: alphabet -> t
 

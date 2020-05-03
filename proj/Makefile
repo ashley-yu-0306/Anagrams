@@ -35,6 +35,10 @@ docs-private: build
 		-html -stars -d doc.private \
 		-inv-merge-ml-mli -m A $(MLIS) $(MLS)
 
+anthill:
+	dune build bin/main.exe
+	cp _build/default/bin/main.exe anthill
+
 clean:
 	ocamlbuild -clean
 	rm -rf doc.public doc.private game.zip

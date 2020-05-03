@@ -4,7 +4,8 @@ open Game
 type player = {   
   player_words:(Command.word * Game.points) list;
   total_points: Game.points;
-  player_letter_set: Game.t
+  player_letter_set: Game.t;
+  current_letter: string
 }
 
 type player_id = int
@@ -21,11 +22,15 @@ type  t = {
 
 type result = Legal of t | Illegal
 
+let random_letter() = 
+  Char.escaped (Char.chr ((Random.self_init(); Random.int 26) + 65))
+
 (** [init_player] initializes a player *)
 let init_player set = {
   player_words = [];
   total_points = 0;
-  player_letter_set = set
+  player_letter_set = set;
+  current_letter = random_letter()
 }
 
 let init_state set num turn mode check = {
@@ -94,7 +99,8 @@ let rec update_player_list state players word id  =
       let player = {
         player_words = words;
         total_points = v.total_points + points;
-        player_letter_set = v.player_letter_set
+        player_letter_set = v.player_letter_set;
+        current_letter = random_letter()
       } in (k,player)::(update_player_list state t word id)
     else (k,v)::(update_player_list state t word id)
 
@@ -165,6 +171,7 @@ let pass game state =
 (** [update_player_list3 players ns id] is the list of [players] with 
     the player whose id is [id] updated with a new letter set [ns].*)
 let rec update_player_list3 players ns id = 
+  let cur_let = (List.assoc id players).current_letter in
   match players with
   | [] -> []
   | (k,v)::t -> if k = id 
@@ -173,6 +180,7 @@ let rec update_player_list3 players ns id =
         player_words = v.player_words;
         total_points = v.total_points - 5;
         player_letter_set = ns;
+        current_letter = cur_let
       } in (k,player)::(update_player_list3 t ns id)
     else (k,v)::(update_player_list3 t ns id)
 
@@ -237,7 +245,8 @@ let rec remove_invalid next_player inv_words state =
                                       total_points = 
                                         next_player.total_points - 
                                         calculate_word_points h state;
-                                      player_letter_set = next_player.player_letter_set}) 
+                                      player_letter_set = next_player.player_letter_set;
+                                      current_letter = ""}) 
                        t state)
                else remove_invalid next_player t state)
 
@@ -264,5 +273,16 @@ let valid game state =
 let print_player_word_list state id = 
   let wl = (List.assoc id state.player_list).player_words in
   List.iter (fun (k,v)-> print_string k; print_newline ();) wl
+
+(** [print_all_player_word_list_helper st acc] is a helper function 
+    that prints all player[id]'s word list. *)
+let rec print_all_player_word_list_helper st acc = 
+  if acc > List.length st.player_list then ()
+  else print_string "Player " ^ string_of_int acc; 
+  print_player_word_list st acc;
+  print_all_player_word_list_helper st (acc + 1)
+
+let print_all_player_word_list st = print_all_player_word_list_helper st 1
+
 
 let get_check_mode st = st.check
