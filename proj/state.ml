@@ -104,12 +104,12 @@ let rec remove x lst acc = match lst with
   | h::t -> if h = x then remove x t acc else remove x t (h::acc)
 
 (** [remove_set lst r x] is the list of pairs [lst] with the first 
-occurence of [x] removed. *)
+    occurence of [x] removed. *)
 let rec remove_set lst r x = match lst with
   | [] -> []
   | (h,p)::t -> if (h = x && r = false)
-  then remove_set t true x
-  else if r = true then (h,p)::(remove_set t true x) else (h,p)::(remove_set t false x)
+    then remove_set t true x
+    else if r = true then (h,p)::(remove_set t true x) else (h,p)::(remove_set t false x)
 
 (**[check_illegal ll combo_l] is [true] iff [ll] contains letter(s) that is not
    in the combo or more occurances of some letter offered in the combo. *)
@@ -120,12 +120,12 @@ let rec check_illegal ll combo_l =
     else check_illegal t (remove h combo_l [])
 
 (** [string_to_char_list s i] is the character list of [s], where [i] is the
-length of the string subtracted by 1. *)
+    length of the string subtracted by 1. *)
 let rec string_to_char_list s i = 
   if i>(-1) then (String.get s i) ::string_to_char_list s (i-1) else [] 
 
 (** [char_removal s c] is the list of pairs [s] with pairs whose key corresponds
-to the elements in [c] removed. *)
+    to the elements in [c] removed. *)
 let rec char_removal s c = 
   match c with 
   | [] -> s 
@@ -139,12 +139,12 @@ let create word game state =
     let player_l = state.player_list in 
     let new_player_l = update_player_list state player_l word player in
     let char_l = string_to_char_list word ((String.length word)-1)
-    Legal { state with
-            turns_left = state.turns_left - 1;
-            player_list = new_player_l;
-            current_player = next_player state;
-            set = char_removal state.set char_l
-          } 
+        Legal { state with
+                turns_left = state.turns_left - 1;
+                player_list = new_player_l;
+                current_player = next_player state;
+                set = char_removal state.set char_l
+              } 
 
 let pass game state = 
   Legal { state with
@@ -178,12 +178,12 @@ let swap l state json =
         }
 
 (** [update_player_list4 players p id] is [players] with [p] instead of the
-player whose id is [id]. *)
+    player whose id is [id]. *)
 let rec update_player_list4 players p id = 
   match players with 
   | [] -> []
   | (k,v)::t -> if k=id then (k,p)::(update_player_list4 p id) 
-  else (k,v)::(update_player_list4 p id)
+    else (k,v)::(update_player_list4 p id)
 
 let steal w p st = 
   let player_list = st.player_list in 
@@ -191,7 +191,7 @@ let steal w p st =
   let words = player.player_words in 
   if !(List.mem_assoc (String.uppercase_ascii w) (words) then Illegal 
   else let player' = { player with player_words = remove w words;} in 
-   {st with player_list = update_player_list4}
+    {st with player_list = update_player_list4}
 
 let player_count state = 
   state.total_players
@@ -254,5 +254,16 @@ let valid game state =
 let print_player_word_list state id = 
   let wl = (List.assoc id state.player_list).player_words in
   List.iter (fun (k,v)-> print_string k; print_newline ();) wl
+
+(** [print_all_player_word_list_helper st acc] is a helper function 
+    that prints all player[id]'s word list. *)
+let rec print_all_player_word_list_helper st acc = 
+  if acc > List.length st.player_list then ()
+  else print_string "Player " ^ string_of_int acc; 
+  print_player_word_list st acc;
+  print_all_player_word_list_helper st (acc + 1)
+
+let print_all_player_word_list st = print_all_player_word_list_helper st 1
+
 
 let get_check_mode st = st.check

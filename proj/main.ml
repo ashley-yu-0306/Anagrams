@@ -1,7 +1,6 @@
 open Game
 open Command
 open State
-open Anthill
 
 
 let rec print winners text = 
@@ -59,6 +58,11 @@ let rec check_phase game st =
            | Invalid wl -> State.invalid wl game st |> check_phase game))
     )
   end
+
+
+
+let rec loopgame2 game st json : unit = ()
+
 
 
 (** [loopgame game st json] is the [game] with updating states [st]. *)
@@ -207,7 +211,7 @@ let play_game j =
     let initst = init_state our_game num_players num_turns game_mode false in 
     if game_mode = "normal" then
       loopgame our_game initst json else
-      loopgame our_game initst json
+      loopgame2 our_game initst json
   else
     let our_game = combo_set_var (from_json json) 6 in
     let initst = init_state our_game 2 5 "normal" false in
