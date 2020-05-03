@@ -64,6 +64,7 @@ val steal: Command.word -> player_id -> t -> result
 (** [player_count state] is the number of players in the game.*)
 val player_count: t -> int
 
+(** [player_count st] prints the players current letter. *)
 val print_player_letter: t -> unit
 
 (** [winner_check state] is the list of winners in game of state [state] and

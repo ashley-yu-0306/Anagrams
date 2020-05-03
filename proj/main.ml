@@ -60,7 +60,7 @@ let each_turn_print st game =
   print_list game 2;
   (* Print all player's current words. *)
   print_all_player_word_list st;
-  (* Print each player's letter.  *)
+  (* Print each player's letter. *)
   print_player_letter st
 
 let rec loopgame2 game st json : unit =  
