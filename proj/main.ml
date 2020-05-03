@@ -59,9 +59,15 @@ let rec check_phase game st =
     )
   end
 
+let each_turn_print st game = 
+  (* First, we want to print out the pool: *)
+  print_list game;
 
 
-let rec loopgame2 game st json : unit = ()
+
+
+
+  let rec loopgame2 game st json : unit = ()
 
 
 

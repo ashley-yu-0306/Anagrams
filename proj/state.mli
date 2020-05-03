@@ -74,7 +74,6 @@ val valid : Game.t -> t -> t
 (** [print_player_word_list state id] prints player[id]'s word list.*)
 val print_player_word_list: t -> player_id -> unit
 
-
 (** [print_all_player_word_list state id] prints all player[id]'s word list.*)
 val print_all_player_word_list: t -> unit
 
