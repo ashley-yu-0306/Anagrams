@@ -59,7 +59,9 @@ let each_turn_print st game =
   (* First, we want to print out the pool: *)
   print_list game 2;
   (* Print all player's current words. *)
-  print_all_player_word_list st
+  print_all_player_word_list st;
+  (* Print each player's letter.  *)
+  print_player_letter st
 
 let rec loopgame2 game st json : unit =  
   let turns_left = State.turns st in 
@@ -112,7 +114,7 @@ let rec loopgame2 game st json : unit =
               | Legal st' -> ignore(Sys.command "clear"); loopgame2 game st' json
             end
         | Steal (id, old_word, new_word) -> let target = String.uppercase_ascii old_word in 
-        let steal_from = State.get_wordlist_by_id st id in
+          let steal_from = State.get_wordlist_by_id st id in
           if List.mem_assoc target steal_from then 
             match steal target id st with 
             | Illegal -> print_endline "Illegal"; loopgame2 game st json;

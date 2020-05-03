@@ -262,13 +262,17 @@ let print_player_word_list state id =
   if wl = [] then print_endline "\nNo words yet!\n" else
     List.iter (fun (k,v)-> print_string k; print_newline ();) wl
 
+let print_player_letter st = 
+  print_endline ("Current player's letter" ^ 
+                 (List.assoc st.current_player st.player_list).current_letter)
+
 (** [print_all_player_word_list_helper st acc] is a helper function 
     that prints all player[id]'s word list. *)
 let rec print_all_player_word_list_helper st acc = 
   if acc > List.length st.player_list then ()
-  else print_string ("Player " ^ string_of_int acc ^ " "); 
-  print_player_word_list st acc;
-  print_all_player_word_list_helper st (acc + 1)
+  else (print_string ("Player " ^ string_of_int acc ^ " "); 
+        print_player_word_list st acc;
+        print_all_player_word_list_helper st (acc + 1))
 
 let print_all_player_word_list st = print_all_player_word_list_helper st 1
 
