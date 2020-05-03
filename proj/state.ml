@@ -17,7 +17,6 @@ type  t = {
   total_players: int;
   mode: string;
   set: Game.t;
-  check: bool
 }
 
 type result = Legal of t | Illegal
@@ -33,14 +32,13 @@ let init_player set = {
   current_letter = random_letter()
 }
 
-let init_state set num turn mode check = {
+let init_state set num turn mode = {
   turns_left= turn * num; 
   player_list = List.init num (fun i -> ((i + 1), init_player set));
   current_player = 1;
   total_players = num;
   mode = mode;
   set= set;
-  check = check
 }
 
 let turns state = 
@@ -144,7 +142,7 @@ let create word game state =
     let player = state.current_player in 
     let player_l = state.player_list in 
     let new_player_l = update_player_list state player_l word player in
-    let char_l = string_to_char_list word ((String.length word)-1)
+    let char_l = string_to_char_list word ((String.length word)-1) in
         Legal { state with
                 turns_left = state.turns_left - 1;
                 player_list = new_player_l;
@@ -165,8 +163,7 @@ let rec update_player_list3 players ns id =
   | [] -> []
   | (k,v)::t -> if k = id 
     then 
-      let player = {
-        player_words = v.player_words;
+      let player = { v with
         total_points = v.total_points - 5;
         player_letter_set = ns;
       } in (k,player)::(update_player_list3 t ns id)
