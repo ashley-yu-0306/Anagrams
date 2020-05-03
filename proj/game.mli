@@ -35,7 +35,7 @@ val combo_set: alphabet -> t
 val print_list : t -> int -> unit
 
 (** [get_points set l] is the point that the letter [l] is worth. *)
-val get_points: t -> letter -> points
+val get_points: all_letters_in_json -> letter -> points
 
 (** [get_letters game acc] is a list of letters in the combo set [game].
     Required: all uppercase. *)

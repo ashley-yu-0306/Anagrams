@@ -46,6 +46,10 @@ let init_state set num turn mode a = {
 let turns state = 
   state.turns_left
 
+
+let state_alpha state = 
+  state.alpha
+
 let current_player state = 
   state.current_player
 
@@ -80,9 +84,10 @@ let cl_to_ll cl = List.map (fun x -> Char.escaped x) cl
    let seq = word |> String.to_seq |> List.of_seq |> List.map (Game.get_points set) in 
    List.fold_right (+) seq 0 *)
 let calculate_word_points word st = 
-  let set = current_player_letter_set st in
+  let a = state_alpha st in
+  (* let set = current_player_letter_set st in *)
   let base = List.fold_left 
-      (fun x y -> x + Game.get_points set y) 0 (word |> word_to_cl |> cl_to_ll) in 
+      (fun x y -> x + Game.get_points a y) 0 (word |> word_to_cl |> cl_to_ll) in 
   let length = String.length word in 
   if length >= 3 && length < 5 
   then base |> float_of_int |> (fun x -> x*. 1.2) |> int_of_float
@@ -124,11 +129,7 @@ let rec check_illegal ll combo_l =
 (**[check_letter_used st word] is [true] iff [word] contains the player's 
    current letter in [st]. *)
 let check_letter_used st word = String.contains (String.uppercase_ascii word)
-<<<<<<< HEAD
     (String.get (current_player_letter st) 0)
-=======
-    ((String.get (List.assoc st.current_player st.player_list).current_letter) 0)
->>>>>>> c69d8da7d1827eb66c21e7428f7f20839e5ca7f9
 
 (** [string_to_string_list s i] is the string list of [s], where [i] is the
     length of the string subtracted by 1. *)

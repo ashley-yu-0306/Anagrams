@@ -75,7 +75,7 @@ let print_list a m= if m = 1 then print_endline "\nYour Letters: \n"
   List.iter (fun (k,v) -> print_string ""; print_int v; print_string " pts   ") a;
   print_endline "\n"
 
-let rec get_points set l = match set with 
+let rec get_points a l = match a with 
   | [] -> failwith "not in letter set"
   (* can be changed when implementing legal/illegal inputs! *)
   | (l', p) :: t -> if l = l' then p else get_points t l 
@@ -87,5 +87,5 @@ let rec char_removal s c =
   | [] -> s 
   | h::t -> char_removal (List.remove_assoc h s) t
 
-  let add_in_pool game l = failwith "Unimpl"
-  (*(l, the letter's points) :: game *)
+let add_in_pool game l = failwith "Unimpl"
+(*(l, the letter's points) :: game *)
