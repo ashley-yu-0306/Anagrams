@@ -8,8 +8,9 @@ type alphabet =  { vowels: (letter * points) list;
 
 (* type t = { vowels: (letter * points) list; 
            consonants: (letter * points) list } *)
-
 type t = (letter * points) list
+
+type all_letters_in_json = (letter * points) list
 
 (** [points_as_int e] is a letter-points pair pased from json with points as 
     integer.*)
@@ -19,6 +20,8 @@ let from_json j : alphabet = {
   vowels = j |> member "vowels" |> to_assoc |> List.map points_as_int;
   consonants = j|> member "consonants" |> to_assoc |> List.map points_as_int;
 }
+
+let all_letters a : all_letters_in_json = a.consonants @ a.vowels
 
 (** [rand_l a b] returns a random letter in the list [a], with 
     index between 0 (inclusive) and the bound [b] (exclusive). *)

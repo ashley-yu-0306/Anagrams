@@ -17,6 +17,7 @@ type  t = {
   total_players: int;
   mode: string;
   set: Game.t;
+  alpha: Game.all_letters_in_json
 }
 
 type result = Legal of t | Illegal
@@ -32,13 +33,14 @@ let init_player set = {
   current_letter = random_letter()
 }
 
-let init_state set num turn mode = {
+let init_state set num turn mode a = {
   turns_left= turn * num; 
   player_list = List.init num (fun i -> ((i + 1), init_player set));
   current_player = 1;
   total_players = num;
   mode = mode;
   set= set;
+  alpha = a
 }
 
 let turns state = 
@@ -55,6 +57,9 @@ let current_player_points state =
 
 let current_player_letter_set state =
   (List.assoc state.current_player state.player_list).player_letter_set
+
+let current_player_letter st = 
+  (List.assoc st.current_player st.player_list).current_letter
 
 let get_pool st = st.set
 
@@ -118,8 +123,8 @@ let rec check_illegal ll combo_l =
 
 (**[check_letter_used st word] is [true] iff [word] contains the player's 
    current letter in [st]. *)
-let check_letter_used st word = String.contains word
-    ((String.get (List.assoc st.current_player st.player_list).current_letter) 0)
+let check_letter_used st word = String.contains (String.uppercase_ascii word)
+    (String.get (current_player_letter st) 0)
 
 (** [string_to_string_list s i] is the string list of [s], where [i] is the
     length of the string subtracted by 1. *)
@@ -140,12 +145,14 @@ let create word state =
       total_players = state.total_players;
       mode = state.mode;
       set = state.set;
+      alpha = state.alpha
     } 
 
 let create_p word state = 
   if word = "" || not(check_letter_used state word) || 
      check_illegal (word |> word_to_cl |> cl_to_ll) 
-       (Game.get_letters (current_player_letter_set state)) then Illegal
+       ((current_player_letter state)::(Game.get_letters (current_player_letter_set state)))
+  then Illegal
   else
     let player = state.current_player in 
     let player_l = state.player_list in 
@@ -272,7 +279,7 @@ let print_player_word_list state id =
 
 let print_player_letter st = 
   print_endline ("Current player's letter: " ^ 
-                 (List.assoc st.current_player st.player_list).current_letter)
+                 (current_player_letter st))
 
 (** [print_all_player_word_list_helper st acc] is a helper function 
     that prints all player[id]'s word list. *)

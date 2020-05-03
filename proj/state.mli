@@ -16,7 +16,7 @@ type player_id = int
 (** [init_state set num turn mode] is the initial state of the game. The initial state
     has the combination of letters [set], the turns left in the game, the
     current player, and the list of players. *)
-val init_state : Game.t -> int -> int -> string -> t
+val init_state : Game.t -> int -> int -> string -> Game.all_letters_in_json -> t
 
 (** [turns state] is the turns left in game state [state]. *)
 val turns: t  -> int

@@ -267,11 +267,12 @@ let play_game j =
   let config = ask_configure() in
   if config then
     let num_words = ask_num_letters() in
+    let alpha = all_letters (from_json json) in
     let our_game = combo_set_var (from_json json) num_words in
     let num_players = ask_players() in
     let num_turns = ask_turns() in 
     let game_mode = ask_mode() in
-    let initst = init_state our_game num_players num_turns game_mode in 
+    let initst = init_state our_game num_players num_turns game_mode alpha in 
     ignore(Sys.command "clear");
     if game_mode = "normal" then begin
       ANSITerminal.(print_string [red] 
@@ -285,7 +286,8 @@ let play_game j =
     end
   else
     let our_game = combo_set_var (from_json json) 6 in
-    let initst = init_state our_game 2 5 "normal" in
+    let alpha = all_letters (from_json json) in
+    let initst = init_state our_game 2 5 "normal" alpha in
     loopgame our_game initst json
 
 

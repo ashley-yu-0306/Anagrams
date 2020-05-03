@@ -12,12 +12,16 @@ type letter = string
     the json file. *)
 type alphabet
 
+type all_letters_in_json
+
 (** [from_json j] is the game alphabet that [j] represents.
     Requires: [j] is a valid JSON game representation. *)
 val from_json : Yojson.Basic.t -> alphabet
 
 (** [combo_set_var a lim] is the randomly picked letter set for the game. *)
 val combo_set_var: alphabet -> int -> t
+
+val all_letters: alphabet -> all_letters_in_json
 
 (** [swap_letter a l set] is the [set] of letters with [l] replaced with
     a letter from [a]. *)
