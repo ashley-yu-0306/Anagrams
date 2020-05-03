@@ -46,7 +46,6 @@ let init_state set num turn mode a = {
 let turns state = 
   state.turns_left
 
-
 let state_alpha state = 
   state.alpha
 
@@ -113,6 +112,17 @@ let rec update_player_list state players word id  =
       } in (k,player)::(update_player_list state t word id)
     else (k,v)::(update_player_list state t word id)
 
+let rec update_player_list_pass state players id = 
+  match players with
+  | [] -> [] 
+  | (k,v)::t -> 
+    let player = {
+      player_words = v.player_words;
+      total_points = v.total_points;
+      player_letter_set = v.player_letter_set;
+      current_letter = random_letter()
+    } in (k,player)::(update_player_list_pass state t id)
+
 (**[remove x lst acc] is [lst] with the first occurance of [x] removed. *)
 let rec remove x lst acc = match lst with
   | [] -> acc
@@ -177,6 +187,7 @@ let pass state = if state.mode = "normal" then
           } 
   else  Legal { state with
                 turns_left = state.turns_left - 1;
+                player_list = update_player_list_pass state state.player_list current_player;
                 current_player = next_player state;
                 set = 
                   Game.add_in_pool state.set (current_player_letter state) (state_alpha state)

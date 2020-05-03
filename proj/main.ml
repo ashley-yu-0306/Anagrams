@@ -73,7 +73,7 @@ let rec loopgame2 game st json : unit =
     check_phase game st)
   else (
     let points = State.current_player_points st |> string_of_int in
-    each_turn_print st game;
+    each_turn_print st (get_pool st);
     print_endline ("There are " ^ (turns_left |> string_of_int) 
                    ^ " turns left in the game.");
     print_endline ("(Player " ^ (State.current_player st |> string_of_int)
@@ -109,7 +109,7 @@ let rec loopgame2 game st json : unit =
               | Illegal -> 
                 print_endline 
                   "This word cannot be created with your own letter or the letters in the pool."; 
-                loopgame2 game st json
+                loopgame2 (get_pool st) st json
               | Legal st' -> ignore(Sys.command "clear"); loopgame2 game st' json
             end
         | Steal (id, old_word, new_word) -> begin
