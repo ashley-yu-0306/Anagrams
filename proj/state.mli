@@ -82,3 +82,5 @@ val print_player_word_list: t -> player_id -> unit
 (** [print_all_player_word_list state id] prints all player[id]'s word list.*)
 val print_all_player_word_list: t -> unit
 
+(** [get_wordlist_by_id st id] is the wordlist of player [id].*)
+val get_wordlist_by_id: t -> player_id -> (Command.word * Game.points) list

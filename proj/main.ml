@@ -111,15 +111,14 @@ let rec loopgame2 game st json : unit =
                 loopgame2 game st json
               | Legal st' -> ignore(Sys.command "clear"); loopgame2 game st' json
             end
-        | Swap l -> let target = String.uppercase_ascii l in 
-          if List.mem target (set |> Game.get_letters) then 
-            match swap l st json with 
+        | Steal (id, old_word, new_word) -> let target = String.uppercase_ascii old_word in 
+        let steal_from = State.get_wordlist_by_id st id in
+          if List.mem_assoc target steal_from then 
+            match steal target id st with 
             | Illegal -> print_endline "Illegal"; loopgame2 game st json;
             | Legal st' -> 
-              print_endline "Your letter has been swapped. You've lost 5 points.";
-              ignore(Unix.sleep 3);
-              ignore(Sys.command "clear");
-              loopgame2 game st' json else 
+              loopgame2 game st' json 
+          else 
             (print_endline "This letter is not in your letter set. Please try again."; 
              loopgame2 game st json) 
         |_ -> print_endline 

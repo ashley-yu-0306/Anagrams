@@ -271,3 +271,5 @@ let rec print_all_player_word_list_helper st acc =
   print_all_player_word_list_helper st (acc + 1)
 
 let print_all_player_word_list st = print_all_player_word_list_helper st 1
+
+let get_wordlist_by_id st id = (List.assoc id st.player_list).player_words
