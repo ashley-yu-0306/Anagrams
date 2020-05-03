@@ -43,7 +43,12 @@ val next_player: t -> player_id
 val calculate_word_points: Command.word ->t -> Game.points
 
 (** [create word game state] is the result after the player in [game] attempts
-    to create the [word]. *)
+    to create the [word]. The result does not change the set of playable
+    letters. *)
+val create: Command.word -> Game.t -> t -> result
+
+(** [create_p word game state] is the result after the player in [game] attempts
+    to create the [word]. The result changes the set of playable letters.. *)
 val create: Command.word -> Game.t -> t -> result
 
 (** [pass game state] is the result after the player in [game] passes their turn.*)

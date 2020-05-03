@@ -77,3 +77,22 @@ let rec get_points set l = match set with
   | (l', p) :: t -> if l = l' then p else get_points t l 
 
 let get_letters game = List.map fst game
+
+let rec remove_set lst r x = match lst with
+  | [] -> []
+  | (h,p)::t -> if (h = x && r = false)
+    then remove_set t true x
+    else if r = true then (h,p)::(remove_set t true x) else (h,p)::(remove_set t false x)
+
+(** [remove_set lst r x] is the list of pairs [lst] with the first 
+    occurence of [x] removed. *)
+let rec remove_set lst r x = match lst with
+  | [] -> []
+  | (h,p)::t -> if (h = x && r = false)
+    then remove_set t true x
+    else if r = true then (h,p)::(remove_set t true x) else (h,p)::(remove_set t false x)
+
+let rec char_removal s c = 
+  match c with 
+  | [] -> s 
+  | h::t -> char_removal (remove_set s false h) t

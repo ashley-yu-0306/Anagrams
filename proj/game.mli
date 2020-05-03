@@ -47,3 +47,6 @@ val swap_letter: alphabet -> letter -> t -> t
     is swapped to the [swappair]. *)
 val generate_new_set: letter -> (letter * points) -> t -> t
 
+(** [char_removal s c] is the list of pairs [s] with pairs whose key corresponds
+    to the elements in [c] removed. *)
+val char_removal: t -> char list -> t
