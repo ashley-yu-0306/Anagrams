@@ -4,7 +4,8 @@ open Game
 type player = {   
   player_words:(Command.word * Game.points) list;
   total_points: Game.points;
-  player_letter_set: Game.t
+  player_letter_set: Game.t;
+  current_letter: string
 }
 
 type player_id = int
@@ -21,11 +22,15 @@ type  t = {
 
 type result = Legal of t | Illegal
 
+let random_letter() = 
+  Char.escaped (Char.chr ((Random.self_init(); Random.int 26) + 65))
+
 (** [init_player] initializes a player *)
 let init_player set = {
   player_words = [];
   total_points = 0;
-  player_letter_set = set
+  player_letter_set = set;
+  current_letter = random_letter()
 }
 
 let init_state set num turn mode check = {
@@ -94,7 +99,8 @@ let rec update_player_list state players word id  =
       let player = {
         player_words = words;
         total_points = v.total_points + points;
-        player_letter_set = v.player_letter_set
+        player_letter_set = v.player_letter_set;
+        current_letter = random_letter()
       } in (k,player)::(update_player_list state t word id)
     else (k,v)::(update_player_list state t word id)
 

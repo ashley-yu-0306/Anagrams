@@ -62,12 +62,13 @@ let rec check_phase game st =
 let each_turn_print st game = 
   (* First, we want to print out the pool: *)
   print_list game;
+  (* Print all player's current words. *)
+  print_all_player_word_list st
 
 
 
 
-
-  let rec loopgame2 game st json : unit = ()
+let rec loopgame2 game st json : unit = ()
 
 
 
