@@ -170,23 +170,23 @@ let rec ask_turns() =
   | x -> x
 
 let rec ask_mode() = 
-  print_endline "Which game mode (normal, speed): "; 
+  print_endline "Which game mode (normal, pool): "; 
   print_string "> "; 
   match read_line() with
   | "normal" -> "normal"
-  | "speed" -> "speed"
+  | "pool" -> "pool"
   | _ -> print_endline "ERROR. Enter a valid game mode: ";
     ask_mode()
 
 
-let rec ask_check() = 
-  print_endline "Which check mode (human, dictionary): "; 
-  print_string "> "; 
-  match read_line() with
-  | "human" -> false
-  | "dictionary" -> true
-  | _ -> print_endline "ERROR. Enter a valid check mode: ";
-    ask_check()
+(* let rec ask_check() = 
+   print_endline "Which check mode (human, dictionary): "; 
+   print_string "> "; 
+   match read_line() with
+   | "human" -> false
+   | "dictionary" -> true
+   | _ -> print_endline "ERROR. Enter a valid check mode: ";
+    ask_check() *)
 
 (** [play_game j] starts the game with the letter set generated from the 
     alphabet in file [j]. *)
@@ -204,9 +204,10 @@ let play_game j =
     let num_players = ask_players() in
     let num_turns = ask_turns() in 
     let game_mode = ask_mode() in
-    let check_mode = ask_check() in
-    let initst = init_state our_game num_players num_turns game_mode check_mode in 
-    loopgame our_game initst json
+    let initst = init_state our_game num_players num_turns game_mode false in 
+    if game_mode = "normal" then
+      loopgame our_game initst json else
+      loopgame our_game initst json
   else
     let our_game = combo_set_var (from_json json) 6 in
     let initst = init_state our_game 2 5 "normal" false in

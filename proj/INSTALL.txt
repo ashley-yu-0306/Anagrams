@@ -2,7 +2,7 @@ To run and play the game:
 
 0. Install packages:
 Update to the latest opam version. (Type in 'opam update' in terminal.)
-	a. Anthill
+	a. Anthillma
 Type 'opam install anthill' in terminal.
 
 1. Open terminal under file 'game'.
