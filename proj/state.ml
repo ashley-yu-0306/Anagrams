@@ -29,11 +29,10 @@ let init_player set = {
 }
 
 let init_state set num turn mode check = {
-  turns_left= turn * num; (*hard coded // change with config implementation*)
-  (* player_list= [(1,init_player);(2,init_player)]; *)
+  turns_left= turn * num; 
   player_list = List.init num (fun i -> ((i + 1), init_player set));
   current_player = 1;
-  total_players = num; (*hard coded // change with config implementation*)
+  total_players = num;
   mode = mode;
   set= set;
   check = check
@@ -99,10 +98,18 @@ let rec update_player_list state players word id  =
       } in (k,player)::(update_player_list state t word id)
     else (k,v)::(update_player_list state t word id)
 
-(**[remove l lst acc] is [lst] with the first occurance of [l] removed. *)
-let rec remove l lst acc = match lst with
+(**[remove x lst acc] is [lst] with the first occurance of [x] removed. *)
+let rec remove x lst acc = match lst with
   | [] -> acc
-  | h :: t -> if l = h then acc @ t else remove l t (h :: acc)
+  | h::t -> if h = x then remove x t acc else remove x t (h::acc)
+
+(** [remove_set lst r x] is the list of pairs [lst] with the first 
+occurence of [x] removed. *)
+let rec remove_set lst r x = match lst with
+  | [] -> []
+  | (h,p)::t -> if (h = x && r = false)
+  then remove_set t true x
+  else if r = true then (h,p)::(remove_set t true x) else (h,p)::(remove_set t false x)
 
 (**[check_illegal ll combo_l] is [true] iff [ll] contains letter(s) that is not
    in the combo or more occurances of some letter offered in the combo. *)
@@ -112,6 +119,18 @@ let rec check_illegal ll combo_l =
   | h :: t -> if not (List.mem h combo_l) then true 
     else check_illegal t (remove h combo_l [])
 
+(** [string_to_char_list s i] is the character list of [s], where [i] is the
+length of the string subtracted by 1. *)
+let rec string_to_char_list s i = 
+  if i>(-1) then (String.get s i) ::string_to_char_list s (i-1) else [] 
+
+(** [char_removal s c] is the list of pairs [s] with pairs whose key corresponds
+to the elements in [c] removed. *)
+let rec char_removal s c = 
+  match c with 
+  | [] -> s 
+  | h::t -> char_removal (remove_set s false h) t
+
 let create word game state = 
   if word = "" || check_illegal (word |> word_to_cl |> cl_to_ll) 
        (Game.get_letters (current_player_letter_set state)) then Illegal
@@ -119,10 +138,12 @@ let create word game state =
     let player = state.current_player in 
     let player_l = state.player_list in 
     let new_player_l = update_player_list state player_l word player in
+    let char_l = string_to_char_list word ((String.length word)-1)
     Legal { state with
             turns_left = state.turns_left - 1;
             player_list = new_player_l;
             current_player = next_player state;
+            set = char_removal state.set char_l
           } 
 
 let pass game state = 
@@ -155,6 +176,22 @@ let swap l state json =
           player_list = update_player_list3 state.player_list new_set id;
           current_player = next_player state;
         }
+
+(** [update_player_list4 players p id] is [players] with [p] instead of the
+player whose id is [id]. *)
+let rec update_player_list4 players p id = 
+  match players with 
+  | [] -> []
+  | (k,v)::t -> if k=id then (k,p)::(update_player_list4 p id) 
+  else (k,v)::(update_player_list4 p id)
+
+let steal w p st = 
+  let player_list = st.player_list in 
+  let player = List.assoc p player_list in 
+  let words = player.player_words in 
+  if !(List.mem_assoc (String.uppercase_ascii w) (words) then Illegal 
+  else let player' = { player with player_words = remove w words;} in 
+   {st with player_list = update_player_list4}
 
 let player_count state = 
   state.total_players
