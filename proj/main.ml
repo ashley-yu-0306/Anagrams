@@ -113,16 +113,11 @@ let rec loopgame2 game st json : unit =
                 loopgame2 game st json
               | Legal st' -> ignore(Sys.command "clear"); loopgame2 game st' json
             end
-        | Steal (id, old_word, new_word) -> let target = String.uppercase_ascii old_word in 
-          let steal_from = State.get_wordlist_by_id st id in
-          if List.mem_assoc target steal_from then 
-            match steal target id st with 
-            | Illegal -> print_endline "Illegal"; loopgame2 game st json;
+        | Steal (id, old_word, new_word) -> begin
+            match steal old_word id st with 
+            | Illegal -> print_endline "This letter is not in your letter set. Please try again."; loopgame2 game st json;
             | Legal st' ->  
-              loopgame2 game st' json 
-          else 
-            (print_endline "This letter is not in your letter set. Please try again."; 
-             loopgame2 game st json) 
+              loopgame2 game st' json end
         |_ -> print_endline 
                 "Malformed command. Available commands: 'create', 'pass', 'quit', 'swap'."; 
       )
