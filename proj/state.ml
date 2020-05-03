@@ -177,6 +177,7 @@ let create_p word state =
             turns_left = state.turns_left - 1;
             player_list = new_player_l;
             current_player = next_player state;
+            (** Line 181 needs changing! *)
             set = char_removal state.set char_l
           } 
 
