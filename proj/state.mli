@@ -54,8 +54,8 @@ val create: Command.word -> t -> result
     to create the [word]. The result changes the set of playable letters.. *)
 val create_p: Command.word -> t -> result
 
-(** [pass game state] is the result after the player in [game] passes their turn.*)
-val pass: Game.t -> t -> result
+(** [pass state] is the result after the player in [game] passes their turn.*)
+val pass: t -> result
 
 (** [swap game state] is the result after the player in [game] swaps their letter
     [l]. *)

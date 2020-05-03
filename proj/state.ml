@@ -124,7 +124,11 @@ let rec check_illegal ll combo_l =
 (**[check_letter_used st word] is [true] iff [word] contains the player's 
    current letter in [st]. *)
 let check_letter_used st word = String.contains (String.uppercase_ascii word)
+<<<<<<< HEAD
     (String.get (current_player_letter st) 0)
+=======
+    ((String.get (List.assoc st.current_player st.player_list).current_letter) 0)
+>>>>>>> c69d8da7d1827eb66c21e7428f7f20839e5ca7f9
 
 (** [string_to_string_list s i] is the string list of [s], where [i] is the
     length of the string subtracted by 1. *)
@@ -165,11 +169,19 @@ let create_p word state =
             set = char_removal state.set char_l
           } 
 
-let pass game state = 
-  Legal { state with
-          turns_left = state.turns_left - 1;
-          current_player = next_player state;
-        }
+let pass state = if state.mode = "normal" then
+    Legal { state with
+            turns_left = state.turns_left - 1;
+            current_player = next_player state;
+          } 
+  else  Legal { state with
+                turns_left = state.turns_left - 1;
+                current_player = next_player state;
+                set = 
+                  Game.add_in_pool state.set 
+                    (List.assoc (state.current_player) 
+                       (state.player_list)).current_letter
+              } 
 
 (** [update_player_list3 players ns id] is the list of [players] with 
     the player whose id is [id] updated with a new letter set [ns].*)
