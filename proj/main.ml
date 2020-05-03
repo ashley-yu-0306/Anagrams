@@ -95,7 +95,7 @@ let rec loopgame2 game st json : unit =
           ignore(Sys.command "clear");
           print_endline ("Player " ^ (State.current_player st |> string_of_int) 
                          ^ " has passed.\n"); 
-          begin match pass game st with 
+          begin match pass st with 
             | Legal st' -> loopgame2 game st' json
             | Illegal -> failwith "Impossible error"
           end
@@ -164,7 +164,7 @@ let rec loopgame game st json : unit =
           ignore(Sys.command "clear");
           print_endline ("Player " ^ (State.current_player st |> string_of_int) 
                          ^ " has passed."); 
-          begin match pass game st with 
+          begin match pass st with 
             | Legal st' -> loopgame game st' json
             | Illegal -> loopgame game st json
           end
