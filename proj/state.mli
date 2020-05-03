@@ -45,11 +45,11 @@ val calculate_word_points: Command.word ->t -> Game.points
 (** [create word game state] is the result after the player in [game] attempts
     to create the [word]. The result does not change the set of playable
     letters. *)
-val create: Command.word -> Game.t -> t -> result
+val create: Command.word -> t -> result
 
 (** [create_p word game state] is the result after the player in [game] attempts
     to create the [word]. The result changes the set of playable letters.. *)
-val create: Command.word -> Game.t -> t -> result
+val create_p: Command.word -> t -> result
 
 (** [pass game state] is the result after the player in [game] passes their turn.*)
 val pass: Game.t -> t -> result
@@ -86,4 +86,4 @@ val print_player_word_list: t -> player_id -> unit
 val print_all_player_word_list: t -> unit
 
 (* [get_wordlist_by_id st id] is the wordlist of player [id].
-val get_wordlist_by_id: t -> player_id -> (Command.word * Game.points) list *)
+   val get_wordlist_by_id: t -> player_id -> (Command.word * Game.points) list *)

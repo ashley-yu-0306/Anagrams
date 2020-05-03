@@ -114,12 +114,16 @@ let rec check_illegal ll combo_l =
   | h :: t -> if not (List.mem h combo_l) then true 
     else check_illegal t (remove h combo_l [])
 
-(** [string_to_char_list s i] is the character list of [s], where [i] is the
+
+let check_letter_used st word = String.contains word
+    ((String.get (List.assoc st.current_player st.player_list).current_letter) 0)
+
+(** [string_to_string_list s i] is the string list of [s], where [i] is the
     length of the string subtracted by 1. *)
 let rec string_to_string_list s i = 
   if i>(-1) then String.make 1 (String.get s i) ::string_to_string_list s (i-1) else [] 
 
-let create word game state = 
+let create word state = 
   if word = "" || check_illegal (word |> word_to_cl |> cl_to_ll) 
        (Game.get_letters (current_player_letter_set state)) then Illegal
   else
@@ -135,8 +139,9 @@ let create word game state =
       set = state.set;
     } 
 
-let create_p word game state = 
-  if word = "" || check_illegal (word |> word_to_cl |> cl_to_ll) 
+let create_p word state = 
+  if word = "" || not(check_letter_used state word) || 
+     check_illegal (word |> word_to_cl |> cl_to_ll) 
        (Game.get_letters (current_player_letter_set state)) then Illegal
   else
     let player = state.current_player in 
