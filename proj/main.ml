@@ -96,7 +96,7 @@ let rec loopgame2 game st json : unit =
           print_endline ("Player " ^ (State.current_player st |> string_of_int) 
                          ^ " has passed.\n"); 
           begin match pass st with 
-            | Legal st' -> loopgame2 game st' json
+            | Legal st' -> loopgame2 (get_pool st') st' json
             | Illegal -> failwith "Impossible error"
           end
         | Create w -> 
@@ -110,7 +110,7 @@ let rec loopgame2 game st json : unit =
                 print_endline 
                   "This word cannot be created with your own letter or the letters in the pool."; 
                 loopgame2 (get_pool st) st json
-              | Legal st' -> ignore(Sys.command "clear"); loopgame2 game st' json
+              | Legal st' -> ignore(Sys.command "clear"); loopgame2 (get_pool st') st' json
             end
         | Steal (id, old_word, new_word) -> begin
             match steal old_word id st with 
@@ -120,7 +120,7 @@ let rec loopgame2 game st json : unit =
                                 "This word cannot be created with your own letter or the letters in the pool.";
                   loopgame2 game st json
                 | Legal st' ->
-                  loopgame2 game st' json end
+                  loopgame2 (get_pool st') st' json end
           end
         |_ -> print_endline 
                 "Malformed command. Available commands: 'create', 'pass', 'quit', 'swap'."; 

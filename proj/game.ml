@@ -21,7 +21,7 @@ let from_json j : alphabet = {
   consonants = j|> member "consonants" |> to_assoc |> List.map points_as_int;
 }
 
-let all_letters a : all_letters_in_json = a.consonants @ a.vowels
+let all_letters a : all_letters_in_json = a.vowels @ a.consonants 
 
 (** [rand_l a b] returns a random letter in the list [a], with 
     index between 0 (inclusive) and the bound [b] (exclusive). *)
