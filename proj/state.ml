@@ -109,11 +109,12 @@ let rec remove x lst acc = match lst with
 
 (** [remove_set lst r x] is the list of pairs [lst] with the first 
     occurence of [x] removed. *)
-let rec remove_set lst r x = match lst with
-  | [] -> []
-  | (h,p)::t -> if (h = x && r = false)
+(** can use List.remove_assoc instead *)
+(* let rec remove_set lst r x = match lst with
+   | [] -> []
+   | (h,p)::t -> if (h = x && r = false)
     then remove_set t true x
-    else if r = true then (h,p)::(remove_set t true x) else (h,p)::(remove_set t false x)
+    else if r = true then (h,p)::(remove_set t true x) else (h,p)::(remove_set t false x) *)
 
 (**[check_illegal ll combo_l] is [true] iff [ll] contains letter(s) that is not
    in the combo or more occurances of some letter offered in the combo. *)
