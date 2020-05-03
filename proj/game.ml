@@ -87,5 +87,5 @@ let rec char_removal s c =
   | [] -> s 
   | h::t -> char_removal (List.remove_assoc h s) t
 
-let add_in_pool game l = failwith "Unimpl"
+let add_in_pool game l a = (l,(get_points a l))::game
 (*(l, the letter's points) :: game *)

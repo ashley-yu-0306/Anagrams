@@ -55,4 +55,4 @@ val char_removal: t -> letter list -> t
 
 (** [add_in_pool game l] is the new pool with a new letter from the player 
     who chose to pass.*)
-val add_in_pool: t -> letter -> t
+val add_in_pool: t -> letter -> all_letters_in_json -> t

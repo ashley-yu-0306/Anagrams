@@ -81,7 +81,7 @@ let cl_to_ll cl = List.map (fun x -> Char.escaped x) cl
                   |> List.map String.uppercase_ascii
 
 (* let calculate_word_points word set = 
-   let seq = word |> String.to_seq |> List.of_seq |> List.map (Game.get_points set) in 
+   let seq = word |> String.to_seq |> List.of_seq |> List.map (Game.get_points a) in 
    List.fold_right (+) seq 0 *)
 let calculate_word_points word st = 
   let a = state_alpha st in
@@ -179,9 +179,7 @@ let pass state = if state.mode = "normal" then
                 turns_left = state.turns_left - 1;
                 current_player = next_player state;
                 set = 
-                  Game.add_in_pool state.set 
-                    (List.assoc (state.current_player) 
-                       (state.player_list)).current_letter
+                  Game.add_in_pool state.set (current_player_letter state) (state_alpha state)
               } 
 
 (** [update_player_list3 players ns id] is the list of [players] with 
@@ -246,7 +244,6 @@ let winner_check state =
   winner_check_helper p_list (win_id::[]) win_p
 
 (** =====Below is for check phase====== *)
-
 
 (** [remove_invalid next_player inv_words state] is a player with all invalid 
     words removed from his words list*)
