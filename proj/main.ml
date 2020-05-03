@@ -118,7 +118,7 @@ let rec loopgame2 game st json : unit =
           if List.mem_assoc target steal_from then 
             match steal target id st with 
             | Illegal -> print_endline "Illegal"; loopgame2 game st json;
-            | Legal st' -> 
+            | Legal st' ->  
               loopgame2 game st' json 
           else 
             (print_endline "This letter is not in your letter set. Please try again."; 

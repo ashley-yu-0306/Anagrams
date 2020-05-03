@@ -259,7 +259,7 @@ let valid game state =
 
 let print_player_word_list state id = 
   let wl = (List.assoc id state.player_list).player_words in
-  if wl = [] then print_endline "\nNo words yet!\n" else
+  if wl = [] then print_string "No words yet.\n" else
     List.iter (fun (k,v)-> print_string k; print_newline ();) wl
 
 let print_player_letter st = 
@@ -268,11 +268,12 @@ let print_player_letter st =
 
 (** [print_all_player_word_list_helper st acc] is a helper function 
     that prints all player[id]'s word list. *)
-let rec print_all_player_word_list_helper st acc = 
-  if acc > List.length st.player_list then ()
-  else (print_string ("Player " ^ string_of_int acc ^ " "); 
-        print_player_word_list st acc;
-        print_all_player_word_list_helper st (acc + 1))
+let rec print_all_player_word_list_helper st acc : unit = 
+  if (acc > List.length st.player_list) 
+  then ()
+  else begin print_string ("Player " ^ string_of_int acc ^ ": "); 
+    print_player_word_list st acc;
+    print_all_player_word_list_helper st (acc + 1) end
 
 let print_all_player_word_list st = print_all_player_word_list_helper st 1
 
