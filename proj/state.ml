@@ -116,7 +116,8 @@ let rec check_illegal ll combo_l =
   | h :: t -> if not (List.mem h combo_l) then true 
     else check_illegal t (remove h combo_l [])
 
-
+(**[check_letter_used st word] is [true] iff [word] contains the player's 
+   current letter in [st]. *)
 let check_letter_used st word = String.contains word
     ((String.get (List.assoc st.current_player st.player_list).current_letter) 0)
 
