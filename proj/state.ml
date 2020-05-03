@@ -263,7 +263,7 @@ let print_player_word_list state id =
     List.iter (fun (k,v)-> print_string k; print_newline ();) wl
 
 let print_player_letter st = 
-  print_endline ("Current player's letter" ^ 
+  print_endline ("Current player's letter: " ^ 
                  (List.assoc st.current_player st.player_list).current_letter)
 
 (** [print_all_player_word_list_helper st acc] is a helper function 
