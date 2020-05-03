@@ -77,3 +77,11 @@ let rec get_points set l = match set with
   | (l', p) :: t -> if l = l' then p else get_points t l 
 
 let get_letters game = List.map fst game
+
+
+(** [char_removal s c] is the list of pairs [s] with pairs whose key corresponds
+    to the elements in [c] removed. *)
+let rec char_removal s c = 
+  match c with 
+  | [] -> s 
+  | h::t -> char_removal (List.remove_assoc h s) t

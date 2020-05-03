@@ -68,16 +68,77 @@ let each_turn_print st game =
 
 
 
-let rec loopgame2 game st json : unit = ()
+let rec loopgame2 game st json : unit =  
+  let turns_left = State.turns st in 
+  if turns_left = 0 
+  then (
+    ignore(Sys.command "clear");
+    ANSITerminal.(print_string [green] 
+                    "Turns completed! Entering check phase... \n \n"); 
+    check_phase game st)
+  else (
+    let points = State.current_player_points st |> string_of_int in
+    let set = State.current_player_letter_set st in 
+    print_list (set);
+    print_endline ("There are " ^ (turns_left |> string_of_int) 
+                   ^ " turns left in the game.");
+    print_endline ("(Player " ^ (State.current_player st |> string_of_int)
+                   ^ "), you currently have " ^ points 
+                   ^ " points. Enter your word: ");
+    ANSITerminal.(print_string [yellow] 
+                    "Available commands: 'create', 'pass', 'quit', 'steal'.\n");
+    print_string "> ";
+    match parse (read_line()) with
+    | exception Empty -> print_endline "Please enter a command."; 
+      loopgame2 game st json
+    | exception Malformed -> 
+      print_endline 
+        "Malformed command. Available commands: 'create', 'pass', 'quit', 'steal'."; 
+      loopgame2 game st json
+    | your_command ->  (match your_command with
+        | Quit -> print_endline "Bye!"; exit 0
+        | Pass -> 
+          ignore(Sys.command "clear");
+          print_endline ("Player " ^ (State.current_player st |> string_of_int) 
+                         ^ " has passed.\n"); 
+          begin match pass game st with 
+            | Legal st' -> loopgame2 game st' json
+            | Illegal -> failwith "Impossible error"
+          end
+        | Create w -> 
+          if List.mem_assoc (String.uppercase_ascii w) 
+              (State.current_player_wordlist st) 
+          then (print_endline "This word has already been created."; 
+                loopgame2 game st json) 
+          else 
+            begin match create w set st with
+              | Illegal -> 
+                print_endline 
+                  "This word cannot be created with your letter set."; 
+                loopgame2 game st json
+              | Legal st' -> ignore(Sys.command "clear"); loopgame2 game st' json
+            end
+        | Swap l -> let target = String.uppercase_ascii l in 
+          if List.mem target (set |> Game.get_letters) then 
+            match swap l st json with 
+            | Illegal -> print_endline "Illegal"; loopgame game st json;
+            | Legal st' -> 
+              print_endline "Your letter has been swapped. You've lost 5 points.";
+              ignore(Unix.sleep 3);
+              ignore(Sys.command "clear");
+              loopgame game st' json else 
+            (print_endline "This letter is not in your letter set. Please try again."; 
+             loopgame game st json) 
+        |_ -> print_endline 
+                "Malformed command. Available commands: 'create', 'pass', 'quit', 'swap'."; 
+      )
+
+  )
 
 
 
 (** [loopgame game st json] is the [game] with updating states [st]. *)
 let rec loopgame game st json : unit = 
-  (* let timer () =  (Lwt.bind (Unix.sleep 3; Lwt.return ()) 
-                     (fun () -> print_endline "Time's up!"; 
-                       Lwt.return())) in 
-     Lwt.async(timer); *)
   let turns_left = State.turns st in 
   if turns_left = 0 
   then (
@@ -138,6 +199,8 @@ let rec loopgame game st json : unit =
               loopgame game st' json else 
             (print_endline "This letter is not in your letter set. Please try again."; 
              loopgame game st json) 
+        |_ -> print_endline 
+                "Malformed command. Available commands: 'create', 'pass', 'quit', 'swap'."; 
       )
 
   )
@@ -215,13 +278,21 @@ let play_game j =
     let num_players = ask_players() in
     let num_turns = ask_turns() in 
     let game_mode = ask_mode() in
-    let initst = init_state our_game num_players num_turns game_mode false in 
-    if game_mode = "normal" then
-      loopgame our_game initst json else
+    let initst = init_state our_game num_players num_turns game_mode in 
+    ignore(Sys.command "clear");
+    if game_mode = "normal" then begin
+      ANSITerminal.(print_string [red] 
+                      "GAME MODE: NORMAL \n \n"); 
+      loopgame our_game initst json 
+    end
+    else begin
+      ANSITerminal.(print_string [red] 
+                      "GAME MODE: POOL \n \n"); 
       loopgame2 our_game initst json
+    end
   else
     let our_game = combo_set_var (from_json json) 6 in
-    let initst = init_state our_game 2 5 "normal" false in
+    let initst = init_state our_game 2 5 "normal" in
     loopgame our_game initst json
 
 
