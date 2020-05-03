@@ -35,6 +35,9 @@ val current_player_points: t -> Game.points
 (** [current_player_letter_set state] is the current player's letter set. *)
 val current_player_letter_set: t -> Game.t
 
+(** [get_pool st] is the current pool. *)
+val get_pool: t -> Game.t
+
 (** [next_player state] gives the [id] of the player whose turn is next. *)
 val next_player: t -> player_id
 
@@ -42,12 +45,12 @@ val next_player: t -> player_id
     values in [set]. *)
 val calculate_word_points: Command.word ->t -> Game.points
 
-(** [create word game state] is the result after the player in [game] attempts
+(** [create word state] is the result after the player in [game] attempts
     to create the [word]. The result does not change the set of playable
     letters. *)
 val create: Command.word -> t -> result
 
-(** [create_p word game state] is the result after the player in [game] attempts
+(** [create_p word state] is the result after the player in [game] attempts
     to create the [word]. The result changes the set of playable letters.. *)
 val create_p: Command.word -> t -> result
 

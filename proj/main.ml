@@ -73,7 +73,6 @@ let rec loopgame2 game st json : unit =
     check_phase game st)
   else (
     let points = State.current_player_points st |> string_of_int in
-    (* let set = State.current_player_letter_set st in  *)
     each_turn_print st game;
     print_endline ("There are " ^ (turns_left |> string_of_int) 
                    ^ " turns left in the game.");
@@ -106,18 +105,23 @@ let rec loopgame2 game st json : unit =
           then (print_endline "This word has already been created."; 
                 loopgame2 game st json) 
           else 
-            begin match create w st with
+            begin match create_p w st with
               | Illegal -> 
                 print_endline 
-                  "This word cannot be created with your letter set."; 
+                  "This word cannot be created with your own letter or the letters in the pool."; 
                 loopgame2 game st json
               | Legal st' -> ignore(Sys.command "clear"); loopgame2 game st' json
             end
         | Steal (id, old_word, new_word) -> begin
             match steal old_word id st with 
             | Illegal -> print_endline "This letter is not in your letter set. Please try again."; loopgame2 game st json;
-            | Legal st' ->  
-              loopgame2 game st' json end
+            | Legal st' ->  begin match create_p new_word st with 
+                | Illegal ->  print_endline 
+                                "This word cannot be created with your own letter or the letters in the pool.";
+                  loopgame2 game st json
+                | Legal st' ->
+                  loopgame2 game st' json end
+          end
         |_ -> print_endline 
                 "Malformed command. Available commands: 'create', 'pass', 'quit', 'swap'."; 
       )

@@ -56,6 +56,8 @@ let current_player_points state =
 let current_player_letter_set state =
   (List.assoc state.current_player state.player_list).player_letter_set
 
+let get_pool st = st.set
+
 let next_player state = 
   if (not (state.current_player = state.total_players))
   then state.current_player + 1 
