@@ -1,8 +1,4 @@
 B _build
 PKG oUnit
 PKG yojson
-<<<<<<< HEAD
 PKG ANSITerminal
-=======
-PKG ANSITerminal
->>>>>>> e4e0b74eb5a59b016e9e673490dfe157c94a6a75

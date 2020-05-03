@@ -26,9 +26,9 @@ val swap_letter: alphabet -> letter -> t -> t
 (** [combo_set a] is the randomly picked letter set for the game. *)
 val combo_set: alphabet -> t
 
-(** [print_list a] prints out the letters and corresponding points in the combo 
-    set.*)
-val print_list : t -> unit
+(** [print_list a m] prints out the letters and corresponding points in the combo 
+    set with text corresponding to game mode [m].*)
+val print_list : t -> int -> unit
 
 (** [get_points set l] is the point that the letter [l] is worth. *)
 val get_points: t -> letter -> points
@@ -47,4 +47,4 @@ val generate_new_set: letter -> (letter * points) -> t -> t
 
 (** [char_removal s c] is the list of pairs [s] with pairs whose key corresponds
     to the elements in [c] removed. *)
-val char_removal: t -> char list -> t
+val char_removal: t -> letter list -> t

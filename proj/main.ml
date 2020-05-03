@@ -34,39 +34,32 @@ let rec end_phase game st =
 (** [check_phase game st] is the check phase of [game] with the final state 
     [st], where players check each other's word lists. *)
 let rec check_phase game st = 
-  if State.get_check_mode st then
-    failwith "use library"
-  else begin
-    print_endline 
-      "If everything looks good, enter 'valid', or if any words look wrong, 
+  print_endline 
+    "If everything looks good, enter 'valid', or if any words look wrong, 
       enter 'invalid (the word or words separated with space)'. "; 
-    if current_player st > State.player_count st 
-    then (ignore(Sys.command "clear"); end_phase game st)
-    else (
-      print_endline ("(Player " ^ (State.current_player st |> string_of_int)
-                     ^ ") " ^ "Check your next player's word list:");
-      State.print_player_word_list st (next_player st);
-      print_string "> ";
-      (match parse_check (read_line()) with
-       | exception Empty -> print_endline "Please enter a command."; 
-         check_phase game st
-       | exception Malformed -> 
-         print_endline "Malformed command. Available commands: 'valid', 'invalid'"; 
-         check_phase game st
-       | your_command -> (match your_command with
-           | Valid -> State.valid game st |> check_phase game
-           | Invalid wl -> State.invalid wl game st |> check_phase game))
-    )
-  end
+  if current_player st > State.player_count st 
+  then (ignore(Sys.command "clear"); end_phase game st)
+  else (
+    print_endline ("(Player " ^ (State.current_player st |> string_of_int)
+                   ^ ") " ^ "Check your next player's word list:");
+    State.print_player_word_list st (next_player st);
+    print_string "> ";
+    (match parse_check (read_line()) with
+     | exception Empty -> print_endline "Please enter a command."; 
+       check_phase game st
+     | exception Malformed -> 
+       print_endline "Malformed command. Available commands: 'valid', 'invalid'"; 
+       check_phase game st
+     | your_command -> (match your_command with
+         | Valid -> State.valid game st |> check_phase game
+         | Invalid wl -> State.invalid wl game st |> check_phase game))
+  )
 
 let each_turn_print st game = 
   (* First, we want to print out the pool: *)
-  print_list game;
+  print_list game 2;
   (* Print all player's current words. *)
   print_all_player_word_list st
-
-
-
 
 let rec loopgame2 game st json : unit =  
   let turns_left = State.turns st in 
@@ -79,14 +72,14 @@ let rec loopgame2 game st json : unit =
   else (
     let points = State.current_player_points st |> string_of_int in
     let set = State.current_player_letter_set st in 
-    print_list (set);
+    each_turn_print st game;
     print_endline ("There are " ^ (turns_left |> string_of_int) 
                    ^ " turns left in the game.");
     print_endline ("(Player " ^ (State.current_player st |> string_of_int)
                    ^ "), you currently have " ^ points 
                    ^ " points. Enter your word: ");
     ANSITerminal.(print_string [yellow] 
-                    "Available commands: 'create', 'pass', 'quit', 'steal'.\n");
+                    "Available commands: 'create', 'pass', 'steal', 'quit'.\n");
     print_string "> ";
     match parse (read_line()) with
     | exception Empty -> print_endline "Please enter a command."; 
@@ -121,14 +114,14 @@ let rec loopgame2 game st json : unit =
         | Swap l -> let target = String.uppercase_ascii l in 
           if List.mem target (set |> Game.get_letters) then 
             match swap l st json with 
-            | Illegal -> print_endline "Illegal"; loopgame game st json;
+            | Illegal -> print_endline "Illegal"; loopgame2 game st json;
             | Legal st' -> 
               print_endline "Your letter has been swapped. You've lost 5 points.";
               ignore(Unix.sleep 3);
               ignore(Sys.command "clear");
-              loopgame game st' json else 
+              loopgame2 game st' json else 
             (print_endline "This letter is not in your letter set. Please try again."; 
-             loopgame game st json) 
+             loopgame2 game st json) 
         |_ -> print_endline 
                 "Malformed command. Available commands: 'create', 'pass', 'quit', 'swap'."; 
       )
@@ -149,7 +142,7 @@ let rec loopgame game st json : unit =
   else (
     let points = State.current_player_points st |> string_of_int in
     let set = State.current_player_letter_set st in 
-    print_list (set);
+    print_list (set) 1;
     print_endline ("There are " ^ (turns_left |> string_of_int) 
                    ^ " turns left in the game.");
     print_endline ("(Player " ^ (State.current_player st |> string_of_int)

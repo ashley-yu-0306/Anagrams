@@ -65,7 +65,8 @@ let print_list2 a = print_endline "Your Letters: ";
   List.iter (fun (k,v) -> print_string (k ^ ", worth "); 
               print_int v; print_endline " points. ") a
 
-let print_list a = print_endline "\nYour Letters: \n"; 
+let print_list a m= if m = 1 then print_endline "\nYour Letters: \n"
+  else print_endline "\nThe Pool: \n";
   List.iter (fun (k,v) -> ANSITerminal.(print_string [Bold;blue] ("  " ^ k ^ "     "))) a;
   print_string "\n-----------------------------------------------------------------------------\n";
   List.iter (fun (k,v) -> print_string ""; print_int v; print_string " pts   ") a;
@@ -78,15 +79,7 @@ let rec get_points set l = match set with
 
 let get_letters game = List.map fst game
 
-(** [remove_set lst r x] is the list of pairs [lst] with the first 
-    occurence of [x] removed. *)
-let rec remove_set lst r x = match lst with
-  | [] -> []
-  | (h,p)::t -> if (h = x && r = false)
-    then remove_set t true x
-    else if r = true then (h,p)::(remove_set t true x) else (h,p)::(remove_set t false x)
-
 let rec char_removal s c = 
   match c with 
   | [] -> s 
-  | h::t -> char_removal (remove_set s false h) t
+  | h::t -> char_removal (List.remove_assoc h s) t

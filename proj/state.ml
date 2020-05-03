@@ -69,7 +69,6 @@ let word_to_cl n = List.init (String.length n) (String.get n)
 let cl_to_ll cl = List.map (fun x -> Char.escaped x) cl 
                   |> List.map String.uppercase_ascii
 
-
 (* let calculate_word_points word set = 
    let seq = word |> String.to_seq |> List.of_seq |> List.map (Game.get_points set) in 
    List.fold_right (+) seq 0 *)
@@ -107,15 +106,6 @@ let rec remove x lst acc = match lst with
   | [] -> acc
   | h::t -> if h = x then remove x t acc else remove x t (h::acc)
 
-(** [remove_set lst r x] is the list of pairs [lst] with the first 
-    occurence of [x] removed. *)
-(** can use List.remove_assoc instead *)
-(* let rec remove_set lst r x = match lst with
-   | [] -> []
-   | (h,p)::t -> if (h = x && r = false)
-    then remove_set t true x
-    else if r = true then (h,p)::(remove_set t true x) else (h,p)::(remove_set t false x) *)
-
 (**[check_illegal ll combo_l] is [true] iff [ll] contains letter(s) that is not
    in the combo or more occurances of some letter offered in the combo. *)
 let rec check_illegal ll combo_l = 
@@ -126,8 +116,8 @@ let rec check_illegal ll combo_l =
 
 (** [string_to_char_list s i] is the character list of [s], where [i] is the
     length of the string subtracted by 1. *)
-let rec string_to_char_list s i = 
-  if i>(-1) then (String.get s i) ::string_to_char_list s (i-1) else [] 
+let rec string_to_string_list s i = 
+  if i>(-1) then String.make 1 (String.get s i) ::string_to_string_list s (i-1) else [] 
 
 let create word game state = 
   if word = "" || check_illegal (word |> word_to_cl |> cl_to_ll) 
@@ -143,7 +133,6 @@ let create word game state =
       total_players = state.total_players;
       mode = state.mode;
       set = state.set;
-      check = state.check;
     } 
 
 let create_p word game state = 
@@ -153,7 +142,7 @@ let create_p word game state =
     let player = state.current_player in 
     let player_l = state.player_list in 
     let new_player_l = update_player_list state player_l word player in
-    let char_l = string_to_char_list word ((String.length word)-1) in
+    let char_l = string_to_string_list word ((String.length word)-1) in
     Legal { state with
             turns_left = state.turns_left - 1;
             player_list = new_player_l;
@@ -206,7 +195,7 @@ let steal w p st =
   let player = List.assoc p player_list in 
   let words = player.player_words in 
   if not (List.mem_assoc (String.uppercase_ascii w) (words)) then Illegal 
-  else let player' = { player with player_words = remove_set words false w;} in 
+  else let player' = { player with player_words = List.remove_assoc w words;} in 
     Legal {st with player_list = update_player_list4 player_list player' p}
 
 let player_count state = 
@@ -270,17 +259,15 @@ let valid game state =
 
 let print_player_word_list state id = 
   let wl = (List.assoc id state.player_list).player_words in
-  List.iter (fun (k,v)-> print_string k; print_newline ();) wl
+  if wl = [] then print_endline "\nNo words yet!\n" else
+    List.iter (fun (k,v)-> print_string k; print_newline ();) wl
 
 (** [print_all_player_word_list_helper st acc] is a helper function 
     that prints all player[id]'s word list. *)
 let rec print_all_player_word_list_helper st acc = 
   if acc > List.length st.player_list then ()
-  else print_string "Player " ^ string_of_int acc; 
+  else print_string ("Player " ^ string_of_int acc ^ " "); 
   print_player_word_list st acc;
   print_all_player_word_list_helper st (acc + 1)
 
 let print_all_player_word_list st = print_all_player_word_list_helper st 1
-
-
-let get_check_mode st = st.check
