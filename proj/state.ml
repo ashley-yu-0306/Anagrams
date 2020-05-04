@@ -198,7 +198,6 @@ let pass state = if state.mode = "normal" then
 (** [update_player_list3 players ns id] is the list of [players] with 
     the player whose id is [id] updated with a new letter set [ns].*)
 let rec update_player_list3 players ns id = 
-  let cur_let = (List.assoc id players).current_letter in
   match players with
   | [] -> []
   | (k,v)::t -> if k = id 
@@ -206,7 +205,6 @@ let rec update_player_list3 players ns id =
       let player = { v with
                      total_points = v.total_points - 5;
                      player_letter_set = ns;
-                     current_letter = cur_let
                    } in (k,player)::(update_player_list3 t ns id)
     else (k,v)::(update_player_list3 t ns id)
 
@@ -214,7 +212,7 @@ let swap l state json =
   let alphabet = from_json json in 
   let id = state.current_player in 
   let set = current_player_letter_set state in
-  let new_set = swap_letter alphabet l set in
+  let new_set = swap_letter alphabet l set in 
   Legal { state with
           turns_left = state.turns_left - 1;
           player_list = update_player_list3 state.player_list new_set id;
@@ -278,7 +276,7 @@ let winner_check state =
   let win_p = (List.assoc win_id p_list).total_points in
   winner_check_helper p_list (win_id::[]) win_p
 
-(** =====Below is for check phase====== *)
+(* =====Below is for check phase====== *)
 
 (** [remove_invalid next_player inv_words state] is a player with all invalid 
     words removed from his words list*)

@@ -53,6 +53,7 @@ let swap_letter a l set =
   let new_set = List.remove_assoc ul set in 
   ((l',points)::new_set)
 
+
 let rec print_letters s = 
   match s with 
   | [] -> ()

@@ -205,18 +205,20 @@ let rec loopgame game st json : unit =
               | Legal st' -> ignore(Sys.command "clear"); loopgame game st' json
             end
         | Swap l -> let target = String.uppercase_ascii l in 
-          if List.mem target (set |> Game.get_letters) then 
+          if List.mem target (set |> Game.get_letters) then begin
             match swap l st json with 
             | Illegal -> print_endline "Illegal"; loopgame game st json;
             | Legal st' -> 
               print_endline 
-                "Your letter has been swapped. You've lost 5 points.";
+                "\nYour letter has been swapped. You've lost 5 points.\n";
               ignore(Unix.sleep 3);
               ignore(Sys.command "clear");
-              loopgame game st' json else 
-            (print_endline 
-               "This letter is not in your letter set. Please try again."; 
-             loopgame game st json) 
+              loopgame game st' json end
+          else begin
+            print_endline 
+              "This letter is not in your letter set. Please try again."; 
+            loopgame game st json
+          end
         |_ -> print_endline 
                 "Malformed command. Available commands: 
                     'create [word]', 
