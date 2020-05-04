@@ -49,9 +49,9 @@ val swap_letter: alphabet -> letter -> t -> t
     is swapped to the [swappair]. *)
 val generate_new_set: letter -> (letter * points) -> t -> t
 
-(** [char_removal s c] is the list of pairs [s] with pairs whose key corresponds
+(** [letter_removal s c] is the list of pairs [s] with pairs whose key corresponds
     to the elements in [c] removed. *)
-val char_removal: t -> letter list -> t
+val letter_removal: t -> letter list -> t
 
 (** [add_in_pool game l] is the new pool with a new letter from the player 
     who chose to pass.*)

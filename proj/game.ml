@@ -82,10 +82,9 @@ let rec get_points a l = match a with
 
 let get_letters game = List.map fst game
 
-let rec char_removal s c = 
+let rec letter_removal s c = 
   match c with 
   | [] -> s 
-  | h::t -> char_removal (List.remove_assoc h s) t
+  | h::t -> letter_removal (List.remove_assoc h s) t
 
 let add_in_pool game l a = (l,(get_points a l))::game
-(*(l, the letter's points) :: game *)

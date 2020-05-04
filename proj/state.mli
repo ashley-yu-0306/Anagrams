@@ -13,15 +13,16 @@ type t
 type result = Legal of t | Illegal
 type player_id = int
 
-(** [init_state set num turn mode] is the initial state of the game. The initial state
-    has the combination of letters [set], the turns left in the game, the
+(** [init_state set num turn mode] is the initial state of the game. The initial
+    state has the combination of letters [set], the turns left in the game, the
     current player, and the list of players. *)
 val init_state : Game.t -> int -> int -> string -> Game.all_letters_in_json -> t
 
 (** [turns state] is the turns left in game state [state]. *)
 val turns: t  -> int
 
-(** [current_player state] is the player_id whose turn is active in state [st]. *)
+(** [current_player state] is the player_id whose turn is active in state 
+    [st].*)
 val current_player: t -> int
 
 (** [current_player_wordlist state] is the current word-points list of the 
@@ -57,12 +58,17 @@ val create_p: Command.word -> t -> result
 (** [pass state] is the result after the player in [game] passes their turn.*)
 val pass: t -> result
 
-(** [swap game state] is the result after the player in [game] swaps their letter
-    [l]. *)
+(** [swap game state] is the result after the player in [game] swaps their 
+    letter [l]. *)
 val swap: Game.letter -> t -> Yojson.Basic.t -> result
 
-(** [steal w p st] is the result after the current player steals word [w] from player [p]. *)
+(** [steal w p st] is the result after the current player steals word [w] from 
+    player [p]. *)
 val steal: Command.word -> player_id -> t -> result
+
+(** [create_from_steal stolen new_word st] is the result of creating a new word 
+    out of the stolen word.*)
+val create_from_steal: Command.word -> Command.word -> t -> result
 
 (** [player_count state] is the number of players in the game.*)
 val player_count: t -> int

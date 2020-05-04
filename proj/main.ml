@@ -80,21 +80,29 @@ let rec loopgame2 game st json : unit =
                    ^ "), you currently have " ^ points 
                    ^ " points. Enter your word: ");
     ANSITerminal.(print_string [yellow] 
-                    "Available commands: 'create', 'pass', 'steal', 'quit'.\n");
+                    "Available commands: 
+                    'create [word]', 
+                    'pass', 
+                    'steal [player_id] [stolen_word] [new_word]', 
+                    'quit'.\n");
     print_string "> ";
     match parse (read_line()) with
     | exception Empty -> print_endline "Please enter a command."; 
       loopgame2 game st json
     | exception Malformed -> 
       print_endline 
-        "Malformed command. Available commands: 'create', 'pass', 'quit', 'steal'."; 
+        "Malformed command. Available commands: \n
+                    'create [word]', 
+                    'pass', 
+                    'steal [player_id] [stolen_word] [new_word]', 
+                    'quit'.\n"; 
       loopgame2 game st json
     | your_command ->  (match your_command with
         | Quit -> print_endline "Bye!"; exit 0
         | Pass -> 
           ignore(Sys.command "clear");
           print_endline ("Player " ^ (State.current_player st |> string_of_int) 
-                         ^ " has passed.\n"); 
+                         ^ " has passed.\n \n"); 
           begin match pass st with 
             | Legal st' -> loopgame2 (get_pool st') st' json
             | Illegal -> failwith "Impossible error"
@@ -114,16 +122,23 @@ let rec loopgame2 game st json : unit =
             end
         | Steal (id, old_word, new_word) -> begin
             match steal old_word id st with 
-            | Illegal -> print_endline "This letter is not in your letter set. Please try again."; loopgame2 game st json;
-            | Legal st' ->  begin match create_p new_word st with 
+            | Illegal -> print_endline 
+                           "This word is not in that player's letter set. Please try again."; 
+              loopgame2 game st json;
+            | Legal st' ->  
+              begin match create_from_steal old_word new_word st' with 
                 | Illegal ->  print_endline 
                                 "This word cannot be created with your own letter or the letters in the pool.";
                   loopgame2 game st json
-                | Legal st' ->
+                | Legal st' -> ignore(Sys.command "clear");
                   loopgame2 (get_pool st') st' json end
           end
         |_ -> print_endline 
-                "Malformed command. Available commands: 'create', 'pass', 'quit', 'swap'."; 
+                "Malformed command. Available commands: 
+                    'create [word]', 
+                    'pass', 
+                    'steal [player_id] [stolen_word] [new_word]', 
+                    'quit'.\n"; 
       )
 
   )
@@ -149,14 +164,22 @@ let rec loopgame game st json : unit =
                    ^ "), you currently have " ^ points 
                    ^ " points. Enter your word: ");
     ANSITerminal.(print_string [yellow] 
-                    "Available commands: 'create', 'pass', 'quit', 'swap'.\n");
+                    "Available commands: 
+                    'create [word]', 
+                    'pass', 
+                    'quit', 
+                    'swap [letter]'.\n");
     print_string "> ";
     match parse (read_line()) with
     | exception Empty -> print_endline "Please enter a command."; 
       loopgame game st json
     | exception Malformed -> 
       print_endline 
-        "Malformed command. Available commands: 'create', 'pass', 'quit', 'swap'."; 
+        "Malformed command. Available commands: 
+                    'create [word]', 
+                    'pass', 
+                    'quit', 
+                    'swap [letter]'.\n"; 
       loopgame game st json
     | your_command ->  (match your_command with
         | Quit -> print_endline "Bye!"; exit 0
@@ -186,14 +209,20 @@ let rec loopgame game st json : unit =
             match swap l st json with 
             | Illegal -> print_endline "Illegal"; loopgame game st json;
             | Legal st' -> 
-              print_endline "Your letter has been swapped. You've lost 5 points.";
+              print_endline 
+                "Your letter has been swapped. You've lost 5 points.";
               ignore(Unix.sleep 3);
               ignore(Sys.command "clear");
               loopgame game st' json else 
-            (print_endline "This letter is not in your letter set. Please try again."; 
+            (print_endline 
+               "This letter is not in your letter set. Please try again."; 
              loopgame game st json) 
         |_ -> print_endline 
-                "Malformed command. Available commands: 'create', 'pass', 'quit', 'swap'."; 
+                "Malformed command. Available commands: 
+                    'create [word]', 
+                    'pass', 
+                    'quit', 
+                    'swap [letter]'.\n"; 
       )
 
   )
@@ -229,7 +258,7 @@ let rec ask_num_letters() =
       ask_num_letters() else x
 
 let rec ask_turns() = 
-  print_endline "How many turns: "; 
+  print_endline "How many turns per player: "; 
   print_string "> "; 
   match parse_number (read_line()) with
   | 0 -> print_endline "ERROR. Enter a valid number: "; 
@@ -245,15 +274,6 @@ let rec ask_mode() =
   | _ -> print_endline "ERROR. Enter a valid game mode: ";
     ask_mode()
 
-
-(* let rec ask_check() = 
-   print_endline "Which check mode (human, dictionary): "; 
-   print_string "> "; 
-   match read_line() with
-   | "human" -> false
-   | "dictionary" -> true
-   | _ -> print_endline "ERROR. Enter a valid check mode: ";
-    ask_check() *)
 
 (** [play_game j] starts the game with the letter set generated from the 
     alphabet in file [j]. *)
@@ -293,7 +313,7 @@ let play_game j =
 
 (** [main ()] prompts for the game to play, then starts it. *)
 let main () = 
-  ignore(Sys.command "echo resize -s 30 90");
+  ignore(Sys.command "resize -s 30 90");
   ignore(Sys.command "clear");
   ANSITerminal.(print_string [red]
                   "\n\nWelcome to ANAGRAMS.\n");

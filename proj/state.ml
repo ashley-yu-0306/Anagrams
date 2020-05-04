@@ -126,14 +126,14 @@ let rec update_player_list_pass state players id =
 (**[remove x lst acc] is [lst] with the first occurance of [x] removed. *)
 let rec remove x lst acc = match lst with
   | [] -> acc
-  | h::t -> if h = x then remove x t acc else remove x t (h::acc)
+  | h::t -> if h = x then acc @ t else remove x t (h::acc)
 
 (**[check_illegal ll combo_l] is [true] iff [ll] contains letter(s) that is not
    in the combo or more occurances of some letter offered in the combo. *)
 let rec check_illegal ll combo_l = 
   match ll with 
   | [] -> false
-  | h :: t -> if not (List.mem h combo_l) then true 
+  | h :: t -> print_endline h; if not (List.mem h combo_l) then true 
     else check_illegal t (remove h combo_l [])
 
 (**[check_letter_used st word] is [true] iff [word] contains the player's 
@@ -142,9 +142,10 @@ let check_letter_used st word = String.contains (String.uppercase_ascii word)
     (String.get (current_player_letter st) 0)
 
 (** [string_to_string_list s i] is the string list of [s], where [i] is the
-    length of the string subtracted by 1. *)
-let rec string_to_string_list s i = 
-  if i>(-1) then String.make 1 (String.get s i) ::string_to_string_list s (i-1) else [] 
+    length of the string subtracted by 1. All in uppercase. *)
+let rec string_to_string_list s i = let ups = String.uppercase_ascii s in
+  if i>(-1) then 
+    String.make 1 (String.get ups i) ::string_to_string_list ups (i-1) else [] 
 
 let create word state = 
   if word = "" || check_illegal (word |> word_to_cl |> cl_to_ll) 
@@ -172,13 +173,13 @@ let create_p word state =
     let player = state.current_player in 
     let player_l = state.player_list in 
     let new_player_l = update_player_list state player_l word player in
-    let char_l = string_to_string_list word ((String.length word)-1) in
+    let letter_used_l = string_to_string_list word ((String.length word)-1) in
     Legal { state with
             turns_left = state.turns_left - 1;
             player_list = new_player_l;
             current_player = next_player state;
             (** Line 181 needs changing! *)
-            set = char_removal state.set char_l
+            set = letter_removal state.set letter_used_l
           } 
 
 let pass state = if state.mode = "normal" then
@@ -229,12 +230,34 @@ let rec update_player_list4 players p id =
     else (k,v)::(update_player_list4 t p id)
 
 let steal w p st = 
+  let wup = String.uppercase_ascii w in
   let player_list = st.player_list in 
   let player = List.assoc p player_list in 
   let words = player.player_words in 
-  if not (List.mem_assoc (String.uppercase_ascii w) (words)) then Illegal 
-  else let player' = { player with player_words = List.remove_assoc w words;} in 
+  if not (List.mem_assoc wup words) then Illegal 
+  else let player' = { player with player_words = List.remove_assoc wup words;} in 
     Legal {st with player_list = update_player_list4 player_list player' p}
+
+let create_from_steal stolen new_word st = 
+  let stolen_list = 
+    string_to_string_list stolen ((String.length stolen) -1) in
+  let my_letter = 
+    (List.assoc st.current_player st.player_list).current_letter in
+  let new_word_list_except_my_letter = 
+    remove my_letter (string_to_string_list new_word 
+                        ((String.length new_word) -1)) [] in
+  if List.sort compare stolen_list = 
+     List.sort compare new_word_list_except_my_letter then begin
+    let player = st.current_player in 
+    let player_l = st.player_list in 
+    let new_player_l = update_player_list st player_l new_word player in
+    Legal { st with
+            turns_left = st.turns_left - 1;
+            player_list = new_player_l;
+            current_player = next_player st;
+          } 
+  end
+  else Illegal
 
 let player_count state = 
   state.total_players
@@ -300,8 +323,8 @@ let print_player_word_list state id =
     List.iter (fun (k,v)-> print_string k; print_newline ();) wl
 
 let print_player_letter st = 
-  print_endline ("Current player's letter: " ^ 
-                 (current_player_letter st))
+  print_string ("\nCurrent player's letter: " );
+  ANSITerminal.(print_string [Bold;blue] ((current_player_letter st) ^ "\n\n"))
 
 (** [print_all_player_word_list_helper st acc] is a helper function 
     that prints all player[id]'s word list. *)
