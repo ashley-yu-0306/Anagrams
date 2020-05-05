@@ -31,6 +31,8 @@ val turns: t  -> int
     [st].*)
 val current_player: t -> int
 
+val current_player_stolen: t -> (player_id * Command.word) list
+
 (** [current_player_wordlist state] is the current word-points list of the 
     current player.*)
 val current_player_wordlist: t -> (Command.word * Game.points) list
@@ -51,6 +53,9 @@ val next_player: t -> player_id
 (** [calculate_word_points word set] is the points of [word] based on point
     values in [set]. *)
 val calculate_word_points: Command.word ->t -> Game.points
+
+(** [start_message st] prints available messages for the current player. *)
+val start_message: t -> unit
 
 (** [create word state s] is the result after the player in [game] attempts
     to create the [word]. [s] is whether or not the word was stolen. *)

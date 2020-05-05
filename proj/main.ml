@@ -69,26 +69,30 @@ let each_turn_print st game rep =
   else ()
 
 let game_info st rep mode = 
-  if not rep then begin 
+  if rep then ()
+  else
     let turns_left = State.turns st in 
     let points = State.current_player_points st |> string_of_int in 
-    (print_endline ("There are " ^ (turns_left |> string_of_int) 
-                    ^ " turns left in the game.");
-     print_endline ("(Player " ^ (State.current_player st |> string_of_int)
-                    ^ "), you currently have " ^ points 
-                    ^ " points. Enter your word: ");
-     if mode = "pool" 
-     then (ANSITerminal.(print_string [yellow] 
-                           ("Available commands: 'create [word]', 
+    print_endline ("There are " ^ (turns_left |> string_of_int) 
+                   ^ " turns left in the game.");
+    print_endline ("(Player " ^ (State.current_player st |> string_of_int)
+                   ^ "), you currently have " ^ points 
+                   ^ " points. Enter your word: ");
+    let () = (if mode = "pool" 
+              then (ANSITerminal.(print_string [yellow] 
+                                    ("Available commands: 'create [word]', 
                     'pass',
                     'steal [player_id] [stolen_word] [new_word]',  
                     'quit'.\n"));)
-     else 
-       ANSITerminal.(print_string [yellow] 
-                       ("Available commands: 'create [word]', 
+              else 
+                ANSITerminal.(print_string [yellow] 
+                                ("Available commands: 'create [word]', 
                     'pass',
                     'swap [letter]',  
-                    'quit'.\n"));) end 
+                    'quit'.\n"));) in begin
+      if not (current_player_stolen st = []) then start_message st else () end
+
+
 
 (** [loopgame2 game st json rep] is the [game] with updating states [st] in pool 
     mode.*)
