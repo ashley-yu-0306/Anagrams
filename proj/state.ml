@@ -145,7 +145,7 @@ let calculate_swap_points state =
 (* [action_message a w p] prints information about word [w] and the points [p]
    gained or lost as a result of action [a]*)
 let action_message a w p = begin
-  let p' = string_of_int p in
+  let p' = string_of_int (abs p) in
   let message = 
     if a = "swap" then ("\n'"^w^"' has been swapped. You've lost "^p'^" points.")
     else if a = "create" then  ("\n'"^w^"' has been created. You've gained "^p'^" points.")
