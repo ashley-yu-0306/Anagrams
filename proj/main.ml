@@ -118,7 +118,7 @@ let rec loopgame2 game st json : unit =
           then (print_endline "This word has already been created."; 
                 loopgame2 game st json) 
           else 
-            begin match create_p w st with
+            begin match create w st with
               | Illegal -> 
                 print_endline 
                   "This word cannot be created with your own letter or the letters in the pool."; 
