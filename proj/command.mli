@@ -45,5 +45,8 @@ val parse : string -> command
 (** [parse_number] is similar to [parse]; parses number of players at start. *)
 val parse_number : string -> int
 
-(** [parse_check] is similar to [parse]; parses commands in check phase. *)
+(** [parse_check] is similar to [parse]; parses commands in check phase. 
+    Examples:
+    - [parse_check "invalid aa bb cc"] is [Invalid ["aa"; "bb"; "cc"]]
+    - [parse_check "valid"] is [Valid]. *)
 val parse_check : string -> check

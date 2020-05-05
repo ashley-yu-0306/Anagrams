@@ -1,3 +1,15 @@
+(** [Test Plan] 
+    1) Printing effects, random number generaters and functions in Main.ml are 
+    tested manually through play tests.
+    The rest of the essential functions in Game.ml, Command.ml and State.ml are 
+    tested in OUnit. 
+
+    2) Test cases were developed by black box testing. 
+
+    3) Our tests ensure that the functions work as intended in the 
+    documentations, and thus along with rigorous play testing, prove the 
+    correctness of our system. *)
+
 open Game
 open Command
 open State
@@ -19,11 +31,40 @@ let pp_list pp_elt lst =
     in loop 0 "" lst
   in "[" ^ pp_elts lst ^ "]"
 
+
 (*=============== Tests for Game ==============*)
+let a1 = from_json (Yojson.Basic.from_file "alphabet1.json")
+
+
+let make_swap_letter_test
+    (name: string)
+    (a: alphabet)
+    (l: letter)
+    (s: Game.t)
+    (expected_output: Game.t): test = 
+  name >:: (fun _ -> 
+      assert_equal expected_output (swap_letter a l s))
+
+let make_generate_new_set 
+    (name: string)
+    (l: letter)
+    (swappair: (letter * points))
+    (s: Game.t)
+    (expected_output: Game.t): test = 
+  name >:: (fun _ -> 
+      assert_equal expected_output (generate_new_set l swappair s))
+
+
+
+let game_tests = [
+
+]
+
+
 (*=============== Tests for State ==============*)
 (*=============== Tests for Command ==============*)
 
-let make_command_test
+let make_parse_test
     (name: string)
     (str: string)
     (expected_output: command): test = 
@@ -38,11 +79,11 @@ let make_check_test
       assert_equal expected_output (parse_check str))
 
 let command_tests = [
-  make_command_test "quit" "quit" Quit;
-  make_command_test "create" "create cat" (Create "cat");
-  make_command_test "pass" "pass" Pass;
-  make_command_test "swap" "swap u" (Swap "u");
-  make_command_test "steal" "steal 1 cat taco" (Steal (1, "cat", "taco"));
+  make_parse_test "quit" "quit" Quit;
+  make_parse_test "create" "create cat" (Create "cat");
+  make_parse_test "pass" "pass" Pass;
+  make_parse_test "swap" "swap u" (Swap "u");
+  make_parse_test "steal" "steal 1 cat taco" (Steal (1, "cat", "taco"));
   "Empty: empty" >:: (fun _ -> 
       assert_raises Empty (fun _ -> 
           parse ""));
@@ -74,6 +115,7 @@ let command_tests = [
 
 let suite =
   "test suite for ANAGRAMS"  >::: List.flatten [  
+    game_tests;
     command_tests;
   ]
 

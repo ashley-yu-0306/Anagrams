@@ -314,8 +314,6 @@ let main () =
                   "\n\nWelcome to ANAGRAMS.\n");
   print_endline
     "Please enter the name of the game alphabet file you want to load.\n";
-  (* I think we could also automatically load an alphabet file by random,
-      or by number of turns, time limit, etc. *)
   print_string  "> ";
   match read_line () with
   | exception End_of_file -> ()
