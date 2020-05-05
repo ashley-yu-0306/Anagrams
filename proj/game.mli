@@ -8,10 +8,12 @@ type points = int
 (** The type of the letters. *)
 type letter = string
 
-(** [alphabet] represents all the letters and their points read from
-    the json file. *)
+(** [alphabet] is all the letters and their points read from
+    the json file, split into vowels and consonants. *)
 type alphabet
 
+(** [all_letters_in_json] is all the letters and their points read from
+    the json file. *)
 type all_letters_in_json
 
 (** [from_json j] is the game alphabet that [j] represents.
@@ -30,8 +32,8 @@ val swap_letter: alphabet -> letter -> t -> t
 (** [combo_set a] is the randomly picked letter set for the game. *)
 val combo_set: alphabet -> t
 
-(** [print_list a m] prints out the letters and corresponding points in the combo 
-    set with text corresponding to game mode [m].*)
+(** [print_list a m] prints out the letters and corresponding points in the 
+combo set with text corresponding to game mode [m].*)
 val print_list : t -> int -> unit
 
 (** [get_points set l] is the point that the letter [l] is worth. *)
@@ -49,8 +51,8 @@ val swap_letter: alphabet -> letter -> t -> t
     is swapped to the [swappair]. *)
 val generate_new_set: letter -> (letter * points) -> t -> t
 
-(** [letter_removal s c] is the list of pairs [s] with pairs whose key corresponds
-    to the elements in [c] removed. *)
+(** [letter_removal s c] is the list of pairs [s] with pairs whose key 
+corresponds to the elements in [c] removed. *)
 val letter_removal: t -> letter list -> t
 
 (** [add_in_pool game l] is the new pool with a new letter from the player 

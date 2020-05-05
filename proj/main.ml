@@ -2,7 +2,7 @@ open Game
 open Command
 open State
 
-
+(** [print winners text] prints the winners. *)
 let rec print winners text = 
   print_endline text;
   if (text = "") && (List.length winners = 2)
@@ -14,6 +14,7 @@ let rec print winners text =
     | id::[] -> print [] (text ^ "and " ^ (id |> string_of_int))
     | id::t -> print t (text ^ (id |> string_of_int) ^ ", ")
 
+(** [end_phase game st] prints the winning message and exits the game. *)
 let rec end_phase game st = 
   let winner_check = winner_check st in 
   match winner_check with 
@@ -55,6 +56,8 @@ let rec check_phase game st =
          | Invalid wl -> State.invalid wl game st |> check_phase game))
   )
 
+(** [each_turn_print st game] prints the pool, all players' wordlists, and the 
+    current player's letter for each turn in pool mode. *)
 let each_turn_print st game = 
   (* First, we want to print out the pool: *)
   print_list game 2;
@@ -63,6 +66,8 @@ let each_turn_print st game =
   (* Print each player's letter. *)
   print_player_letter st
 
+(** [loopgame2 game st json] is the [game] with updating states [st] in pool 
+    mode.*)
 let rec loopgame2 game st json : unit =  
   let turns_left = State.turns st in 
   if turns_left = 0 
@@ -118,7 +123,8 @@ let rec loopgame2 game st json : unit =
                 print_endline 
                   "This word cannot be created with your own letter or the letters in the pool."; 
                 loopgame2 (get_pool st) st json
-              | Legal st' -> ignore(Sys.command "clear"); loopgame2 (get_pool st') st' json
+              | Legal st' -> ignore(Sys.command "clear"); 
+                loopgame2 (get_pool st') st' json
             end
         | Steal (id, old_word, new_word) -> begin
             match steal old_word id st with 
@@ -143,9 +149,8 @@ let rec loopgame2 game st json : unit =
 
   )
 
-
-
-(** [loopgame game st json] is the [game] with updating states [st]. *)
+(** [loopgame game st json] is the [game] with updating states [st] in normal
+    mode. *)
 let rec loopgame game st json : unit = 
   let turns_left = State.turns st in 
   if turns_left = 0 
@@ -229,7 +234,7 @@ let rec loopgame game st json : unit =
 
   )
 
-
+(** [ask_configure()] is [true] iff the player chooses to configure. *)
 let rec ask_configure() = 
   print_endline "Would you like to configure your game? (answer yes or no)"; 
   print_string "> "; 
@@ -250,6 +255,8 @@ let rec ask_players() =
     ask_players()
   | x -> x
 
+(** [ask_num_letters()] prompts the player for the number of letters for the 
+    turns, and returns that number to the initial state.*)
 let rec ask_num_letters() = 
   print_endline "How many letters (max 10): "; 
   print_string "> "; 
@@ -259,6 +266,8 @@ let rec ask_num_letters() =
   | x -> if x > 10 then 
       ask_num_letters() else x
 
+(** [ask_turns()] prompts the player for the number of turns, and returns that 
+    number to the initial state. *)
 let rec ask_turns() = 
   print_endline "How many turns per player: "; 
   print_string "> "; 
@@ -267,6 +276,8 @@ let rec ask_turns() =
     ask_num_letters()
   | x -> x
 
+(** [ask_mode()] prompts the player for the game mode, and returns that 
+    string to the initial state.*)
 let rec ask_mode() = 
   print_endline "Which game mode (normal, pool): "; 
   print_string "> "; 
@@ -321,7 +332,7 @@ let main () =
                   "\n\nWelcome to ANAGRAMS.\n");
   print_endline
     "Please enter the name of the game alphabet file you want to load.\n";
-  (** I think we could also automatically load an alphabet file by random,
+  (* I think we could also automatically load an alphabet file by random,
       or by number of turns, time limit, etc. *)
   print_string  "> ";
   match read_line () with

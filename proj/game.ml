@@ -6,8 +6,6 @@ type letter = string
 type alphabet =  { vowels: (letter * points) list; 
                    consonants: (letter * points) list }
 
-(* type t = { vowels: (letter * points) list; 
-           consonants: (letter * points) list } *)
 type t = (letter * points) list
 
 type all_letters_in_json = (letter * points) list
@@ -36,7 +34,8 @@ let combo_set_var a lim =
                                       else rand_l a.consonants 18) in
   vow_lst @ cons_lst
 
-(** [to_list a] returns the keys of the association list [a] except for key [k].*)
+(** [to_list a] returns the keys of the association list [a] except for 
+    key [k].*)
 let rec to_list a k  = 
   match a with 
   | [] -> []
@@ -53,7 +52,6 @@ let swap_letter a l set =
   let new_set = List.remove_assoc ul set in 
   ((l',points)::new_set)
 
-
 let rec print_letters s = 
   match s with 
   | [] -> ()
@@ -65,20 +63,19 @@ let combo_set a =
 
 let generate_new_set l swappair set = swappair :: (List.remove_assoc l set)
 
-let print_list2 a = print_endline "Your Letters: "; 
-  List.iter (fun (k,v) -> print_string (k ^ ", worth "); 
-              print_int v; print_endline " points. ") a
-
 let print_list a m= if m = 1 then print_endline "\nYour Letters: \n"
   else print_endline "\nThe Pool: \n";
-  List.iter (fun (k,v) -> ANSITerminal.(print_string [Bold;blue] ("  " ^ k ^ "     "))) a;
-  print_string "\n-----------------------------------------------------------------------------\n";
-  List.iter (fun (k,v) -> print_string ""; print_int v; print_string " pts   ") a;
+  List.iter 
+    (fun (k,v) -> 
+       ANSITerminal.(print_string [Bold;blue] ("  " ^ k ^ "     "))) a;
+  print_string 
+    "\n-----------------------------------------------------------------------------\n";
+  List.iter (fun (k,v) -> 
+      print_string ""; print_int v; print_string " pts   ") a;
   print_endline "\n"
 
 let rec get_points a l = match a with 
   | [] -> failwith "not in letter set"
-  (* can be changed when implementing legal/illegal inputs! *)
   | (l', p) :: t -> if l = l' then p else get_points t l 
 
 let get_letters game = List.map fst game

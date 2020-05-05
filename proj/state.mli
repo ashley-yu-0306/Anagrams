@@ -7,10 +7,16 @@
 open Game
 open Command
 
-(** The abstract types representing the state of the player and the game. *)
+(** The abstract type of the player. *)
 type player
+
+(** The abstract type of the game state. *)
 type t
+
+(** The type of returning result of a command action. *)
 type result = Legal of t | Illegal
+
+(** The type of a player id. *)
 type player_id = int
 
 (** [init_state set num turn mode] is the initial state of the game. The initial
@@ -93,6 +99,3 @@ val print_player_word_list: t -> player_id -> unit
 
 (** [print_all_player_word_list state id] prints all player[id]'s word list.*)
 val print_all_player_word_list: t -> unit
-
-(* [get_wordlist_by_id st id] is the wordlist of player [id].
-   val get_wordlist_by_id: t -> player_id -> (Command.word * Game.points) list *)

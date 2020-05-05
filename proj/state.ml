@@ -22,7 +22,8 @@ type  t = {
 
 type result = Legal of t | Illegal
 
-let random_letter() = 
+(** [random_letter ()] is a random uppercase letter from the English alphabet.*)
+let random_letter () = 
   Char.escaped (Char.chr ((Random.self_init(); Random.int 26) + 65))
 
 (** [init_player] initializes a player *)
@@ -61,6 +62,7 @@ let current_player_points state =
 let current_player_letter_set state =
   (List.assoc state.current_player state.player_list).player_letter_set
 
+(** [current_player_letter st] is the current player's letter at state [st]. *)
 let current_player_letter st = 
   (List.assoc st.current_player st.player_list).current_letter
 
@@ -79,12 +81,8 @@ let word_to_cl n = List.init (String.length n) (String.get n)
 let cl_to_ll cl = List.map (fun x -> Char.escaped x) cl 
                   |> List.map String.uppercase_ascii
 
-(* let calculate_word_points word set = 
-   let seq = word |> String.to_seq |> List.of_seq |> List.map (Game.get_points a) in 
-   List.fold_right (+) seq 0 *)
 let calculate_word_points word st = 
   let a = state_alpha st in
-  (* let set = current_player_letter_set st in *)
   let base = List.fold_left 
       (fun x y -> x + Game.get_points a y) 0 (word |> word_to_cl |> cl_to_ll) in 
   let length = String.length word in 
@@ -94,9 +92,9 @@ let calculate_word_points word st =
   then base |> float_of_int |> (fun x -> x*. 1.5) |> int_of_float
   else base
 
-(** [update_player_list state players word id] updates the state of the player
-    with player_id [id] in [players] by adding points gained in entering [word]. 
-    Points are calculated with the letter combination set in [state].*)
+(** [update_player_list state players word id] is the updated state of the 
+    player with player_id [id] in [players] by adding points gained in entering 
+    [word]. Points are calculated with the letter combination set in [state].*)
 let rec update_player_list state players word id  = 
   match players with
   | [] -> [] 
@@ -112,6 +110,8 @@ let rec update_player_list state players word id  =
       } in (k,player)::(update_player_list state t word id)
     else (k,v)::(update_player_list state t word id)
 
+(** [update_player_list_pass state players id] is the updated state after the 
+    player chooses to pass.*)
 let rec update_player_list_pass state players id = 
   match players with
   | [] -> [] 
@@ -189,10 +189,13 @@ let pass state = if state.mode = "normal" then
           } 
   else  Legal { state with
                 turns_left = state.turns_left - 1;
-                player_list = update_player_list_pass state state.player_list current_player;
+                player_list = 
+                  update_player_list_pass state state.player_list 
+                    current_player;
                 current_player = next_player state;
                 set = 
-                  Game.add_in_pool state.set (current_player_letter state) (state_alpha state)
+                  Game.add_in_pool state.set (current_player_letter state) 
+                    (state_alpha state)
               } 
 
 (** [update_player_list3 players ns id] is the list of [players] with 
@@ -233,8 +236,8 @@ let steal w p st =
   let player = List.assoc p player_list in 
   let words = player.player_words in 
   if not (List.mem_assoc wup words) then Illegal 
-  else let player' = { player with player_words = List.remove_assoc wup words;} in 
-    Legal {st with player_list = update_player_list4 player_list player' p}
+  else let player' = { player with player_words = List.remove_assoc wup words;} 
+    in Legal {st with player_list = update_player_list4 player_list player' p}
 
 let create_from_steal stolen new_word st = 
   let stolen_list = 
@@ -260,6 +263,9 @@ let create_from_steal stolen new_word st =
 let player_count state = 
   state.total_players
 
+(** [winner_check_helper players winners winner_p] is the list of winners in 
+    game of state [state] and the highest number of point achieved by a player 
+    in that game.*)
 let rec winner_check_helper players winners winner_p = 
   match players with 
   | [] -> (winners,winner_p)
@@ -276,6 +282,7 @@ let winner_check state =
   let win_p = (List.assoc win_id p_list).total_points in
   winner_check_helper p_list (win_id::[]) win_p
 
+
 (* =====Below is for check phase====== *)
 
 (** [remove_invalid next_player inv_words state] is a player with all invalid 
@@ -290,7 +297,8 @@ let rec remove_invalid next_player inv_words state =
                                       total_points = 
                                         next_player.total_points - 
                                         calculate_word_points h state;
-                                      player_letter_set = next_player.player_letter_set;
+                                      player_letter_set = 
+                                        next_player.player_letter_set;
                                       current_letter = ""}) 
                        t state)
                else remove_invalid next_player t state)
@@ -334,5 +342,4 @@ let rec print_all_player_word_list_helper st acc : unit =
     print_all_player_word_list_helper st (acc + 1) end
 
 let print_all_player_word_list st = print_all_player_word_list_helper st 1
-(* 
-let get_wordlist_by_id st id = (List.assoc id st.player_list).player_words *)
+
