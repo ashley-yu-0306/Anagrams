@@ -8,9 +8,13 @@ type points = int
 (** The type of the letters. *)
 type letter = string
 
-(** [alphabet] represents all the letters and their points read from
-    the json file. *)
+(** [alphabet] is all the letters and their points read from
+    the json file, split into vowels and consonants. *)
 type alphabet
+
+(** [all_letters_in_json] is all the letters and their points read from
+    the json file. *)
+type all_letters_in_json
 
 (** [from_json j] is the game alphabet that [j] represents.
     Requires: [j] is a valid JSON game representation. *)
@@ -19,6 +23,8 @@ val from_json : Yojson.Basic.t -> alphabet
 (** [combo_set_var a lim] is the randomly picked letter set for the game. *)
 val combo_set_var: alphabet -> int -> t
 
+val all_letters: alphabet -> all_letters_in_json
+
 (** [swap_letter a l set] is the [set] of letters with [l] replaced with
     a letter from [a]. *)
 val swap_letter: alphabet -> letter -> t -> t 
@@ -26,12 +32,12 @@ val swap_letter: alphabet -> letter -> t -> t
 (** [combo_set a] is the randomly picked letter set for the game. *)
 val combo_set: alphabet -> t
 
-(** [print_list a m] prints out the letters and corresponding points in the combo 
-    set with text corresponding to game mode [m].*)
+(** [print_list a m] prints out the letters and corresponding points in the 
+combo set with text corresponding to game mode [m].*)
 val print_list : t -> int -> unit
 
 (** [get_points set l] is the point that the letter [l] is worth. *)
-val get_points: t -> letter -> points
+val get_points: all_letters_in_json -> letter -> points
 
 (** [get_letters game acc] is a list of letters in the combo set [game].
     Required: all uppercase. *)
@@ -45,6 +51,10 @@ val swap_letter: alphabet -> letter -> t -> t
     is swapped to the [swappair]. *)
 val generate_new_set: letter -> (letter * points) -> t -> t
 
-(** [char_removal s c] is the list of pairs [s] with pairs whose key corresponds
-    to the elements in [c] removed. *)
-val char_removal: t -> letter list -> t
+(** [letter_removal s c] is the list of pairs [s] with pairs whose key 
+corresponds to the elements in [c] removed. *)
+val letter_removal: t -> letter list -> t
+
+(** [add_in_pool game l] is the new pool with a new letter from the player 
+    who chose to pass.*)
+val add_in_pool: t -> letter -> all_letters_in_json -> t

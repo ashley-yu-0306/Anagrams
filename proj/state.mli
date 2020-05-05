@@ -7,21 +7,28 @@
 open Game
 open Command
 
-(** The abstract types representing the state of the player and the game. *)
+(** The abstract type of the player. *)
 type player
+
+(** The abstract type of the game state. *)
 type t
+
+(** The type of returning result of a command action. *)
 type result = Legal of t | Illegal
+
+(** The type of a player id. *)
 type player_id = int
 
-(** [init_state set num turn mode] is the initial state of the game. The initial state
-    has the combination of letters [set], the turns left in the game, the
+(** [init_state set num turn mode] is the initial state of the game. The initial
+    state has the combination of letters [set], the turns left in the game, the
     current player, and the list of players. *)
-val init_state : Game.t -> int -> int -> string -> t
+val init_state : Game.t -> int -> int -> string -> Game.all_letters_in_json -> t
 
 (** [turns state] is the turns left in game state [state]. *)
 val turns: t  -> int
 
-(** [current_player state] is the player_id whose turn is active in state [st]. *)
+(** [current_player state] is the player_id whose turn is active in state 
+    [st].*)
 val current_player: t -> int
 
 (** [current_player_wordlist state] is the current word-points list of the 
@@ -35,6 +42,9 @@ val current_player_points: t -> Game.points
 (** [current_player_letter_set state] is the current player's letter set. *)
 val current_player_letter_set: t -> Game.t
 
+(** [get_pool st] is the current pool. *)
+val get_pool: t -> Game.t
+
 (** [next_player state] gives the [id] of the player whose turn is next. *)
 val next_player: t -> player_id
 
@@ -42,28 +52,34 @@ val next_player: t -> player_id
     values in [set]. *)
 val calculate_word_points: Command.word ->t -> Game.points
 
-(** [create word game state] is the result after the player in [game] attempts
+(** [create word state] is the result after the player in [game] attempts
     to create the [word]. The result does not change the set of playable
     letters. *)
 val create: Command.word -> t -> result
 
-(** [create_p word game state] is the result after the player in [game] attempts
+(** [create_p word state] is the result after the player in [game] attempts
     to create the [word]. The result changes the set of playable letters.. *)
 val create_p: Command.word -> t -> result
 
-(** [pass game state] is the result after the player in [game] passes their turn.*)
-val pass: Game.t -> t -> result
+(** [pass state] is the result after the player in [game] passes their turn.*)
+val pass: t -> result
 
-(** [swap game state] is the result after the player in [game] swaps their letter
-    [l]. *)
+(** [swap game state] is the result after the player in [game] swaps their 
+    letter [l]. *)
 val swap: Game.letter -> t -> Yojson.Basic.t -> result
 
-(** [steal w p st] is the result after the current player steals word [w] from player [p]. *)
+(** [steal w p st] is the result after the current player steals word [w] from 
+    player [p]. *)
 val steal: Command.word -> player_id -> t -> result
+
+(** [create_from_steal stolen new_word st] is the result of creating a new word 
+    out of the stolen word.*)
+val create_from_steal: Command.word -> Command.word -> t -> result
 
 (** [player_count state] is the number of players in the game.*)
 val player_count: t -> int
 
+(** [player_count st] prints the players current letter. *)
 val print_player_letter: t -> unit
 
 (** [winner_check state] is the list of winners in game of state [state] and
@@ -83,6 +99,3 @@ val print_player_word_list: t -> player_id -> unit
 
 (** [print_all_player_word_list state id] prints all player[id]'s word list.*)
 val print_all_player_word_list: t -> unit
-
-(** [get_wordlist_by_id st id] is the wordlist of player [id].*)
-val get_wordlist_by_id: t -> player_id -> (Command.word * Game.points) list

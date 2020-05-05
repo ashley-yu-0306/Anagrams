@@ -17,11 +17,13 @@ type  t = {
   total_players: int;
   mode: string;
   set: Game.t;
+  alpha: Game.all_letters_in_json
 }
 
 type result = Legal of t | Illegal
 
-let random_letter() = 
+(** [random_letter ()] is a random uppercase letter from the English alphabet.*)
+let random_letter () = 
   Char.escaped (Char.chr ((Random.self_init(); Random.int 26) + 65))
 
 (** [init_player] initializes a player *)
@@ -32,17 +34,21 @@ let init_player set = {
   current_letter = random_letter()
 }
 
-let init_state set num turn mode = {
+let init_state set num turn mode a = {
   turns_left= turn * num; 
   player_list = List.init num (fun i -> ((i + 1), init_player set));
   current_player = 1;
   total_players = num;
   mode = mode;
   set= set;
+  alpha = a
 }
 
 let turns state = 
   state.turns_left
+
+let state_alpha state = 
+  state.alpha
 
 let current_player state = 
   state.current_player
@@ -55,6 +61,12 @@ let current_player_points state =
 
 let current_player_letter_set state =
   (List.assoc state.current_player state.player_list).player_letter_set
+
+(** [current_player_letter st] is the current player's letter at state [st]. *)
+let current_player_letter st = 
+  (List.assoc st.current_player st.player_list).current_letter
+
+let get_pool st = st.set
 
 let next_player state = 
   if (not (state.current_player = state.total_players))
@@ -69,13 +81,10 @@ let word_to_cl n = List.init (String.length n) (String.get n)
 let cl_to_ll cl = List.map (fun x -> Char.escaped x) cl 
                   |> List.map String.uppercase_ascii
 
-(* let calculate_word_points word set = 
-   let seq = word |> String.to_seq |> List.of_seq |> List.map (Game.get_points set) in 
-   List.fold_right (+) seq 0 *)
 let calculate_word_points word st = 
-  let set = current_player_letter_set st in
+  let a = state_alpha st in
   let base = List.fold_left 
-      (fun x y -> x + Game.get_points set y) 0 (word |> word_to_cl |> cl_to_ll) in 
+      (fun x y -> x + Game.get_points a y) 0 (word |> word_to_cl |> cl_to_ll) in 
   let length = String.length word in 
   if length >= 3 && length < 5 
   then base |> float_of_int |> (fun x -> x*. 1.2) |> int_of_float
@@ -83,9 +92,9 @@ let calculate_word_points word st =
   then base |> float_of_int |> (fun x -> x*. 1.5) |> int_of_float
   else base
 
-(** [update_player_list state players word id] updates the state of the player
-    with player_id [id] in [players] by adding points gained in entering [word]. 
-    Points are calculated with the letter combination set in [state].*)
+(** [update_player_list state players word id] is the updated state of the 
+    player with player_id [id] in [players] by adding points gained in entering 
+    [word]. Points are calculated with the letter combination set in [state].*)
 let rec update_player_list state players word id  = 
   match players with
   | [] -> [] 
@@ -101,23 +110,42 @@ let rec update_player_list state players word id  =
       } in (k,player)::(update_player_list state t word id)
     else (k,v)::(update_player_list state t word id)
 
+(** [update_player_list_pass state players id] is the updated state after the 
+    player chooses to pass.*)
+let rec update_player_list_pass state players id = 
+  match players with
+  | [] -> [] 
+  | (k,v)::t -> 
+    let player = {
+      player_words = v.player_words;
+      total_points = v.total_points;
+      player_letter_set = v.player_letter_set;
+      current_letter = random_letter()
+    } in (k,player)::(update_player_list_pass state t id)
+
 (**[remove x lst acc] is [lst] with the first occurance of [x] removed. *)
 let rec remove x lst acc = match lst with
   | [] -> acc
-  | h::t -> if h = x then remove x t acc else remove x t (h::acc)
+  | h::t -> if h = x then acc @ t else remove x t (h::acc)
 
 (**[check_illegal ll combo_l] is [true] iff [ll] contains letter(s) that is not
    in the combo or more occurances of some letter offered in the combo. *)
 let rec check_illegal ll combo_l = 
   match ll with 
   | [] -> false
-  | h :: t -> if not (List.mem h combo_l) then true 
+  | h :: t -> print_endline h; if not (List.mem h combo_l) then true 
     else check_illegal t (remove h combo_l [])
 
-(** [string_to_string_list s i] is the character list of [s], where [i] is the
-    length of the string subtracted by 1. *)
-let rec string_to_string_list s i = 
-  if i>(-1) then String.make 1 (String.get s i) ::string_to_string_list s (i-1) else [] 
+(**[check_letter_used st word] is [true] iff [word] contains the player's 
+   current letter in [st]. *)
+let check_letter_used st word = String.contains (String.uppercase_ascii word)
+    (String.get (current_player_letter st) 0)
+
+(** [string_to_string_list s i] is the string list of [s], where [i] is the
+    length of the string subtracted by 1. All in uppercase. *)
+let rec string_to_string_list s i = let ups = String.uppercase_ascii s in
+  if i>(-1) then 
+    String.make 1 (String.get ups i) ::string_to_string_list ups (i-1) else [] 
 
 let create word state = 
   if word = "" || check_illegal (word |> word_to_cl |> cl_to_ll) 
@@ -133,33 +161,46 @@ let create word state =
       total_players = state.total_players;
       mode = state.mode;
       set = state.set;
+      alpha = state.alpha
     } 
 
 let create_p word state = 
-  if word = "" || check_illegal (word |> word_to_cl |> cl_to_ll) 
-       (Game.get_letters (current_player_letter_set state)) then Illegal
+  if word = "" || not(check_letter_used state word) || 
+     check_illegal (word |> word_to_cl |> cl_to_ll) 
+       ((current_player_letter state)::(Game.get_letters (get_pool state)))
+  then Illegal
   else
     let player = state.current_player in 
     let player_l = state.player_list in 
     let new_player_l = update_player_list state player_l word player in
-    let char_l = string_to_string_list word ((String.length word)-1) in
+    let letter_used_l = string_to_string_list word ((String.length word)-1) in
     Legal { state with
             turns_left = state.turns_left - 1;
             player_list = new_player_l;
             current_player = next_player state;
-            set = char_removal state.set char_l
+            (** Line 181 needs changing! *)
+            set = letter_removal state.set letter_used_l
           } 
 
-let pass game state = 
-  Legal { state with
-          turns_left = state.turns_left - 1;
-          current_player = next_player state;
-        }
+let pass state = if state.mode = "normal" then
+    Legal { state with
+            turns_left = state.turns_left - 1;
+            current_player = next_player state;
+          } 
+  else  Legal { state with
+                turns_left = state.turns_left - 1;
+                player_list = 
+                  update_player_list_pass state state.player_list 
+                    current_player;
+                current_player = next_player state;
+                set = 
+                  Game.add_in_pool state.set (current_player_letter state) 
+                    (state_alpha state)
+              } 
 
 (** [update_player_list3 players ns id] is the list of [players] with 
     the player whose id is [id] updated with a new letter set [ns].*)
 let rec update_player_list3 players ns id = 
-  let cur_let = (List.assoc id players).current_letter in
   match players with
   | [] -> []
   | (k,v)::t -> if k = id 
@@ -167,7 +208,6 @@ let rec update_player_list3 players ns id =
       let player = { v with
                      total_points = v.total_points - 5;
                      player_letter_set = ns;
-                     current_letter = cur_let
                    } in (k,player)::(update_player_list3 t ns id)
     else (k,v)::(update_player_list3 t ns id)
 
@@ -175,7 +215,7 @@ let swap l state json =
   let alphabet = from_json json in 
   let id = state.current_player in 
   let set = current_player_letter_set state in
-  let new_set = swap_letter alphabet l set in
+  let new_set = swap_letter alphabet l set in 
   Legal { state with
           turns_left = state.turns_left - 1;
           player_list = update_player_list3 state.player_list new_set id;
@@ -191,16 +231,41 @@ let rec update_player_list4 players p id =
     else (k,v)::(update_player_list4 t p id)
 
 let steal w p st = 
+  let wup = String.uppercase_ascii w in
   let player_list = st.player_list in 
   let player = List.assoc p player_list in 
   let words = player.player_words in 
-  if not (List.mem_assoc (String.uppercase_ascii w) (words)) then Illegal 
-  else let player' = { player with player_words = List.remove_assoc w words;} in 
-    Legal {st with player_list = update_player_list4 player_list player' p}
+  if not (List.mem_assoc wup words) then Illegal 
+  else let player' = { player with player_words = List.remove_assoc wup words;} 
+    in Legal {st with player_list = update_player_list4 player_list player' p}
+
+let create_from_steal stolen new_word st = 
+  let stolen_list = 
+    string_to_string_list stolen ((String.length stolen) -1) in
+  let my_letter = 
+    (List.assoc st.current_player st.player_list).current_letter in
+  let new_word_list_except_my_letter = 
+    remove my_letter (string_to_string_list new_word 
+                        ((String.length new_word) -1)) [] in
+  if List.sort compare stolen_list = 
+     List.sort compare new_word_list_except_my_letter then begin
+    let player = st.current_player in 
+    let player_l = st.player_list in 
+    let new_player_l = update_player_list st player_l new_word player in
+    Legal { st with
+            turns_left = st.turns_left - 1;
+            player_list = new_player_l;
+            current_player = next_player st;
+          } 
+  end
+  else Illegal
 
 let player_count state = 
   state.total_players
 
+(** [winner_check_helper players winners winner_p] is the list of winners in 
+    game of state [state] and the highest number of point achieved by a player 
+    in that game.*)
 let rec winner_check_helper players winners winner_p = 
   match players with 
   | [] -> (winners,winner_p)
@@ -217,8 +282,8 @@ let winner_check state =
   let win_p = (List.assoc win_id p_list).total_points in
   winner_check_helper p_list (win_id::[]) win_p
 
-(** =====Below is for check phase====== *)
 
+(* =====Below is for check phase====== *)
 
 (** [remove_invalid next_player inv_words state] is a player with all invalid 
     words removed from his words list*)
@@ -232,7 +297,8 @@ let rec remove_invalid next_player inv_words state =
                                       total_points = 
                                         next_player.total_points - 
                                         calculate_word_points h state;
-                                      player_letter_set = next_player.player_letter_set;
+                                      player_letter_set = 
+                                        next_player.player_letter_set;
                                       current_letter = ""}) 
                        t state)
                else remove_invalid next_player t state)
@@ -263,8 +329,8 @@ let print_player_word_list state id =
     List.iter (fun (k,v)-> print_string k; print_newline ();) wl
 
 let print_player_letter st = 
-  print_endline ("Current player's letter" ^ 
-                 (List.assoc st.current_player st.player_list).current_letter)
+  print_string ("\nCurrent player's letter: " );
+  ANSITerminal.(print_string [Bold;blue] ((current_player_letter st) ^ "\n\n"))
 
 (** [print_all_player_word_list_helper st acc] is a helper function 
     that prints all player[id]'s word list. *)
@@ -277,4 +343,3 @@ let rec print_all_player_word_list_helper st acc : unit =
 
 let print_all_player_word_list st = print_all_player_word_list_helper st 1
 
-let get_wordlist_by_id st id = (List.assoc id st.player_list).player_words

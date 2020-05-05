@@ -6,10 +6,9 @@ type letter = string
 type alphabet =  { vowels: (letter * points) list; 
                    consonants: (letter * points) list }
 
-(* type t = { vowels: (letter * points) list; 
-           consonants: (letter * points) list } *)
-
 type t = (letter * points) list
+
+type all_letters_in_json = (letter * points) list
 
 (** [points_as_int e] is a letter-points pair pased from json with points as 
     integer.*)
@@ -19,6 +18,8 @@ let from_json j : alphabet = {
   vowels = j |> member "vowels" |> to_assoc |> List.map points_as_int;
   consonants = j|> member "consonants" |> to_assoc |> List.map points_as_int;
 }
+
+let all_letters a : all_letters_in_json = a.vowels @ a.consonants 
 
 (** [rand_l a b] returns a random letter in the list [a], with 
     index between 0 (inclusive) and the bound [b] (exclusive). *)
@@ -33,7 +34,8 @@ let combo_set_var a lim =
                                       else rand_l a.consonants 18) in
   vow_lst @ cons_lst
 
-(** [to_list a] returns the keys of the association list [a] except for key [k].*)
+(** [to_list a] returns the keys of the association list [a] except for 
+    key [k].*)
 let rec to_list a k  = 
   match a with 
   | [] -> []
@@ -61,25 +63,26 @@ let combo_set a =
 
 let generate_new_set l swappair set = swappair :: (List.remove_assoc l set)
 
-let print_list2 a = print_endline "Your Letters: "; 
-  List.iter (fun (k,v) -> print_string (k ^ ", worth "); 
-              print_int v; print_endline " points. ") a
-
 let print_list a m= if m = 1 then print_endline "\nYour Letters: \n"
   else print_endline "\nThe Pool: \n";
-  List.iter (fun (k,v) -> ANSITerminal.(print_string [Bold;blue] ("  " ^ k ^ "     "))) a;
-  print_string "\n-----------------------------------------------------------------------------\n";
-  List.iter (fun (k,v) -> print_string ""; print_int v; print_string " pts   ") a;
+  List.iter 
+    (fun (k,v) -> 
+       ANSITerminal.(print_string [Bold;blue] ("  " ^ k ^ "     "))) a;
+  print_string 
+    "\n-----------------------------------------------------------------------------\n";
+  List.iter (fun (k,v) -> 
+      print_string ""; print_int v; print_string " pts   ") a;
   print_endline "\n"
 
-let rec get_points set l = match set with 
+let rec get_points a l = match a with 
   | [] -> failwith "not in letter set"
-  (* can be changed when implementing legal/illegal inputs! *)
   | (l', p) :: t -> if l = l' then p else get_points t l 
 
 let get_letters game = List.map fst game
 
-let rec char_removal s c = 
+let rec letter_removal s c = 
   match c with 
   | [] -> s 
-  | h::t -> char_removal (List.remove_assoc h s) t
+  | h::t -> letter_removal (List.remove_assoc h s) t
+
+let add_in_pool game l a = (l,(get_points a l))::game
