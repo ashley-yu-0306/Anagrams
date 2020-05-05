@@ -71,7 +71,7 @@ let each_turn_print st game rep =
 let game_info st rep mode = 
   if not rep then begin 
     let turns_left = State.turns st in 
-    let points = State.current_player st |> string_of_int in 
+    let points = State.current_player_points st |> string_of_int in 
     (print_endline ("There are " ^ (turns_left |> string_of_int) 
                     ^ " turns left in the game.");
      print_endline ("(Player " ^ (State.current_player st |> string_of_int)
@@ -131,7 +131,7 @@ let rec loopgame2 game st json rep: unit =
               | Illegal s-> 
                 (ANSITerminal.(print_string [red] s)); 
                 loopgame2 (get_pool st) st json true
-              | Legal st' -> ignore(Sys.command "clear"); 
+              | Legal st' -> ignore(Unix.sleep 2);ignore(Sys.command "clear"); 
                 loopgame2 (get_pool st') st' json false
             end
         | Steal (id, old_word, new_word) -> begin
@@ -142,7 +142,7 @@ let rec loopgame2 game st json rep: unit =
               begin match create new_word st' true with 
                 | Illegal s -> (ANSITerminal.(print_string [red] s));
                   loopgame2 game st json true
-                | Legal st' -> ignore(Sys.command "clear");
+                | Legal st' -> ignore(Unix.sleep 2);ignore(Sys.command "clear");
                   loopgame2 (get_pool st') st' json false end
           end
         |_ ->  ANSITerminal.(print_string [red] "Malformed command. Please use available commands.\n"; 
@@ -193,16 +193,14 @@ let rec loopgame game st json rep: unit =
               | Illegal s-> 
                 (ANSITerminal.(print_string [red] s); 
                  loopgame game st json true)
-              | Legal st' -> ignore(Sys.command "clear"); loopgame game st' json false
+              | Legal st' -> ignore(Unix.sleep 2);ignore(Sys.command "clear"); loopgame game st' json false
             end
         | Swap l -> let target = String.uppercase_ascii l in 
           if List.mem target (set |> Game.get_letters) then begin
             match swap l st json with 
             | Illegal s-> print_endline s; loopgame game st json true;
             | Legal st' -> 
-              print_endline 
-                "\nYour letter has been swapped. You've lost 5 points.\n";
-              ignore(Unix.sleep 3);
+              ignore(Unix.sleep 2);
               ignore(Sys.command "clear");
               loopgame game st' json false end
           else begin

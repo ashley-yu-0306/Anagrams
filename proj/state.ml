@@ -5,7 +5,8 @@ type player = {
   player_words:(Command.word * Game.points) list;
   total_points: Game.points;
   player_letter_set: Game.t;
-  current_letter: string
+  current_letter: string;
+  swaps: float;
 }
 
 type player_id = int
@@ -31,7 +32,8 @@ let init_player set = {
   player_words = [];
   total_points = 0;
   player_letter_set = set;
-  current_letter = random_letter()
+  current_letter = random_letter();
+  swaps = 0.;
 }
 
 let init_state set num turn mode a = {
@@ -103,7 +105,8 @@ let rec remove_invalid next_player inv_words state =
   | h :: t -> (if List.mem_assoc h (next_player.player_words) 
                then (let new_next_pwlst = 
                        List.remove_assoc h (next_player.player_words) in 
-                     remove_invalid ({player_words = new_next_pwlst; 
+                     remove_invalid ({next_player with 
+                                      player_words = new_next_pwlst; 
                                       total_points = 
                                         next_player.total_points - 
                                         calculate_word_points h state;
@@ -112,6 +115,21 @@ let rec remove_invalid next_player inv_words state =
                                       current_letter = ""}) 
                        t state)
                else remove_invalid next_player t state)
+
+let calculate_swap_points state = 
+  let id = state.current_player in 
+  let player = List.assoc id state.player_list in 
+  let swaps = player.swaps in 
+  (-.(5. +. (1.5**swaps))) |> Float.round |> int_of_float
+
+(* [action_message a w p] prints information about word [w] and the points [p]
+   gained or lost as a result of action [a]*)
+let action_message a w p = begin
+  let p' = string_of_int p in
+  let message = 
+    if a = "swap" then ("\n'"^w^"' has been swapped. You've lost "^p'^" points.\n")
+    else if a = "create" || a = "steal" then  ("\n'"^w^"' has been created. You've gained "^p'^" points.\n")
+    else "" in print_endline message; end
 
 (** [update_player_list state ns players word action id] is the player_list 
     as a result of [action] being executed on player whose id is [id] in [state]. 
@@ -125,10 +143,11 @@ let rec update_player_list state ns players word action id  =
   | (k,v)::t -> if k = id 
     then 
       let raw_pts = calculate_word_points word state in 
-      let actual_pts = if action = "swap" then -5 
+      let words = String.uppercase_ascii word in
+      let actual_pts = if action = "swap" then calculate_swap_points state
         else if action = "check" || action = "steal" then -raw_pts 
         else raw_pts in 
-      let words = String.uppercase_ascii word in
+      action_message action words actual_pts; 
       let player = {
         player_words = if action = "steal" || action = "check" then 
             let p = List.mem_assoc words v.player_words in 
@@ -140,6 +159,7 @@ let rec update_player_list state ns players word action id  =
         total_points = v.total_points + actual_pts;
         player_letter_set = ns;
         current_letter = if action = "check" then "" else random_letter();
+        swaps = if action = "swap" then v.swaps +. 1. else v.swaps
       } in (k,player)::(update_player_list state ns t word action id)
     else (k,v)::(update_player_list state ns t word action id)
 
