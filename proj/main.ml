@@ -312,7 +312,7 @@ let play_game j =
 
 (** [main ()] prompts for the game to play, then starts it. *)
 let main () = 
-  ignore(Sys.command "resize -s 30 90");
+  ignore(Sys.command "resize -s 30 80");
   ignore(Sys.command "clear");
   ANSITerminal.(print_string [red]
                   "\n\nWelcome to ANAGRAMS.\n");
