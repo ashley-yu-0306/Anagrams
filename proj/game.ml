@@ -21,6 +21,8 @@ let from_json j : alphabet = {
 
 let all_letters a : all_letters_in_json = a.vowels @ a.consonants 
 
+let set_length s = List.length s
+
 (** [rand_l a b] returns a random letter in the list [a], with 
     index between 0 (inclusive) and the bound [b] (exclusive). *)
 let rand_l a b = (List.nth a (Random.self_init(); Random.int b))
@@ -63,16 +65,16 @@ let combo_set a =
 
 let generate_new_set l swappair set = swappair :: (List.remove_assoc l set)
 
-let print_list a m= if m = 1 then print_endline "\nYour Letters: \n"
-  else print_endline "\nThe Pool: \n";
-  List.iter 
-    (fun (k,v) -> 
-       ANSITerminal.(print_string [Bold;blue] ("  " ^ k ^ "     "))) a;
-  print_string 
-    "\n-----------------------------------------------------------------------------\n";
-  List.iter (fun (k,v) -> 
-      print_string ""; print_int v; print_string " pts   ") a;
-  print_endline "\n"
+let print_list a m rep= if not rep then begin if m = 1 then print_endline "\nYour Letters: \n"
+    else print_endline "\nThe Pool: \n";
+    List.iter 
+      (fun (k,v) -> 
+         ANSITerminal.(print_string [Bold;blue] ("  " ^ k ^ "     "))) a;
+    print_string 
+      "\n-----------------------------------------------------------------------------\n";
+    List.iter (fun (k,v) -> 
+        print_string ""; print_int v; print_string " pts   ") a;
+    print_endline "\n" end else ()
 
 let rec get_points a l = match a with 
   | [] -> failwith "not in letter set"
@@ -85,4 +87,12 @@ let rec remove_letter s c =
   | [] -> s 
   | h::t -> remove_letter (List.remove_assoc h s) t
 
-let add_in_pool game l a = (l,(get_points a l))::game
+let add_in_pool game l a = 
+  if l = "" 
+  then match rand_l a 26 with 
+    | (l',p) -> (l',p)::game
+  else ((l,get_points a l)::game)
+
+let rec replenish_pool s n a = 
+  if List.length s = n then s 
+  else let pool = add_in_pool s "" a in replenish_pool pool n a

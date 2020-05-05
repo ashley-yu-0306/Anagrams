@@ -20,7 +20,7 @@ type  t = {
   alpha: Game.all_letters_in_json
 }
 
-type result = Legal of t | Illegal
+type result = Legal of t | Illegal of string
 
 (** [random_letter ()] is a random uppercase letter from the English alphabet.*)
 let random_letter () = 
@@ -65,6 +65,9 @@ let current_player_letter_set state =
 (** [current_player_letter st] is the current player's letter at state [st]. *)
 let current_player_letter st = 
   (List.assoc st.current_player st.player_list).current_letter
+
+let player_count state = 
+  state.total_players
 
 let get_pool st = st.set
 
@@ -130,8 +133,7 @@ let rec update_player_list state ns players word action id  =
         player_words = if action = "steal" || action = "check" then 
             let p = List.mem_assoc words v.player_words in 
             if p = true then List.remove_assoc words v.player_words else 
-              (print_endline "false";
-               List.remove_assoc words v.player_words)
+              List.remove_assoc words v.player_words
           else if not (words = "") 
           then List.append v.player_words [(words,actual_pts)]
           else v.player_words;
@@ -150,17 +152,15 @@ let rec remove x lst acc = match lst with
    in the combo or more occurances of some letter offered in the combo. *)
 let rec check_illegal ll combo_l = 
   match ll with 
-  | [] -> (print_endline "false, cl"; false)
-  | h :: t -> print_endline h; if not (List.mem h combo_l) then (print_endline "true, cl"; true)
+  | [] -> false
+  | h :: t -> if not (List.mem h combo_l) then true
     else check_illegal t (remove h combo_l [])
 
 (**[check_letter_used st word] is [true] iff [word] contains the player's 
    current letter in [st]. *)
-let check_letter_used st word = let v = String.contains (String.uppercase_ascii word)
-                                    (String.get (current_player_letter st) 0) in 
-  if v = true 
-  then (print_endline ("true,clu"); v)
-  else (print_endline ("false,clu"); v)
+let check_letter_used st word = String.contains (String.uppercase_ascii word)
+    (String.get (current_player_letter st) 0) 
+
 
 (** [string_to_sl s i] is the string list of [s], where [i] is the
     length of the string subtracted by 1. All in uppercase. *)
@@ -168,12 +168,15 @@ let rec string_to_sl s i = let ups = String.uppercase_ascii s in
   if i>(-1) then 
     String.make 1 (String.get ups i) ::string_to_sl ups (i-1) else [] 
 
-let create word state = 
+let create word state s = 
   let combo = (if state.mode = "pool" 
                then (current_player_letter state)::(Game.get_letters (get_pool state))
                else Game.get_letters (current_player_letter_set state)) in
-  if word = "" || check_illegal (word |> word_to_cl |> cl_to_ll) combo
-     || state.mode = "pool" && not(check_letter_used state word) then Illegal
+  if word = "" then Illegal "Please enter a word."
+  else if (s=false) && (check_illegal (word |> word_to_cl |> cl_to_ll) combo) 
+  then Illegal "This word cannot be constructed with the current letter set."
+  else if state.mode = "pool" && not(check_letter_used state word)
+  then Illegal ("The word '" ^ word ^ "' does not contain your letter.")
   else 
     let player = state.current_player in 
     let player_l = state.player_list in 
@@ -186,7 +189,10 @@ let create word state =
       player_list = new_player_l;
       current_player = next_player state;
       total_players = state.total_players;
-      set = if state.mode = "pool" then remove_letter state.set used_letters_l 
+      set = if state.mode = "pool" 
+        then let n_pool = set_length state.set in
+          let incomp_pool = remove_letter state.set used_letters_l in 
+          replenish_pool incomp_pool n_pool state.alpha 
         else state.set
     } 
 
@@ -221,39 +227,20 @@ let swap l state json =
           current_player = next_player state;
         }
 
-let steal w p st = 
+let steal w nw p st = 
   let wup = String.uppercase_ascii w in
+  let nwup = String.uppercase_ascii nw in 
   let player_l = st.player_list in 
   let player = List.assoc p player_l in
   let words = player.player_words in 
   let new_set = player.player_letter_set in
-  if not (List.mem_assoc wup words) then Illegal 
+  if not (List.mem_assoc wup words) 
+  then Illegal ("The word '" ^ w ^ "' is not in player " ^ string_of_int p ^ "'s word list.")
+  else if not (check_letter_used st nw) 
+  then Illegal ("The word '" ^ nw ^ "' does not contain your letter.")
+  else if not ((String.length nwup) = ((String.length wup) + 1)) 
+  then Illegal ("You cannot use letters in the pool to steal a word.")
   else Legal {st with player_list = update_player_list st new_set player_l wup "steal" p}
-
-let create_from_steal stolen new_word st = 
-  let stolen_list = 
-    string_to_sl stolen ((String.length stolen) -1) in
-  let my_letter = 
-    (List.assoc st.current_player st.player_list).current_letter in
-  let new_word_list_except_my_letter = 
-    remove my_letter (string_to_sl new_word 
-                        ((String.length new_word) -1)) [] in
-  if List.sort compare stolen_list = 
-     List.sort compare new_word_list_except_my_letter then begin
-    let player = st.current_player in 
-    let player_l = st.player_list in 
-    let new_set = (List.assoc player player_l).player_letter_set in
-    let new_player_l = update_player_list st new_set player_l new_word "create" player in
-    Legal { st with
-            turns_left = st.turns_left - 1;
-            player_list = new_player_l;
-            current_player = next_player st;
-          } 
-  end
-  else Illegal
-
-let player_count state = 
-  state.total_players
 
 (** [winner_check_helper players winners winner_p] is the list of winners in 
     game of state [state] and the highest number of point achieved by a player 

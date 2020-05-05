@@ -14,7 +14,7 @@ type player
 type t
 
 (** The type of returning result of a command action. *)
-type result = Legal of t | Illegal
+type result = Legal of t | Illegal of string
 
 (** The type of a player id. *)
 type player_id = int
@@ -52,14 +52,9 @@ val next_player: t -> player_id
     values in [set]. *)
 val calculate_word_points: Command.word ->t -> Game.points
 
-(** [create word state] is the result after the player in [game] attempts
-    to create the [word]. The result does not change the set of playable
-    letters. *)
-val create: Command.word -> t -> result
-
-(* (** [create_p word state] is the result after the player in [game] attempts
-    to create the [word]. The result changes the set of playable letters.. *)
-val create_p: Command.word -> t -> result *)
+(** [create word state s] is the result after the player in [game] attempts
+    to create the [word]. [s] is whether or not the word was stolen. *)
+val create: Command.word -> t -> bool -> result
 
 (** [pass state] is the result after the player in [game] passes their turn.*)
 val pass: t -> result
@@ -68,13 +63,9 @@ val pass: t -> result
     letter [l]. *)
 val swap: Game.letter -> t -> Yojson.Basic.t -> result
 
-(** [steal w p st] is the result after the current player steals word [w] from 
-    player [p]. *)
-val steal: Command.word -> player_id -> t -> result
-
-(** [create_from_steal stolen new_word st] is the result of creating a new word 
-    out of the stolen word.*)
-val create_from_steal: Command.word -> Command.word -> t -> result
+(** [steal w nw p st] is the result after the current player steals word [w] from 
+    player [p] to construct word [nw]. *)
+val steal: Command.word -> Command.word -> player_id -> t -> result
 
 (** [player_count state] is the number of players in the game.*)
 val player_count: t -> int
