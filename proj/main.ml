@@ -61,6 +61,8 @@ let rec check_phase2 game st =
          | Invalid wl -> State.invalid wl game st |> check_phase2 game))
   )
 
+(** Note for myself (Bahar hehe): Need to make it so check is dependent on 
+    the person's letter set, not the overall combo. *)
 let rec check_words_helper game st alst wl acc = 
   match wl with
   | [] -> acc
