@@ -90,6 +90,8 @@ val invalid: Command.word list -> Game.t -> t -> t
     words list is already valid.*)
 val valid : Game.t -> t -> t
 
+val next_player_state : Game.t -> t -> t
+
 (** [print_player_word_list state id] prints player[id]'s word list.*)
 val print_player_word_list: t -> player_id -> unit
 

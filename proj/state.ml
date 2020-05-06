@@ -79,7 +79,7 @@ let player_count state =
 let get_pool st = st.set
 
 let next_player state = 
-  if (not (state.current_player = state.total_players))
+  if (not (state.current_player >= state.total_players))
   then state.current_player + 1 
   else 1
 
@@ -219,7 +219,7 @@ let create word state s =
                else Game.get_letters (current_player_letter_set state)) in
   if word = "" then Illegal "Please enter a word."
   else if (s=false) && (check_illegal (word |> word_to_cl |> cl_to_ll) combo) 
-  then Illegal "This word cannot be constructed with the current letter set."
+  then Illegal "This word cannot be constructed with the current letter set. \n"
   else if state.mode = "pool" && not(check_letter_used state word)
   then Illegal ("The word '" ^ word ^ "' does not contain your letter.")
   else 
@@ -328,6 +328,9 @@ let rec invalid word_lst game state =
 
 let valid game state = 
   {state with current_player = state.current_player + 1}
+
+let next_player_state game state = 
+  {state with current_player = next_player state}
 
 let print_player_word_list state id = 
   let wl = (List.assoc id state.player_list).player_words in

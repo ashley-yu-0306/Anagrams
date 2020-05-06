@@ -32,11 +32,15 @@ let rec end_phase game st =
       exit 0 
 
 
+let rec stdprint_list = function 
+    [] -> ()
+  | e::l -> print_string e ; print_string ", " ; stdprint_list l
+
 (** [check_phase game st] is the check phase of [game] with the final state 
     [st], where players check each other's word lists. *)
-let rec check_phase game st = 
+let rec check_phase2 game st = 
   print_endline 
-    "If everything looks good, enter 'valid', or if any words look wrong, 
+    "\nIf everything looks good, enter 'valid', or if any words look wrong, 
       enter 'invalid (the word or words separated with space)'. "; 
   if current_player st > State.player_count st 
   then (ignore(Sys.command "clear"); end_phase game st)
@@ -47,15 +51,40 @@ let rec check_phase game st =
     print_string "> ";
     (match parse_check (read_line()) with
      | exception Empty -> print_endline "Please enter a command."; 
-       check_phase game st
+       check_phase2 game st
      | exception Malformed -> 
        print_endline
          "Malformed command. Available commands: 'valid', 'invalid'"; 
-       check_phase game st
+       check_phase2 game st
      | your_command -> (match your_command with
-         | Valid -> State.valid game st |> check_phase game
-         | Invalid wl -> State.invalid wl game st |> check_phase game))
+         | Valid -> State.valid game st |> check_phase2 game
+         | Invalid wl -> State.invalid wl game st |> check_phase2 game))
   )
+
+let rec check_words_helper game st alst wl acc = 
+  match wl with
+  | [] -> acc
+  | h::t -> if (List.mem (String.lowercase_ascii h) alst) then check_words_helper game st alst t (acc)
+    else check_words_helper game st alst t (h::acc)
+
+let check_ph_inv game st alst wl = 
+  let invalid_words = check_words_helper game st alst wl [] in
+  stdprint_list invalid_words;
+  State.valid game (State.invalid invalid_words game st)
+
+let rec check_phase game st : unit = 
+  let gamescramble = create_combo_word game in
+  let pp = make_a_lst gamescramble in
+  let listcomp = Lwt_main.run (pp) in
+  if current_player st > State.player_count st 
+  then check_phase2 game (State.next_player_state game st)
+  else
+    print_endline ("\nPlayer " ^ (State.current_player st |> string_of_int) ^ "'s Words: ");
+  State.print_player_word_list st (current_player st);
+  let player_words = List.map (fun (k,v) -> k) (current_player_wordlist st) in
+  print_endline "Their invalid words: ";
+  (check_ph_inv game st listcomp player_words) |> check_phase game
+
 
 (** [each_turn_print st game] prints the pool, all players' wordlists, and the 
     current player's letter for each turn in pool mode. *)
