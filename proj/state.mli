@@ -68,8 +68,8 @@ val pass: t -> result
     letter [l]. *)
 val swap: Game.letter -> t -> Yojson.Basic.t -> result
 
-(** [steal w nw p st] is the result after the current player steals word [w] from 
-    player [p] to construct word [nw]. *)
+(** [steal w nw p st] is the result after the current player steals word [w] 
+    from player [p] to construct word [nw]. *)
 val steal: Command.word -> Command.word -> player_id -> t -> result
 
 (** [player_count state] is the number of players in the game.*)

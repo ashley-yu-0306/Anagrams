@@ -49,7 +49,8 @@ let rec check_phase game st =
      | exception Empty -> print_endline "Please enter a command."; 
        check_phase game st
      | exception Malformed -> 
-       print_endline "Malformed command. Available commands: 'valid', 'invalid'"; 
+       print_endline
+         "Malformed command. Available commands: 'valid', 'invalid'"; 
        check_phase game st
      | your_command -> (match your_command with
          | Valid -> State.valid game st |> check_phase game
@@ -109,7 +110,8 @@ let rec loopgame2 game st json rep: unit =
     game_info st rep "pool";
     print_string "> ";
     match parse (read_line()) with
-    | exception Empty -> ANSITerminal.(print_string [red] "Please enter a command.\n"); 
+    | exception Empty -> ANSITerminal.(print_string [red] 
+                                         "Please enter a command.\n"); 
       loopgame2 game st json true
     | exception Malformed -> 
       ANSITerminal.(print_string [red] 
@@ -128,7 +130,8 @@ let rec loopgame2 game st json rep: unit =
         | Create w -> 
           if List.mem_assoc (String.uppercase_ascii w) 
               (State.current_player_wordlist st) 
-          then (ANSITerminal.(print_string [red]  "This word has already been created.\n"); 
+          then (ANSITerminal.(print_string [red]  
+                                "This word has already been created.\n"); 
                 loopgame2 game st json) true
           else 
             begin match create w st false with
@@ -149,7 +152,8 @@ let rec loopgame2 game st json rep: unit =
                 | Legal st' -> ignore(Unix.sleep 2);ignore(Sys.command "clear");
                   loopgame2 (get_pool st') st' json false end
           end
-        |_ ->  ANSITerminal.(print_string [red] "Malformed command. Please use available commands.\n"; 
+        |_ ->  ANSITerminal.(print_string [red] "Malformed command. 
+        Please use available commands.\n"; 
                              loopgame2 game st json true)
       )
 
@@ -171,7 +175,8 @@ let rec loopgame game st json rep: unit =
     game_info st rep "normal";
     print_string "> ";
     match parse (read_line()) with
-    | exception Empty ->  (ANSITerminal.(print_string [red]  "Please enter a command.\n")); 
+    | exception Empty ->  (ANSITerminal.(print_string [red]  
+                                           "Please enter a command.\n")); 
       loopgame game st json true
     | exception Malformed -> 
       (ANSITerminal.(print_string [red]  
@@ -190,14 +195,16 @@ let rec loopgame game st json rep: unit =
         | Create w -> 
           if List.mem_assoc (String.uppercase_ascii w) 
               (State.current_player_wordlist st) 
-          then ((ANSITerminal.(print_string [red] "This word has already been created.\n"); 
+          then ((ANSITerminal.(print_string [red] 
+                                 "This word has already been created.\n"); 
                  loopgame game st json true))
           else 
             begin match create w st false with
               | Illegal s-> 
                 (ANSITerminal.(print_string [red] s); 
                  loopgame game st json true)
-              | Legal st' -> ignore(Unix.sleep 2);ignore(Sys.command "clear"); loopgame game st' json false
+              | Legal st' -> ignore(Unix.sleep 2);ignore(Sys.command "clear"); 
+                loopgame game st' json false
             end
         | Swap l -> let target = String.uppercase_ascii l in 
           if List.mem target (set |> Game.get_letters) then begin
@@ -209,10 +216,12 @@ let rec loopgame game st json rep: unit =
               loopgame game st' json false end
           else begin
             (ANSITerminal.(print_string [red]  
-                             "This letter is not in your letter set. Please try again.\n"); 
+                             "This letter is not in your letter set. 
+                             Please try again.\n"); 
              loopgame game st json true)
           end
-        |_ -> ANSITerminal.(print_string [red] "Malformed command. Please use available commands.\n"; 
+        |_ -> ANSITerminal.(print_string [red] "Malformed command. 
+        Please use available commands.\n"; 
                             loopgame2 game st json true)
       )
 

@@ -59,22 +59,22 @@ let rec print_letters s =
   | [] -> ()
   | (k,v)::t -> print_endline k; print_letters t
 
-let combo_set a = 
-  [(rand_l a.vowels 5);(rand_l a.vowels 5); (rand_l a.consonants 21); 
-   (rand_l a.consonants 21); (rand_l a.consonants 21); (rand_l a.consonants 21)]
-
 let generate_new_set l swappair set = swappair :: (List.remove_assoc l set)
 
-let print_list a m rep= if not rep then begin if m = 1 then print_endline "\nYour Letters: \n"
+let print_list a m rep= if not rep then begin 
+    if m = 1 then 
+      print_endline "\nYour Letters: \n"
     else print_endline "\nThe Pool: \n";
     List.iter 
       (fun (k,v) -> 
          ANSITerminal.(print_string [Bold;blue] ("  " ^ k ^ "     "))) a;
     print_string 
-      "\n-----------------------------------------------------------------------------\n";
+      ("\n--------------------------------------------------------------------"
+       ^ "---------\n");
     List.iter (fun (k,v) -> 
         print_string ""; print_int v; print_string " pts   ") a;
-    print_endline "\n" end else ()
+    print_endline "\n" 
+  end else ()
 
 let rec get_points a l = match a with 
   | [] -> failwith "not in letter set"

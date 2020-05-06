@@ -15,51 +15,71 @@ open Command
 open State
 open OUnit2
 
-(** [pp_string s] pretty-prints string [s]. Helper function from a2. *)
-let pp_string s = "\"" ^ s ^ "\""
+(** [cmp_set_like_lists lst1 lst2] compares two lists to see whether
+    they are equivalent set-like lists.  That means checking two things.
+    First, they must both be {i set-like}, meaning that they do not
+    contain any duplicates.  Second, they must contain the same elements,
+    though not necessarily in the same order. Reused from a2.*)
+let cmp_set_like_lists lst1 lst2 =
+  let uniq1 = List.sort_uniq compare lst1 in
+  let uniq2 = List.sort_uniq compare lst2 in
+  List.length lst1 = List.length uniq1
+  &&
+  List.length lst2 = List.length uniq2
+  &&
+  uniq1 = uniq2
 
-(** [pp_list pp_elt lst] pretty-prints list [lst], using [pp_elt]
-    to pretty-print each element of [lst]. Helper function from a2. *)
-let pp_list pp_elt lst =
-  let pp_elts lst =
-    let rec loop n acc = function
-      | [] -> acc
-      | [h] -> acc ^ pp_elt h
-      | h1::(h2::t as t') ->
-        if n=100 then acc ^ "..."  (* stop printing long list *)
-        else loop (n+1) (acc ^ (pp_elt h1) ^ "; ") t'
-    in loop 0 "" lst
-  in "[" ^ pp_elts lst ^ "]"
+(** [pair_compare p1 p2] compares two key-value pairs [p1] and [p2] to see 
+    whether they are equivalent. Reused from a4. *)
+let pair_compare p1 p2 = 
+  if fst p1 = fst p2 && cmp_set_like_lists (snd p1) (snd p2) then 0 else 
+    compare (fst p1) (fst p2)
 
+(** [helper l1 l2] is a helper function that compares two lists 
+    [l1] and [l2] to see whether they are equivalent. Reused from a4. *)
+let helper l1 l2 = match l1, l2 with
+  |[], [] -> true
+  |h1 :: t1, h2 :: t2 -> pair_compare h1 h2 = 0
+  |_ , _ -> failwith "impossible"
+
+(** [cmp_set_like_assoc lst1 lst2] compares two assoc lists to see whether
+    they are equivalent set-like lists. Reused from a4. *)
+let cmp_set_like_assoc lst1 lst2 =
+  let uniq1 = List.sort_uniq pair_compare lst1 in
+  let uniq2 = List.sort_uniq pair_compare lst2 in
+  List.length lst1 = List.length uniq1
+  &&
+  List.length lst2 = List.length uniq2
+  &&
+  helper uniq1 uniq2
+(* 
+(*=============== Example alphabet ===============*)
+(** [alp] is the example alphabet, with only 2 vowels and 4 consonants in 
+    json. *)
+let alp = from_json (Yojson.Basic.from_file "test_alphabet.json")
+(** [set] is the example combo set. [alp] is used with number of letters [lim] =
+    6 to eliminate randomization when generating the combo, such that the [set] 
+    conatins all the alphabet. Compatablity with randomization will be 
+    thoroughly tested in play tests. *)
+let set = combo_set_var alp 6
+
+(** [all] is the example alphabet without differentiation between vowels and 
+    consonants.*)
+let all = all_letters alp *)
 
 (*=============== Tests for Game ==============*)
-let a1 = from_json (Yojson.Basic.from_file "alphabet1.json")
-
-
-let make_swap_letter_test
-    (name: string)
-    (a: alphabet)
-    (l: letter)
-    (s: Game.t)
-    (expected_output: Game.t): test = 
-  name >:: (fun _ -> 
-      assert_equal expected_output (swap_letter a l s))
-
-let make_generate_new_set 
-    (name: string)
-    (l: letter)
-    (swappair: (letter * points))
-    (s: Game.t)
-    (expected_output: Game.t): test = 
-  name >:: (fun _ -> 
-      assert_equal expected_output (generate_new_set l swappair s))
-
-
+let alp = from_json (Yojson.Basic.from_file "alphabet1.json")
+let set = combo_set_var alp 6
+let all = all_letters alp
 
 let game_tests = [
-
+  "Set length = 6" >:: (fun _ -> 
+      assert_equal 6 (set_length set));
+  "A: 1" >:: (fun _ -> 
+      assert_equal 1 (get_points all "A"));
+  "F: 3" >:: (fun _ -> 
+      assert_equal 3 (get_points all "F"));
 ]
-
 
 (*=============== Tests for State ==============*)
 (*=============== Tests for Command ==============*)

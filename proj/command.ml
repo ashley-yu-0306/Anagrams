@@ -31,7 +31,8 @@ let check_int s =
   try (int_of_string s |> string_of_int) = s
   with Failure _ -> false
 
-let parse str = match List.rev (String.split_on_char ' ' str |> remove "" []) with
+let parse str = 
+  match List.rev (String.split_on_char ' ' str |> remove "" []) with
   | [] -> raise(Empty)
   | h :: t -> 
     if h = "quit" && t = [] then Quit else 

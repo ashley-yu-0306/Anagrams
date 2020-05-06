@@ -8,12 +8,12 @@ type points = int
 (** The type of the letters. *)
 type letter = string
 
-(** [alphabet] is all the letters and their points read from
+(** [alphabet] is the type of all the letters and their points read from
     the json file, split into vowels and consonants. *)
 type alphabet
 
-(** [all_letters_in_json] is all the letters and their points read from
-    the json file. *)
+(** [all_letters_in_json] is the type of all the letters and their points read 
+    from the json file. *)
 type all_letters_in_json
 
 (** [from_json j] is the game alphabet that [j] represents.
@@ -23,6 +23,8 @@ val from_json : Yojson.Basic.t -> alphabet
 (** [combo_set_var a lim] is the randomly picked letter set for the game. *)
 val combo_set_var: alphabet -> int -> t
 
+(** [all_letters a] is all the letters and their points read 
+    from the json file. *)
 val all_letters: alphabet -> all_letters_in_json
 
 (* [set_length s] is the length of the set [s]. *)
@@ -31,9 +33,6 @@ val set_length: t -> int
 (** [swap_letter a l set] is the [set] of letters with [l] replaced with
     a letter from [a]. *)
 val swap_letter: alphabet -> letter -> t -> t 
-
-(** [combo_set a] is the randomly picked letter set for the game. *)
-val combo_set: alphabet -> t
 
 (** [print_list a m] prints out the letters and corresponding points in the 
     combo set with text corresponding to game mode [m].*)
@@ -45,10 +44,6 @@ val get_points: all_letters_in_json -> letter -> points
 (** [get_letters game acc] is a list of letters in the combo set [game].
     Required: all uppercase. *)
 val get_letters: t -> letter list
-
-(** [swap_letter a game letter] is the letter-points pair to be swapped with 
-    [letter] selected by the player.*)
-val swap_letter: alphabet -> letter -> t -> t
 
 (** [generate_new_set l swappair set] is the new combo set after the letter [l] 
     is swapped to the [swappair]. *)

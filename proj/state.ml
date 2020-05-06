@@ -104,7 +104,8 @@ let calculate_word_points word st : Game.points=
 
 let rec start_message_help st stolen it pt = 
   match stolen with 
-  | [] -> print_string ("You've lost a total of " ^ string_of_int pt ^ " points.\n")
+  | [] -> 
+    print_string ("You've lost a total of " ^ string_of_int pt ^ " points.\n")
   | (id',word)::t -> 
     print_string ("Player "^string_of_int id'^ " stole your word '" ^ 
                   word ^ "' last round! "); 
@@ -147,14 +148,16 @@ let calculate_swap_points state =
 let action_message a w p = begin
   let p' = string_of_int (abs p) in
   let message = 
-    if a = "swap" then ("\n'"^w^"' has been swapped. You've lost "^p'^" points.")
-    else if a = "create" then  ("\n'"^w^"' has been created. You've gained "^p'^" points.")
+    if a = "swap" then 
+      ("\n'"^w^"' has been swapped. You've lost "^p'^" points.")
+    else if a = "create" then  
+      ("\n'"^w^"' has been created. You've gained "^p'^" points.")
     else "" in print_endline message; end
 
 (** [update_player_list state ns players word action id1 id2] is the player_list 
     as a result of [action] being executed on the player with [id1] in [state]. 
-    If [id2] is not "", [action] was exected by [id2] and not [id1]. Player [id1] 
-    takes the letter set [ns]. 
+    If [id2] is not "", [action] was exected by [id2] and not [id1]. 
+    Player [id1] takes the letter set [ns]. 
       If [action] = "steal" or "check", [word] is removed from [id]'s word list. 
          [action] = "swap", [word] is the letter swapped out of [id]'s. 
          [action] = "create", [word] is added to [id]'s word list. *)
@@ -210,8 +213,9 @@ let rec string_to_sl s i = let ups = String.uppercase_ascii s in
     String.make 1 (String.get ups i) ::string_to_sl ups (i-1) else [] 
 
 let create word state s = 
-  let combo = (if state.mode = "pool" 
-               then (current_player_letter state)::(Game.get_letters (get_pool state))
+  let combo = (if state.mode = "pool" then 
+                 (current_player_letter state)::
+                 (Game.get_letters (get_pool state))
                else Game.get_letters (current_player_letter_set state)) in
   if word = "" then Illegal "Please enter a word."
   else if (s=false) && (check_illegal (word |> word_to_cl |> cl_to_ll) combo) 
@@ -222,7 +226,8 @@ let create word state s =
     let player = state.current_player in 
     let player_l = state.player_list in 
     let new_set = (List.assoc player player_l).player_letter_set in
-    let new_player_l = update_player_list state new_set player_l word "create" player (-1) in
+    let new_player_l = 
+      update_player_list state new_set player_l word "create" player (-1) in
     let used_letters_l = string_to_sl word ((String.length word)-1) in
     Legal {
       state with 
@@ -264,7 +269,8 @@ let swap l state json =
   let new_set = swap_letter alphabet l set in 
   Legal { state with
           turns_left = state.turns_left - 1;
-          player_list = update_player_list state new_set player_l l "swap" player (-1);
+          player_list = 
+            update_player_list state new_set player_l l "swap" player (-1);
           current_player = next_player state;
         }
 
@@ -276,13 +282,16 @@ let steal w nw p st =
   let player = List.assoc p player_l in
   let words = player.player_words in 
   let new_set = player.player_letter_set in
-  if not (List.mem_assoc wup words) 
-  then Illegal ("The word '" ^ w ^ "' is not in player " ^ string_of_int p ^ "'s word list.")
+  if not (List.mem_assoc wup words) then 
+    Illegal ("The word '" ^ w ^ "' is not in player " ^ string_of_int p ^ 
+             "'s word list.")
   else if not (check_letter_used st nw) 
   then Illegal ("The word '" ^ nw ^ "' does not contain your letter.")
   else if not ((String.length nwup) = ((String.length wup) + 1)) 
   then Illegal ("You cannot use letters in the pool to steal a word.")
-  else Legal {st with player_list = update_player_list st new_set player_l wup "steal" p p'}
+  else 
+    Legal {st with player_list = 
+                     update_player_list st new_set player_l wup "steal" p p'}
 
 (** [winner_check_helper players winners winner_p] is the list of winners in 
     game of state [state] and the highest number of point achieved by a player 
@@ -313,7 +322,8 @@ let rec invalid word_lst game state =
     let player = List.assoc id player_l in 
     let new_set =  player.player_letter_set in 
     let word = String.uppercase_ascii h in
-    let player_l' = update_player_list state new_set player_l word "check" id (-1) in 
+    let player_l' = 
+      update_player_list state new_set player_l word "check" id (-1) in 
     invalid t game {state with player_list = player_l'}
 
 let valid game state = 
