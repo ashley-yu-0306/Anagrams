@@ -1,4 +1,9 @@
 open Yojson.Basic.Util
+open Yojson.Basic.Util
+open Lwt
+open Lwt.Infix
+open Cohttp
+open Cohttp_lwt_unix
 
 type points = int
 type letter = string
@@ -81,6 +86,19 @@ let rec get_points a l = match a with
   | (l', p) :: t -> if l = l' then p else get_points t l 
 
 let get_letters game = List.map fst game
+
+let create_combo_word lst = List.fold_left (fun a k -> k ^ a) "" (get_letters lst)
+
+let json_anagram url = 
+  (Client.get (Uri.of_string ("http://www.anagramica.com/all/:" ^ url)) >>=
+   fun(resp,body) -> body |> Cohttp_lwt.Body.to_string >|= Yojson.Basic.from_string)
+
+
+let all_anagrams json = json |> member "all" |> Yojson.Basic.Util.to_list |> List.map(to_string)
+
+
+let make_a_lst url = json_anagram url >>= fun y -> all_anagrams y |> Lwt.return
+
 
 let rec remove_letter s c = 
   match c with 

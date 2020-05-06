@@ -5,7 +5,7 @@ MLIS=$(MODULES:=.mli)
 TEST=test.byte
 MAIN=main.byte
 OCAMLBUILD=ocamlbuild -use-ocamlfind
-PKGS=oUnit,yojson,ANSITerminal
+PKGS=oUnit,yojson,ANSITerminal,cohttp,lwt,cohttp-lwt-unix
 
 default: build
 	utop
@@ -35,9 +35,6 @@ docs-private: build
 		-html -stars -d doc.private \
 		-inv-merge-ml-mli -m A $(MLIS) $(MLS)
 
-anthill:
-	dune build bin/main.exe
-	cp _build/default/bin/main.exe anthill
 
 clean:
 	ocamlbuild -clean

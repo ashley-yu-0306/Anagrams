@@ -60,3 +60,10 @@ val add_in_pool: t -> letter -> all_letters_in_json -> t
 (** [replenish_pool s n a] is the pool [s] replenished to be length
     [n] with letters in alphabet [a]. *)
 val replenish_pool: t -> int -> all_letters_in_json -> t
+
+(** [create_combo_word g] make the combo list a string. *)
+val create_combo_word: t -> string
+
+(** [make_a_lst s] makes an API call and generates all possible
+    anagrams of the combo set. *)
+val make_a_lst: string -> string list Lwt.t
