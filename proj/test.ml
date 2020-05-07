@@ -63,21 +63,6 @@ let cmp_set_like_assoc lst1 lst2 =
   &&
   helper uniq1 uniq2
 
-(* 
-(*=============== Example alphabet ===============*)
-(** [alp] is the example alphabet, with only 2 vowels and 4 consonants in 
-    json. *)
-let alp = from_json (Yojson.Basic.from_file "test_alphabet.json")
-(** [set] is the example combo set. [alp] is used with number of letters [lim] =
-    6 to eliminate randomization when generating the combo, such that the [set] 
-    conatins all the alphabet. Compatablity with randomization will be 
-    thoroughly tested in play tests. *)
-let set = combo_set_var alp 6
-
-(** [all] is the example alphabet without differentiation between vowels and 
-    consonants.*)
-let all = all_letters alp *)
-
 exception Error 
 
 (*=============== Tests for Game ==============*)

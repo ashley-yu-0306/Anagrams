@@ -31,10 +31,13 @@ let rec end_phase game st =
                                         ^ " points! Congratulations!\n")); 
       exit 0 
 
-
+(** [stdprint_list l] prints the invalid words after being automatically 
+    checked. *)
 let rec stdprint_list = function 
     [] -> ()
-  | e::l -> print_string e ; print_string ", " ; stdprint_list l
+  | e::l -> 
+    if e != "" then (print_string e ; print_string " " ; stdprint_list l) 
+    else stdprint_list l
 
 (** [check_phase2 game st] is the check phase of [game] with the final state 
     [st], where players check each other's word lists. *)
@@ -162,17 +165,19 @@ let rec loopgame2 game st json rep: unit =
         | Create w -> 
           if List.mem_assoc (String.uppercase_ascii w) 
               (State.current_player_wordlist st) 
-          then (ANSITerminal.(print_string [red]  
-                                "This word has already been created.\n"); 
-                loopgame2 game st json) true
-          else 
-            begin match create w st false with
-              | Illegal s-> 
-                (ANSITerminal.(print_string [red] s)); 
-                loopgame2 (get_pool st) st json true
-              | Legal st' -> ignore(Unix.sleep 2);ignore(Sys.command "clear"); 
-                loopgame2 (get_pool st') st' json false
-            end
+          then begin
+            (ANSITerminal.(print_string [red]  
+                             "This word has already been created.\n")); 
+            loopgame2 game st json true 
+          end
+          else begin 
+            match create w st false with
+            | Illegal s-> 
+              (ANSITerminal.(print_string [red] s)); 
+              loopgame2 (get_pool st) st json true
+            | Legal st' -> ignore(Unix.sleep 2);ignore(Sys.command "clear"); 
+              loopgame2 (get_pool st') st' json false
+          end
         | Steal (id, old_word, new_word) -> begin
             match steal old_word new_word id st with 
             | Illegal s-> print_endline s; 
