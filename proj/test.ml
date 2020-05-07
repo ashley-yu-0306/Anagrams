@@ -1,13 +1,23 @@
 (** [Test Plan] 
     1) Printing effects, random number generaters and functions in Main.ml are 
-    tested manually through play tests.
-    The rest of the essential functions in Game.ml, Command.ml and State.ml are 
-    tested in OUnit. 
+    tested manually through play tests. 
 
-    2) Test cases were developed by black box testing. 
+    2) The abstractness and mutability of State.t was mostly tackled by manual
+    play testing. We used this method to keep track of changes in state 
+    that are the result of the functions create, pass, steal, and swap.  
+    This was possible because essential information pertaining to state
+    (points, word list, current player, turns) are printed in the terminal.
+    However, some of the aforementioned functions were still tested in OUnit 
+    to ensure validity.
 
-    3) Our tests ensure that the functions work as intended in the 
-    documentations, and thus along with rigorous play testing, prove the 
+    3) The rest of the essential functions in Game.ml and Command.ml are tested 
+    in OUnit. State.ml functions that contribute to the core functionality 
+    of State.ml's essential functions are also tested in OUnit.
+
+    4) Test cases were developed by black box testing. 
+
+    5) Our tests ensure that the functions work as intended in the 
+    documentations, and thus, along with rigorous play testing, prove the 
     correctness of our system. *)
 
 open Game
@@ -52,6 +62,7 @@ let cmp_set_like_assoc lst1 lst2 =
   List.length lst2 = List.length uniq2
   &&
   helper uniq1 uniq2
+
 (* 
 (*=============== Example alphabet ===============*)
 (** [alp] is the example alphabet, with only 2 vowels and 4 consonants in 
@@ -67,8 +78,11 @@ let set = combo_set_var alp 6
     consonants.*)
 let all = all_letters alp *)
 
+exception Error 
+
 (*=============== Tests for Game ==============*)
-let alp = from_json (Yojson.Basic.from_file "alphabet1.json")
+let json = Yojson.Basic.from_file "alphabet1.json"
+let alp = from_json json
 let set = combo_set_var alp 6
 let all = all_letters alp
 
@@ -82,6 +96,59 @@ let game_tests = [
 ]
 
 (*=============== Tests for State ==============*)
+
+let st_norm = init_state set 1 5 "normal" all
+let st_pool = init_state set 2 5 "pool" all 
+(*state after swapping "l" in normal*)
+let swap_st_norm = match swap "a" st_norm json with 
+    Legal st -> st | Illegal _ -> raise Error 
+(*state after creating "ab" in pool*)
+let create_ab_st_pool = match create "ab" st_pool false with 
+    Legal st -> st | Illegal _ -> raise Error
+(*state after creating "ab" and passing in pool*)
+let create_ab_pass_st_pool = match pass create_ab_st_pool with 
+    Legal st -> st | Illegal _ -> raise Error 
+let create_ab_steal_st_pool = match steal "ab" "abc" 1 create_ab_st_pool with 
+    Legal st -> st | Illegal _ -> raise Error
+
+let state_tests = "test suite for state" >::: [
+    (*testing initializing of player*)
+    "init id" >:: (fun _ -> assert_equal (current_player st_pool) 1);
+    "init pts">:: (fun _ -> assert_equal (current_player_points st_pool) 0);
+    "init word" >:: (fun _ -> assert_equal (current_player_wordlist st_pool) []);
+    "init stolen" >:: (fun _ -> assert_equal (current_player_stolen st_pool) []);
+    "init turns" >:: (fun _ -> assert_equal (turns st_pool) 10);
+    "init player count" >:: (fun _ -> assert_equal (player_count st_pool) 2);
+    (*testing swap updates player's letter set to not contain swapped letter*)
+    "swap" >:: 
+    (fun _ -> assert_equal (create "a" swap_st_norm false) 
+        (Illegal "This word cannot be constructed with the current 
+        letter set. \n"));
+    (*testing create updates appropriate points & updates player & turns left
+      while also testing that pass updates player*)
+    "create ''" >:: 
+    (fun _ -> assert_equal (create "" st_pool false) 
+        (Illegal "Please enter a word."));
+    "create ab id" >:: (fun _ -> assert_equal (current_player create_ab_st_pool) 2);
+    "create ab p2 pts" >:: (fun _ -> assert_equal (current_player_points create_ab_st_pool) 0);
+    "create turns" >:: (fun _ -> assert_equal (turns create_ab_st_pool) 9);
+    "pass id" >:: (fun _ -> assert_equal (current_player create_ab_pass_st_pool) 1);
+    "pass turns" >:: (fun _ -> assert_equal (turns create_ab_pass_st_pool) 8);
+    "create ab p1 pts" >:: (fun _ -> assert_equal (current_player_points create_ab_pass_st_pool) 4);
+    (*testing steal updates points of player whose word was stolen, updates 
+      player & turns left*)
+    "steal 'bb'" >:: 
+    (fun _ -> assert_equal (steal "bb" "bbc" 1 create_ab_st_pool)
+        (Illegal ("The word 'BB' is not in player 1's word list.")));
+    "steal 'ab'" >:: 
+    (fun _ -> assert_equal (current_player_points create_ab_steal_st_pool) 0);
+    "steal turns" >:: (fun _ -> assert_equal (turns create_ab_steal_st_pool) 8);
+    (*testing that point values of calculate_word_points adhere to multipliers*)
+    "ab" >:: (fun _ -> assert_equal (calculate_word_points "ab" st_pool) 4);
+    "abc" >:: (fun _ -> assert_equal (calculate_word_points "abc" st_pool) 7);
+    "abcde" >:: (fun _ -> assert_equal (calculate_word_points "abcde" st_pool) 13);
+  ]
+
 (*=============== Tests for Command ==============*)
 
 let make_parse_test

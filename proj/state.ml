@@ -177,7 +177,7 @@ let rec update_player_list state ns players word action id1 id2 =
             let p = List.mem_assoc words v.player_words in 
             if p = true then List.remove_assoc words v.player_words else 
               List.remove_assoc words v.player_words
-          else if not (words = "") 
+          else if not (action = "swap") 
           then List.append v.player_words [(words,actual_pts)]
           else v.player_words;
         total_points = v.total_points + actual_pts;
@@ -283,10 +283,10 @@ let steal w nw p st =
   let words = player.player_words in 
   let new_set = player.player_letter_set in
   if not (List.mem_assoc wup words) then 
-    Illegal ("The word '" ^ w ^ "' is not in player " ^ string_of_int p ^ 
+    Illegal ("The word '" ^ wup ^ "' is not in player " ^ string_of_int p ^ 
              "'s word list.")
   else if not (check_letter_used st nw) 
-  then Illegal ("The word '" ^ nw ^ "' does not contain your letter.")
+  then Illegal ("The word '" ^ nwup ^ "' does not contain your letter.")
   else if not ((String.length nwup) = ((String.length wup) + 1)) 
   then Illegal ("You cannot use letters in the pool to steal a word.")
   else 
