@@ -184,7 +184,7 @@ let rec update_player_list state ns players word action id1 id2 =
             let p = List.mem_assoc words v.player_words in 
             if p = true then List.remove_assoc words v.player_words else 
               List.remove_assoc words v.player_words
-          else if not (action = "swap") 
+          else if action = "create"
           then List.append v.player_words [(words,actual_pts)]
           else v.player_words;
         total_points = v.total_points + actual_pts;
