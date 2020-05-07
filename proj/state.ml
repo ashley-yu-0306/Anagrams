@@ -25,15 +25,19 @@ type  t = {
 type result = Legal of t | Illegal of string
 
 (** [random_letter ()] is a random uppercase letter from the English alphabet.*)
-let random_letter () = 
+let random_letter2 () = 
   Char.escaped (Char.chr ((Random.self_init(); Random.int 26) + 65))
+
+let random_letter set = if (set_length set) < 4 
+  then List.nth ["A";"E";"I";"O";"U"] (Random.self_init(); Random.int 5)
+  else Char.escaped (Char.chr ((Random.self_init(); Random.int 26) + 65))
 
 (** [init_player] initializes a player *)
 let init_player set = {
   player_words = [];
   total_points = 0;
   player_letter_set = set;
-  current_letter = random_letter();
+  current_letter = random_letter set;
   swaps = 0.;
   stolen = [];
 }
@@ -185,7 +189,8 @@ let rec update_player_list state ns players word action id1 id2 =
           else v.player_words;
         total_points = v.total_points + actual_pts;
         player_letter_set = ns;
-        current_letter = if action = "check" then "" else random_letter();
+        current_letter = if action = "check" then "" 
+          else random_letter (get_pool state);
         swaps = if action = "swap" then v.swaps +. 1. else v.swaps;
         stolen = if action = "steal" then v.stolen @ [id2, word] else []
       } in (k,player)::(update_player_list state ns t word action id1 id2)
@@ -239,9 +244,9 @@ let create word state s =
       current_player = next_player state;
       total_players = state.total_players;
       set = if state.mode = "pool" 
-        then let n_pool = set_length state.set in
-          let incomp_pool = remove_letter state.set used_letters_l in 
-          replenish_pool incomp_pool n_pool state.alpha 
+        then (*let n_pool = set_length state.set in *)
+          (*let incomp_pool = *)  remove_letter state.set used_letters_l 
+        (* in replenish_pool incomp_pool n_pool state.alpha  *)
         else state.set
     } 
 
