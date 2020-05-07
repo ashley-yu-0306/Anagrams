@@ -84,7 +84,11 @@ exception Error
 let json = Yojson.Basic.from_file "alphabet1.json"
 let alp = from_json json
 let set = combo_set_var alp 6
+let full_subset_of_set = (get_letters set)
+let subset_of_set1 = 
+  (List.nth (get_letters set) 0)::((List.nth (get_letters set) 3)::[])
 let all = all_letters alp
+let set_str = create_combo_word set
 
 let game_tests = [
   "Set length = 6" >:: (fun _ -> 
@@ -93,6 +97,38 @@ let game_tests = [
       assert_equal 1 (get_points all "A"));
   "F: 3" >:: (fun _ -> 
       assert_equal 3 (get_points all "F"));
+
+  "get_letters produces list of strings of length 1" >:: 
+  (fun _ -> assert_equal 6 
+      (List.fold_left (fun a k -> if String.length k = 1 then 1 + a else a) 
+         0 (get_letters set)));
+
+  "create_combo_word produces string of set's size" >:: 
+  (fun _ -> assert_equal 6 (String.length (create_combo_word set)));
+
+  "remove_letter test 1: removes all letters from game when
+   list inputted is all the letters in the set" >:: 
+  (fun _ -> assert_equal 0 (set_length (remove_letter set full_subset_of_set)));
+
+  "remove_letter test 2: removes 2 from game when
+   list inputted is all 2 of letters in the set" >:: 
+  (fun _ -> assert_equal 4 (set_length (remove_letter set subset_of_set1)));
+
+  "add_in_pool: adds letter to pool,
+   increasing length of set by 1" >:: 
+  (fun _ -> assert_equal 7 (set_length (add_in_pool set "A" all)));
+
+  "make_a_lst: makes an API call to Anagramatica, generating a promise
+    containing a string list of the possible words. " >::
+  (fun _ -> assert_equal true 
+      (if (List.length (Lwt_main.run (make_a_lst set_str))) > 0 
+       then true else false));
+
+  "generate_new_set: swaps letter out with a new letter, changing the game" >::
+  (fun _ -> assert_equal 6 
+      (generate_new_set (List.nth full_subset_of_set 0) ("E",2) set 
+       |> set_length));
+
 ]
 
 (*=============== Tests for State ==============*)

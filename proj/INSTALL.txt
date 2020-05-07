@@ -1,5 +1,12 @@
 To run and play the game:
 
+Before playing, because this game makes API calls, need to install:
+
+opam install cohttp lwt js_of_ocaml
+
+opam install cohttp-lwt-unix
+
+opam install lwt
 
 1. Open terminal under file 'game'.
 

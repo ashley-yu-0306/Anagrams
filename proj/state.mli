@@ -50,6 +50,8 @@ val get_pool: t -> Game.t
 (** [next_player state] gives the [id] of the player whose turn is next. *)
 val next_player: t -> player_id
 
+val create_pl_combo_word : (Command.word * Game.points) list -> string
+
 (** [calculate_word_points word set] is the points of [word] based on point
     values in [set]. *)
 val calculate_word_points: Command.word ->t -> Game.points
