@@ -68,3 +68,6 @@ val create_combo_word: t -> string
 (** [make_a_lst s] makes an API call and generates all possible
     anagrams of the combo set. *)
 val make_a_lst: string -> string list Lwt.t
+
+(** [all_to_t all] is the game with all letters in json. *)
+val all_to_t: all_letters_in_json -> t

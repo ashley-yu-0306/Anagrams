@@ -114,3 +114,5 @@ let add_in_pool game l a =
 let rec replenish_pool s n a = 
   if List.length s = n then s 
   else let pool = add_in_pool s "" a in replenish_pool pool n a
+
+let all_to_t a = a

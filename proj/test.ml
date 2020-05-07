@@ -117,7 +117,7 @@ let game_tests = [
 ]
 
 (*=============== Tests for State ==============*)
-
+let set = all_to_t all
 let st_norm = init_state set 1 5 "normal" all
 let st_pool = init_state set 2 5 "pool" all 
 (*state after swapping "l" in normal*)
@@ -132,7 +132,7 @@ let create_ab_pass_st_pool = match pass create_ab_st_pool with
 let create_ab_steal_st_pool = match steal "ab" "abc" 1 create_ab_st_pool with 
     Legal st -> st | Illegal _ -> raise Error
 
-let state_tests = "test suite for state" >::: [
+let state_tests = [
     (*testing initializing of player*)
     "init id" >:: (fun _ -> assert_equal (current_player st_pool) 1);
     "init pts">:: (fun _ -> assert_equal (current_player_points st_pool) 0);
@@ -224,6 +224,7 @@ let command_tests = [
 let suite =
   "test suite for ANAGRAMS"  >::: List.flatten [  
     game_tests;
+    state_tests;
     command_tests;
   ]
 
