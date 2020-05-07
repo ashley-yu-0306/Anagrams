@@ -36,12 +36,12 @@ let rec stdprint_list = function
     [] -> ()
   | e::l -> print_string e ; print_string ", " ; stdprint_list l
 
-(** [check_phase game st] is the check phase of [game] with the final state 
+(** [check_phase2 game st] is the check phase of [game] with the final state 
     [st], where players check each other's word lists. *)
 let rec check_phase2 game st = 
   print_endline 
     "\nIf everything looks good, enter 'valid', or if any words look wrong, 
-      enter 'invalid (the word or words separated with space)'. "; 
+      confirm them as 'invalid (the word or words separated with space)'. "; 
   if current_player st > State.player_count st 
   then (ignore(Sys.command "clear"); end_phase game st)
   else (
@@ -75,17 +75,18 @@ let check_ph_inv game st alst wl =
   State.valid game (State.invalid invalid_words game st)
 
 let rec check_phase game st : unit = 
-  let gamescramble = create_combo_word game in
-  let pp = make_a_lst gamescramble in
-  let listcomp = Lwt_main.run (pp) in
   if current_player st > State.player_count st 
   then check_phase2 game (State.next_player_state game st)
   else
+    let gamescramble = create_pl_combo_word (current_player_wordlist st) in
+    let pp = make_a_lst gamescramble in
+    (* stdprint_list (List.map fst (current_player_wordlist st)); *)
+    let listcomp = Lwt_main.run (pp) in
     print_endline ("\nPlayer " ^ (State.current_player st |> string_of_int) ^ "'s Words: ");
-  State.print_player_word_list st (current_player st);
-  let player_words = List.map (fun (k,v) -> k) (current_player_wordlist st) in
-  print_endline "Their invalid words: ";
-  (check_ph_inv game st listcomp player_words) |> check_phase game
+    State.print_player_word_list st (current_player st);
+    let player_words = List.map (fun (k,v) -> k) (current_player_wordlist st) in
+    print_endline "Their invalid words according to the dictionary: ";
+    (check_ph_inv game st listcomp player_words) |> check_phase game
 
 
 (** [each_turn_print st game] prints the pool, all players' wordlists, and the 
@@ -297,7 +298,7 @@ let rec ask_turns() =
   print_string "> "; 
   match parse_number (read_line()) with
   | 0 -> print_endline "ERROR. Enter a valid number: "; 
-    ask_num_letters()
+    ask_turns()
   | x -> x
 
 (** [ask_mode()] prompts the player for the game mode, and returns that 

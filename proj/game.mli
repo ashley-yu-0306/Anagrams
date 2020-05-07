@@ -50,7 +50,8 @@ val get_letters: t -> letter list
 val generate_new_set: letter -> (letter * points) -> t -> t
 
 (** [remove_letter s c] is the list of pairs [s] with pairs whose key 
-    corresponds to the elements in [c] removed. *)
+    corresponds to the elements in [c] removed.
+    Precondition: letters in [c] are in [s]. *)
 val remove_letter: t -> letter list -> t
 
 (** [add_in_pool game l] is the new pool with a new letter from the player 

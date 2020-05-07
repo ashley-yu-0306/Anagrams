@@ -83,6 +83,9 @@ let next_player state =
   then state.current_player + 1 
   else 1
 
+let create_pl_combo_word playerwl = let pwlkey = List.map fst playerwl in
+  List.fold_left (fun a k -> k ^ a) "" (pwlkey)
+
 (**[word_to_cl n] is a char list of the input [word].*)
 let word_to_cl n = List.init (String.length n) (String.get n)
 
@@ -221,7 +224,7 @@ let create word state s =
   else if (s=false) && (check_illegal (word |> word_to_cl |> cl_to_ll) combo) 
   then Illegal "This word cannot be constructed with the current letter set. \n"
   else if state.mode = "pool" && not(check_letter_used state word)
-  then Illegal ("The word '" ^ word ^ "' does not contain your letter.")
+  then Illegal ("The word '" ^ word ^ "' does not contain your letter.\n")
   else 
     let player = state.current_player in 
     let player_l = state.player_list in 
@@ -286,7 +289,7 @@ let steal w nw p st =
     Illegal ("The word '" ^ w ^ "' is not in player " ^ string_of_int p ^ 
              "'s word list.")
   else if not (check_letter_used st nw) 
-  then Illegal ("The word '" ^ nw ^ "' does not contain your letter.")
+  then Illegal ("The word '" ^ nw ^ "' does not contain your letter.\n")
   else if not ((String.length nwup) = ((String.length wup) + 1)) 
   then Illegal ("You cannot use letters in the pool to steal a word.")
   else 
