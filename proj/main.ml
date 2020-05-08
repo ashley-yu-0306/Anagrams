@@ -36,7 +36,7 @@ let rec end_phase game st =
 let rec stdprint_list = function 
     [] -> ()
   | e::l -> 
-    if e != "" then (print_string e ; print_string " " ; stdprint_list l) 
+    if e != "" then (print_string e ; print_string ", " ; stdprint_list l) 
     else stdprint_list l
 
 (** [check_phase2 game st] is the check phase of [game] with the final state 
@@ -83,7 +83,6 @@ let rec check_phase game st : unit =
   else
     let gamescramble = create_pl_combo_word (current_player_wordlist st) in
     let pp = make_a_lst gamescramble in
-    (* stdprint_list (List.map fst (current_player_wordlist st)); *)
     let listcomp = Lwt_main.run (pp) in
     print_endline ("\nPlayer " ^ (State.current_player st |> string_of_int) ^ "'s Words: ");
     State.print_player_word_list st (current_player st);
@@ -288,7 +287,7 @@ let rec ask_players() =
 (** [ask_num_letters()] prompts the player for the number of letters for the 
     turns, and returns that number to the initial state.*)
 let rec ask_num_letters() = 
-  print_endline "How many letters (max 10): "; 
+  print_endline "How many letters (max 6): "; 
   print_string "> "; 
   match parse_number (read_line()) with
   | 0 -> print_endline "ERROR. Enter a valid number: "; 

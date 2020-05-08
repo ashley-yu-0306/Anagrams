@@ -30,6 +30,9 @@ val all_letters: alphabet -> all_letters_in_json
 (* [set_length s] is the length of the set [s]. *)
 val set_length: t -> int 
 
+(* [empty] returns an empty game. *)
+val empty: unit -> t
+
 (** [swap_letter a l set] is the [set] of letters with [l] replaced with
     a letter from [a]. *)
 val swap_letter: alphabet -> letter -> t -> t 

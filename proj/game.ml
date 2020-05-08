@@ -28,6 +28,8 @@ let all_letters a : all_letters_in_json = a.vowels @ a.consonants
 
 let set_length s = List.length s
 
+let empty() = []
+
 (** [rand_l a b] returns a random letter in the list [a], with 
     index between 0 (inclusive) and the bound [b] (exclusive). *)
 let rand_l a b = (List.nth a (Random.self_init(); Random.int b))
