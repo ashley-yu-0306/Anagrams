@@ -30,7 +30,7 @@ let set_length s = List.length s
 
 let empty() = []
 
-(** [rand_l a b] returns a random letter in the list [a], with 
+(** [rand_l a b] is a random letter in the list [a], with 
     index between 0 (inclusive) and the bound [b] (exclusive). *)
 let rand_l a b = (List.nth a (Random.self_init(); Random.int b))
 
@@ -43,8 +43,8 @@ let combo_set_var a lim =
                                       else rand_l a.consonants 18) in
   vow_lst @ cons_lst
 
-(** [to_list a] returns the keys of the association list [a] except for 
-    key [k].*)
+(** [to_list a k] is a list of the keys of the association list [a] except for 
+    key [k], iff [k] is in [a]. *)
 let rec to_list a k  = 
   match a with 
   | [] -> []
@@ -89,16 +89,19 @@ let rec get_points a l = match a with
 
 let get_letters game = List.map fst game
 
-let create_combo_word lst = List.fold_left (fun a k -> k ^ a) "" (get_letters lst)
+let create_combo_word lst = 
+  List.fold_left (fun a k -> k ^ a) "" (get_letters lst)
 
 (** [json_anagram url] makes an API call and returns a promise of the Yojson. *)
 let json_anagram url = 
   (Client.get (Uri.of_string ("http://www.anagramica.com/all/:" ^ url)) >>=
-   fun(resp,body) -> body |> Cohttp_lwt.Body.to_string >|= Yojson.Basic.from_string)
+   fun(resp,body) -> 
+   body |> Cohttp_lwt.Body.to_string >|= Yojson.Basic.from_string)
 
-(** [all_anagrams json] creates a string list from the Yojson anagrams 
+(** [all_anagrams json] is a string list from the Yojson anagrams 
     of the combo set. *)
-let all_anagrams json = json |> member "all" |> Yojson.Basic.Util.to_list |> List.map(to_string)
+let all_anagrams json = 
+  json |> member "all" |> Yojson.Basic.Util.to_list |> List.map(to_string)
 
 let make_a_lst url = json_anagram url >>= fun y -> all_anagrams y |> Lwt.return
 
@@ -112,9 +115,5 @@ let add_in_pool game l a =
   then match rand_l a 26 with 
     | (l',p) -> (l',p)::game
   else ((l,get_points a l)::game)
-
-let rec replenish_pool s n a = 
-  if List.length s = n then s 
-  else let pool = add_in_pool s "" a in replenish_pool pool n a
 
 let all_to_t a = a

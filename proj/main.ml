@@ -35,6 +35,7 @@ let rec end_phase game st =
     checked. *)
 let rec stdprint_list lst = match lst with
   | [] -> ()
+  | h :: [] -> print_string h ; ()
   | h::t -> print_string h ; print_string ", " ; stdprint_list t
 
 
@@ -258,7 +259,7 @@ let rec loopgame game st json rep: unit =
               loopgame game st' json false end
           else begin
             (ANSITerminal.(print_string [red]  
-                             "This letter is not in your letter set. 
+                             "This letter is not in your letter set. \
                              Please try again.\n"); 
              loopgame game st json true)
           end

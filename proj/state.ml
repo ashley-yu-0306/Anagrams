@@ -24,7 +24,7 @@ type t = {
 
 type result = Legal of t | Illegal of string
 
-(** [random_letter ()] is a random uppercase letter from the English alphabet. *)
+(** [random_letter ()] is a random uppercase letter from the English alphabet.*)
 let random_letter set = if (set_length set) < 4 || (set_length set) > 7
   then List.nth ["A";"E";"I";"O";"U"] (Random.self_init(); Random.int 5)
   else Char.escaped (Char.chr ((Random.self_init(); Random.int 26) + 65))
@@ -308,9 +308,7 @@ let create word state s =
       current_player = next_player state;
       total_players = state.total_players;
       set = if state.mode = "pool" 
-        then (*let n_pool = set_length state.set in *)
-          (*let incomp_pool = *)  remove_letter state.set used_letters_l 
-        (* in replenish_pool incomp_pool n_pool state.alpha  *)
+        then remove_letter state.set used_letters_l 
         else state.set
     } 
 
