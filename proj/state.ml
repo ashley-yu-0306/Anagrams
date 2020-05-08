@@ -12,7 +12,7 @@ type player = {
   stolen: (player_id * Command.word) list;
 }
 
-type  t = {
+type t = {
   turns_left: int;
   player_list: (player_id  * player) list;
   current_player: player_id;
@@ -24,15 +24,12 @@ type  t = {
 
 type result = Legal of t | Illegal of string
 
-(** [random_letter ()] is a random uppercase letter from the English alphabet.*)
-let random_letter2 () = 
-  Char.escaped (Char.chr ((Random.self_init(); Random.int 26) + 65))
-
+(** [random_letter ()] is a random uppercase letter from the English alphabet. *)
 let random_letter set = if (set_length set) < 4 || (set_length set) > 7
   then List.nth ["A";"E";"I";"O";"U"] (Random.self_init(); Random.int 5)
   else Char.escaped (Char.chr ((Random.self_init(); Random.int 26) + 65))
 
-(** [init_player] initializes a player *)
+(** [init_player] initializes a player. *)
 let init_player set = {
   player_words = [];
   total_points = 0;
@@ -420,7 +417,7 @@ let print_player_letter st =
     that prints all player[id]'s word list. *)
 let rec print_all_player_word_list_helper st acc : unit = 
   if (acc > List.length st.player_list) 
-  then ()
+  then () 
   else begin print_string ("Player " ^ string_of_int acc ^ ": "); 
     print_player_word_list st acc;
     print_all_player_word_list_helper st (acc + 1) end

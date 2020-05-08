@@ -27,10 +27,10 @@ val combo_set_var: alphabet -> int -> t
     from the json file. *)
 val all_letters: alphabet -> all_letters_in_json
 
-(* [set_length s] is the length of the set [s]. *)
+(** [set_length s] is the length of the set [s]. *)
 val set_length: t -> int 
 
-(* [empty] returns an empty game. *)
+(** [empty ()] returns an empty game. *)
 val empty: unit -> t
 
 (** [swap_letter a l set] is the [set] of letters with [l] replaced with
@@ -38,7 +38,7 @@ val empty: unit -> t
 val swap_letter: alphabet -> letter -> t -> t 
 
 (** [print_list a m] prints out the letters and corresponding points in the 
-    combo set with text corresponding to game mode [m].*)
+    combo set with text corresponding to game mode [m]. *)
 val print_list : t -> int -> bool -> unit
 
 (** [get_points set l] is the point that the letter [l] is worth. *)
@@ -54,7 +54,7 @@ val generate_new_set: letter -> (letter * points) -> t -> t
 
 (** [remove_letter s c] is the list of pairs [s] with pairs whose key 
     corresponds to the elements in [c] removed.
-    Precondition: letters in [c] are in [s]. *)
+    Requires: letters in [c] are in [s]. *)
 val remove_letter: t -> letter list -> t
 
 (** [add_in_pool game l] is the new pool with a new letter from the player 
