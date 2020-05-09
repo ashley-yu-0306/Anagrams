@@ -158,7 +158,6 @@ let state_tests = [
   "create after swap" >:: 
   (fun _ -> assert_equal (create "a" swap_st_norm false) 
       (Illegal "This word cannot be constructed with the current letter set. \n"));
-
   (*testing create updates appropriate points & updates player & turns left
     while also testing that pass updates player*)
   "create ''" >:: 
@@ -202,10 +201,10 @@ let make_check_test
 
 let command_tests = [
   make_parse_test "quit" "quit" Quit;
-  make_parse_test "create" "create cat" (Create "cat");
+  make_parse_test "create" "create cat" (Create "CAT");
   make_parse_test "pass" "pass" Pass;
-  make_parse_test "swap" "swap u" (Swap "u");
-  make_parse_test "steal" "steal 1 cat taco" (Steal (1, "cat", "taco"));
+  make_parse_test "swap" "swap u" (Swap "U");
+  make_parse_test "steal" "steal 1 cat taco" (Steal (1, "CAT", "TACO"));
   "Empty: empty" >:: (fun _ -> 
       assert_raises Empty (fun _ -> 
           parse ""));
@@ -223,7 +222,7 @@ let command_tests = [
           parse "pass a"));
   make_check_test "valid" "valid" Valid;
   make_check_test "invalid" "invalid this is invalid" 
-    (Invalid ["this";"is";"invalid"]);
+    (Invalid ["THIS";"IS";"INVALID"]);
   "Empty: empty" >:: (fun _ -> 
       assert_raises Empty (fun _ -> 
           parse_check ""));
