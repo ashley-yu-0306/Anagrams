@@ -12,7 +12,7 @@ type player = {
   stolen: (player_id * Command.word) list;
 }
 
-type  t = {
+type t = {
   turns_left: int;
   player_list: (player_id  * player) list;
   current_player: player_id;
@@ -25,14 +25,11 @@ type  t = {
 type result = Legal of t | Illegal of string
 
 (** [random_letter ()] is a random uppercase letter from the English alphabet.*)
-let random_letter2 () = 
-  Char.escaped (Char.chr ((Random.self_init(); Random.int 26) + 65))
-
-let random_letter set = if (set_length set) < 4 
+let random_letter set = if (set_length set) < 4 || (set_length set) > 7
   then List.nth ["A";"E";"I";"O";"U"] (Random.self_init(); Random.int 5)
   else Char.escaped (Char.chr ((Random.self_init(); Random.int 26) + 65))
 
-(** [init_player] initializes a player *)
+(** [init_player] initializes a player. *)
 let init_player set = {
   player_words = [];
   total_points = 0;
@@ -87,8 +84,10 @@ let next_player state =
   then state.current_player + 1 
   else 1
 
-let create_pl_combo_word playerwl = let pwlkey = List.map fst playerwl in
-  List.fold_left (fun a k -> k ^ a) "" (pwlkey)
+let rec remove_dupl lst acc = 
+  match lst with
+  | [] -> acc
+  | h::t -> if List.mem h acc then remove_dupl t acc else remove_dupl t (h::acc)
 
 (**[word_to_cl n] is a char list of the input [word].*)
 let word_to_cl n = List.init (String.length n) (String.get n)
@@ -173,8 +172,8 @@ let rec update_player_list state ns players word action id1 id2 =
             let p = List.mem_assoc words v.player_words in 
             if p = true then List.remove_assoc words v.player_words else 
               List.remove_assoc words v.player_words
-          else if not (action = "swap") && not (word = "") 
-          then List.append v.player_words [(words,actual_pts)]
+          else if action = "create"
+          then v.player_words @ [(words,actual_pts)]
           else v.player_words;
         total_points = v.total_points + actual_pts;
         player_letter_set = ns;
@@ -184,6 +183,62 @@ let rec update_player_list state ns players word action id1 id2 =
         stolen = if action = "steal" then v.stolen @ [id2, word] else []
       } in (k,player)::(update_player_list state ns t word action id1 id2)
     else (k,v)::(update_player_list state ns t word action id1 id2)
+
+
+let update_swap state newset v =  {
+  player_words = v.player_words;
+  total_points = v.total_points + (calculate_swap_points state);
+  player_letter_set = newset;
+  current_letter = random_letter (get_pool state);
+  swaps =  v.swaps +. 1.;
+  stolen = v.stolen
+}
+
+let update_steal state newset word v id2 =  {
+  player_words = 
+    (let words = String.uppercase_ascii word in
+     let p = List.mem_assoc words v.player_words in 
+     if p then List.remove_assoc words v.player_words else 
+       List.remove_assoc words v.player_words);
+  total_points = v.total_points + (calculate_word_points word state);
+  player_letter_set = newset;
+  current_letter = random_letter (get_pool state);
+  swaps =  v.swaps;
+  stolen = v.stolen @ [id2, word]
+}
+
+let update_create state newset word v =  {
+  player_words = 
+    (let words = String.uppercase_ascii word in 
+     v.player_words @ [(words,calculate_word_points word state)]);
+  total_points = v.total_points + (calculate_word_points word state);
+  player_letter_set = newset;
+  current_letter = random_letter (get_pool state);
+  swaps =  v.swaps;
+  stolen = v.stolen
+}
+
+let update_pass state newset v = {
+  player_words = v.player_words;
+  total_points = v.total_points;
+  player_letter_set = newset;
+  current_letter = random_letter (get_pool state);
+  swaps =  v.swaps;
+  stolen = v.stolen
+}
+
+let rec update_player_list2 state newset players word action id1 id2 = 
+  match players with 
+  | [] -> []
+  | (k,v)::t -> if k = id1 then 
+      let player = (
+        if action = "swap" then update_swap state newset v
+        else if action = "steal" then update_steal state newset word v id2
+        else if action = "create" then update_create state newset word v
+        else (* Pass *) update_pass state newset v)
+      in (k,player)::(update_player_list2 state newset t word action id1 id2)
+    else (k,v)::(update_player_list2 state newset t word action id1 id2)
+
 
 (**[remove x lst acc] is [lst] with the first occurance of [x] removed. *)
 let rec remove x lst acc = match lst with
@@ -209,6 +264,15 @@ let rec string_to_sl s i = let ups = String.uppercase_ascii s in
   if i>(-1) then 
     String.make 1 (String.get ups i) ::string_to_sl ups (i-1) else [] 
 
+let create_pl_combo_word playerwl = 
+  let pwlkey = List.map fst playerwl in
+  let str = List.fold_left (fun a k -> k ^ a) "" (pwlkey) in
+  let str_list = string_to_sl str (String.length str - 1) in 
+  let without_dups = remove_dupl str_list [] in
+  let finish = List.fold_left (fun a k -> k ^ a) "" (without_dups) in
+  if String.length finish < 10 then finish else ""
+
+
 let create word state s = 
   let combo = (if state.mode = "pool" then 
                  (current_player_letter state)::
@@ -233,9 +297,7 @@ let create word state s =
       current_player = next_player state;
       total_players = state.total_players;
       set = if state.mode = "pool" 
-        then (*let n_pool = set_length state.set in *)
-          (*let incomp_pool = *)  remove_letter state.set used_letters_l 
-        (* in replenish_pool incomp_pool n_pool state.alpha  *)
+        then remove_letter state.set used_letters_l 
         else state.set
     } 
 
@@ -342,7 +404,7 @@ let print_player_letter st =
     that prints all player[id]'s word list. *)
 let rec print_all_player_word_list_helper st acc : unit = 
   if (acc > List.length st.player_list) 
-  then ()
+  then () 
   else begin print_string ("Player " ^ string_of_int acc ^ ": "); 
     print_player_word_list st acc;
     print_all_player_word_list_helper st (acc + 1) end

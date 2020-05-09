@@ -33,11 +33,11 @@ let rec end_phase game st =
 
 (** [stdprint_list l] prints the invalid words after being automatically 
     checked. *)
-let rec stdprint_list = function 
-    [] -> ()
-  | e::l -> 
-    if e != "" then (print_string e ; print_string " " ; stdprint_list l) 
-    else stdprint_list l
+let rec stdprint_list lst = match lst with
+  | [] -> ()
+  | h :: [] -> print_string h ; ()
+  | h::t -> print_string h ; print_string ", " ; stdprint_list t
+
 
 (** [check_phase2 game st] is the check phase of [game] with the final state 
     [st], where players check each other's word lists. *)
@@ -64,28 +64,34 @@ let rec check_phase2 game st =
          | Invalid wl -> State.invalid wl game st |> check_phase2 game))
   )
 
-(** Note for myself (Bahar hehe): Need to make it so check is dependent on 
-    the person's letter set, not the overall combo. *)
+(** [check_words_helper game st alst wl acc] checks if the words the player
+    created [wl] are in the anagrams list from the API [alst]. *)
 let rec check_words_helper game st alst wl acc = 
   match wl with
   | [] -> acc
-  | h::t -> if (List.mem (String.lowercase_ascii h) alst) then check_words_helper game st alst t (acc)
+  | h::t -> if (List.mem (String.lowercase_ascii h) alst) 
+    then check_words_helper game st alst t (acc)
     else check_words_helper game st alst t (h::acc)
 
+(** [check_ph_inv game st alst wl] creates the new state after
+    the invalid words are found fron checking [wl] against [alst]. *)
 let check_ph_inv game st alst wl = 
   let invalid_words = check_words_helper game st alst wl [] in
   stdprint_list invalid_words;
   State.valid game (State.invalid invalid_words game st)
 
+(** [check_phase game st] is the check phase of [game] with the final state 
+    [st], where an API call returns the possible set of anagrams,
+    and the player's word lists are compared to that set. *)
 let rec check_phase game st : unit = 
   if current_player st > State.player_count st 
   then check_phase2 game (State.next_player_state game st)
   else
     let gamescramble = create_pl_combo_word (current_player_wordlist st) in
     let pp = make_a_lst gamescramble in
-    (* stdprint_list (List.map fst (current_player_wordlist st)); *)
     let listcomp = Lwt_main.run (pp) in
-    print_endline ("\nPlayer " ^ (State.current_player st |> string_of_int) ^ "'s Words: ");
+    print_endline
+      ("\nPlayer " ^ (State.current_player st |> string_of_int) ^ "'s Words: ");
     State.print_player_word_list st (current_player st);
     let player_words = List.map (fun (k,v) -> k) (current_player_wordlist st) in
     print_endline "Their invalid words according to the dictionary: ";
@@ -263,7 +269,7 @@ let rec loopgame game st json rep: unit =
               loopgame game st' json false end
           else begin
             (ANSITerminal.(print_string [red]  
-                             "This letter is not in your letter set. 
+                             "This letter is not in your letter set. \
                              Please try again.\n"); 
              loopgame game st json true)
           end
@@ -298,7 +304,7 @@ let rec ask_players() =
 (** [ask_num_letters()] prompts the player for the number of letters for the 
     turns, and returns that number to the initial state.*)
 let rec ask_num_letters() = 
-  print_endline "How many letters (max 10): "; 
+  print_endline "How many letters (max 6): "; 
   print_string "> "; 
   match parse_number (read_line()) with
   | 0 -> print_endline "ERROR. Enter a valid number: "; 
