@@ -46,6 +46,9 @@ val current_player_points: t -> Game.points
     in [state]. *)
 val current_player_letter_set: t -> Game.t
 
+(** [current_player_letter st] is the current player's letter at state [st]. *)
+val current_player_letter: t -> string 
+
 (** [player_count state] is the number of players in [state].*)
 val player_count: t -> int
 
