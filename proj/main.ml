@@ -100,12 +100,13 @@ let rec check_phase game st : unit =
 (* [action_message a w p] prints information about word [w] and the points [p]
    gained or lost as a result of action [a]*)
 let action_message a w p = begin
+  let w' = String.uppercase_ascii w in 
   let p' = string_of_int (abs p) in
   let message = 
     if a = "swap" then 
-      ("\n'"^w^"' has been swapped. You've lost "^p'^" points.")
+      ("\n'"^w'^"' has been swapped. You've lost "^p'^" points.")
     else if a = "create" then  
-      ("\n'"^w^"' has been created. You've gained "^p'^" points.")
+      ("\n'"^w'^"' has been created. You've gained "^p'^" points.")
     else "" in print_endline message; end
 
 (** [each_turn_print st game] prints the pool, all players' wordlists, and the 

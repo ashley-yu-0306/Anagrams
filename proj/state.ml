@@ -243,7 +243,6 @@ let rec update_player_list state newset players word action id1 id2 =
       in (k,player)::(update_player_list state newset t word action id1 id2)
     else (k,v)::(update_player_list state newset t word action id1 id2)
 
-
 (**[remove x lst acc] is [lst] with the first occurance of [x] removed. *)
 let rec remove x lst acc = match lst with
   | [] -> acc
