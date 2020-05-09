@@ -154,27 +154,26 @@ let state_tests = [
   (*testing swap updates player's letter set to not contain swapped letter*)
   "swap" >:: 
   (fun _ -> assert_equal (create "a" swap_st_norm false) 
-      (Illegal "This word cannot be constructed with the current 
-        letter set. \n"));
+      (Illegal "This word cannot be constructed with the current letter set. \n"));
   (*testing create updates appropriate points & updates player & turns left
     while also testing that pass updates player*)
   "create ''" >:: 
   (fun _ -> assert_equal (create "" st_pool false) 
       (Illegal "Please enter a word."));
   (* "create ab id" >:: (fun _ -> assert_equal (current_player create_ab_st_pool) 2);
-  "create ab p2 pts" >:: (fun _ -> assert_equal (current_player_points create_ab_st_pool) 0);
-  "create turns" >:: (fun _ -> assert_equal (turns create_ab_st_pool) 9); *)
+     "create ab p2 pts" >:: (fun _ -> assert_equal (current_player_points create_ab_st_pool) 0);
+     "create turns" >:: (fun _ -> assert_equal (turns create_ab_st_pool) 9); *)
   (* "pass id" >:: (fun _ -> assert_equal (current_player create_ab_pass_st_pool) 1);
-  "pass turns" >:: (fun _ -> assert_equal (turns create_ab_pass_st_pool) 8);
-  "create ab p1 pts" >:: (fun _ -> assert_equal (current_player_points create_ab_pass_st_pool) 4); *)
+     "pass turns" >:: (fun _ -> assert_equal (turns create_ab_pass_st_pool) 8);
+     "create ab p1 pts" >:: (fun _ -> assert_equal (current_player_points create_ab_pass_st_pool) 4); *)
   (*testing steal updates points of player whose word was stolen, updates 
     player & turns left*)
   (* "steal 'bb'" >:: 
-  (fun _ -> assert_equal (steal "bb" "bbc" 1 create_ab_st_pool)
+     (fun _ -> assert_equal (steal "bb" "bbc" 1 create_ab_st_pool)
       (Illegal ("The word 'BB' is not in player 1's word list."))); *)
   (* "steal 'ab'" >:: 
-  (fun _ -> assert_equal (current_player_points create_ab_steal_st_pool) 0);
-  "steal turns" >:: (fun _ -> assert_equal (turns create_ab_steal_st_pool) 8); *)
+     (fun _ -> assert_equal (current_player_points create_ab_steal_st_pool) 0);
+     "steal turns" >:: (fun _ -> assert_equal (turns create_ab_steal_st_pool) 8); *)
   (*testing that point values of calculate_word_points adhere to multipliers*)
   "ab" >:: (fun _ -> assert_equal (calculate_word_points "ab" st_pool) 4);
   "abc" >:: (fun _ -> assert_equal (calculate_word_points "abc" st_pool) 7);
@@ -199,10 +198,10 @@ let make_check_test
 
 let command_tests = [
   make_parse_test "quit" "quit" Quit;
-  make_parse_test "create" "create cat" (Create "cat");
+  make_parse_test "create" "create cat" (Create "CAT");
   make_parse_test "pass" "pass" Pass;
-  make_parse_test "swap" "swap u" (Swap "u");
-  make_parse_test "steal" "steal 1 cat taco" (Steal (1, "cat", "taco"));
+  make_parse_test "swap" "swap u" (Swap "U");
+  make_parse_test "steal" "steal 1 cat taco" (Steal (1, "CAT", "TACO"));
   "Empty: empty" >:: (fun _ -> 
       assert_raises Empty (fun _ -> 
           parse ""));
@@ -220,7 +219,7 @@ let command_tests = [
           parse "pass a"));
   make_check_test "valid" "valid" Valid;
   make_check_test "invalid" "invalid this is invalid" 
-    (Invalid ["this";"is";"invalid"]);
+    (Invalid ["THIS";"IS";"INVALID"]);
   "Empty: empty" >:: (fun _ -> 
       assert_raises Empty (fun _ -> 
           parse_check ""));
