@@ -229,9 +229,9 @@ let update_check state newset word v = {
   stolen = v.stolen;
 }
 
-(** [update_player_list state newset players word action id1 id2] is the player_list 
-    as a result of [action] being executed on the player with [id1] in [state]. 
-    If [id2] is not "", [action] was exected by [id2] and not [id1]. 
+(** [update_player_list state newset players word action id1 id2] is the 
+    player_list as a result of [action] being executed on the player with [id1] 
+    in [state]. If [id2] is not "", [action] was exected by [id2] and not [id1]. 
     Player [id1] takes the letter set [newset]. 
       If [action] = "steal" or "check", [word] is removed from [id]'s word list. 
          [action] = "swap", [word] is the letter swapped out of [id]'s. 
