@@ -25,44 +25,6 @@ open Command
 open State
 open OUnit2
 
-(** [cmp_set_like_lists lst1 lst2] compares two lists to see whether
-    they are equivalent set-like lists.  That means checking two things.
-    First, they must both be {i set-like}, meaning that they do not
-    contain any duplicates.  Second, they must contain the same elements,
-    though not necessarily in the same order. Reused from a2.*)
-let cmp_set_like_lists lst1 lst2 =
-  let uniq1 = List.sort_uniq compare lst1 in
-  let uniq2 = List.sort_uniq compare lst2 in
-  List.length lst1 = List.length uniq1
-  &&
-  List.length lst2 = List.length uniq2
-  &&
-  uniq1 = uniq2
-
-(** [pair_compare p1 p2] compares two key-value pairs [p1] and [p2] to see 
-    whether they are equivalent. Reused from a4. *)
-let pair_compare p1 p2 = 
-  if fst p1 = fst p2 && cmp_set_like_lists (snd p1) (snd p2) then 0 else 
-    compare (fst p1) (fst p2)
-
-(** [helper l1 l2] is a helper function that compares two lists 
-    [l1] and [l2] to see whether they are equivalent. Reused from a4. *)
-let helper l1 l2 = match l1, l2 with
-  |[], [] -> true
-  |h1 :: t1, h2 :: t2 -> pair_compare h1 h2 = 0
-  |_ , _ -> failwith "impossible"
-
-(** [cmp_set_like_assoc lst1 lst2] compares two assoc lists to see whether
-    they are equivalent set-like lists. Reused from a4. *)
-let cmp_set_like_assoc lst1 lst2 =
-  let uniq1 = List.sort_uniq pair_compare lst1 in
-  let uniq2 = List.sort_uniq pair_compare lst2 in
-  List.length lst1 = List.length uniq1
-  &&
-  List.length lst2 = List.length uniq2
-  &&
-  helper uniq1 uniq2
-
 (* Error is thrown when the state is Illegal. *)
 exception Error 
 
@@ -128,16 +90,22 @@ let game_tests = [
 ]
 
 (*=============== Tests for State ==============*)
+(* the set of all letters in the json *)
 let set = all_to_t all
+(* the state with 1 player, 5 turns, and game mode = "normal" *)
 let st_norm = init_state set 1 5 "normal" all
+(* the state with 2 player, 5 turns, and game mode = "pool" *)
 let st_pool = init_state set 2 5 "pool" all 
-(* state after swapping "l" in normal. *)
 
+(* state after swapping "l" in normal. *)
 let swap_st_norm = match swap "a" st_norm json with 
     Legal st -> st | Illegal _ -> raise Error 
 
+(* the current letter of player 1 in st_pool *)
 let cur_letter1 = current_player_letter st_pool
+(* the point value of cur_letter1 *)
 let cur_letter1_p = calculate_word_points cur_letter1 st_pool
+(* the point value of "ab" ^ curr_letter *)
 let points = ((cur_letter1_p + 4) |> float_of_int)*. 1.2 |> int_of_float
 
 (* state after creating "ab"^curr_letter in pool. *)
@@ -147,9 +115,12 @@ let create_ab_st_pool = match create ("ab"^cur_letter1) st_pool false with
 let create_ab_pass_st_pool = match pass create_ab_st_pool with 
     Legal st -> st | Illegal _ -> raise Error 
 
+(* the current letter of player 2 in st_pool *)
 let cur_letter2 = current_player_letter create_ab_st_pool
-let cur_player = current_player create_ab_st_pool
-let create_ab_steal_st_pool = match steal ("ab"^cur_letter1) ("abc"^cur_letter2)
+
+(*state after stealing "ab"^cur_letter1 to make "ab"^cur_letter1^cur_letter2*)
+let create_ab_steal_st_pool = match steal ("ab"^cur_letter1) 
+                                      ("ab"^cur_letter1^cur_letter2)
                                       1 create_ab_st_pool with 
   Legal st -> st | Illegal s -> raise Error
 
@@ -198,6 +169,7 @@ let state_tests = [
 ]
 
 (*=============== Tests for Command ==============*)
+
 
 let make_parse_test
     (name: string)
