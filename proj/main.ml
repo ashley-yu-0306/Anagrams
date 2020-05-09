@@ -121,6 +121,8 @@ let each_turn_print st game rep =
     print_player_letter st end
   else ()
 
+(** [game_info st rep mode] prints instructions dependent on game mode, 
+    not reprinting when player mistypes when prompted. *) 
 let game_info st rep mode = 
   if rep then ()
   else

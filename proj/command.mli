@@ -1,3 +1,6 @@
+(**
+   Parsing of player commands.
+*)
 
 (** The type [word] represents the word that follows the command. *)
 type word = string

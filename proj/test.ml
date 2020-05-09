@@ -63,6 +63,7 @@ let cmp_set_like_assoc lst1 lst2 =
   &&
   helper uniq1 uniq2
 
+(* Error is thrown when the state is Illegal. *)
 exception Error 
 
 (*=============== Tests for Game ==============*)
