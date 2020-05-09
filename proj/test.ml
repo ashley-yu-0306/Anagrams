@@ -130,6 +130,8 @@ let swap_st_norm = match swap "a" st_norm json with
     Legal st -> st | Illegal _ -> raise Error 
 
 let cur_letter1 = current_player_letter st_pool
+let cur_letter1_p = calculate_word_points cur_letter1 st_pool
+let points = ((cur_letter1_p + 4) |> float_of_int)*. 1.2 |> int_of_float
 
 (*state after creating "ab"^curr_letter in pool*)
 let create_ab_st_pool = match create ("ab"^cur_letter1) st_pool false with 
@@ -141,7 +143,7 @@ let create_ab_pass_st_pool = match pass create_ab_st_pool with
 let cur_letter2 = current_player_letter create_ab_st_pool
 let cur_player = current_player create_ab_st_pool
 let create_ab_steal_st_pool = match steal ("ab"^cur_letter1) ("abc"^cur_letter2) 1 create_ab_st_pool with 
-    Legal st ->st | Illegal s -> raise Error
+    Legal st -> st | Illegal s -> raise Error
 
 let state_tests = [
   (*testing initializing of player*)
@@ -151,30 +153,31 @@ let state_tests = [
   "init stolen" >:: (fun _ -> assert_equal (current_player_stolen st_pool) []);
   "init turns" >:: (fun _ -> assert_equal (turns st_pool) 10);
   "init player count" >:: (fun _ -> assert_equal (player_count st_pool) 2);
+
   (*testing swap updates player's letter set to not contain swapped letter*)
-  "swap" >:: 
+  "create after swap" >:: 
   (fun _ -> assert_equal (create "a" swap_st_norm false) 
-      (Illegal "This word cannot be constructed with the current 
-        letter set. \n"));
+      (Illegal "This word cannot be constructed with the current letter set. \n"));
+
   (*testing create updates appropriate points & updates player & turns left
     while also testing that pass updates player*)
   "create ''" >:: 
   (fun _ -> assert_equal (create "" st_pool false) 
       (Illegal "Please enter a word."));
-  (* "create ab id" >:: (fun _ -> assert_equal (current_player create_ab_st_pool) 2);
+  "create ab id" >:: (fun _ -> assert_equal (current_player create_ab_st_pool) 2);
   "create ab p2 pts" >:: (fun _ -> assert_equal (current_player_points create_ab_st_pool) 0);
-  "create turns" >:: (fun _ -> assert_equal (turns create_ab_st_pool) 9); *)
-  (* "pass id" >:: (fun _ -> assert_equal (current_player create_ab_pass_st_pool) 1);
+  "create turns" >:: (fun _ -> assert_equal (turns create_ab_st_pool) 9); 
+  "pass id" >:: (fun _ -> assert_equal (current_player create_ab_pass_st_pool) 1);
   "pass turns" >:: (fun _ -> assert_equal (turns create_ab_pass_st_pool) 8);
-  "create ab p1 pts" >:: (fun _ -> assert_equal (current_player_points create_ab_pass_st_pool) 4); *)
+  "create ab p1 pts" >:: (fun _ -> assert_equal (current_player_points create_ab_pass_st_pool) points); 
   (*testing steal updates points of player whose word was stolen, updates 
     player & turns left*)
-  (* "steal 'bb'" >:: 
+  "steal 'bb'" >:: 
   (fun _ -> assert_equal (steal "bb" "bbc" 1 create_ab_st_pool)
-      (Illegal ("The word 'BB' is not in player 1's word list."))); *)
-  (* "steal 'ab'" >:: 
+      (Illegal ("The word 'BB' is not in player 1's word list."))); 
+  "steal 'ab'" >:: 
   (fun _ -> assert_equal (current_player_points create_ab_steal_st_pool) 0);
-  "steal turns" >:: (fun _ -> assert_equal (turns create_ab_steal_st_pool) 8); *)
+  "steal turns" >:: (fun _ -> assert_equal (turns create_ab_steal_st_pool) 9); 
   (*testing that point values of calculate_word_points adhere to multipliers*)
   "ab" >:: (fun _ -> assert_equal (calculate_word_points "ab" st_pool) 4);
   "abc" >:: (fun _ -> assert_equal (calculate_word_points "abc" st_pool) 7);
