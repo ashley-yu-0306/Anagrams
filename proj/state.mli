@@ -19,67 +19,68 @@ type result = Legal of t | Illegal of string
 (** The type of a player id. *)
 type player_id = int
 
-(** [init_state set num turn mode] is the initial state of the game. The initial
-    state has the combination of letters [set], the turns left in the game, the
-    current player, and the list of players. *)
+(** [init_state set num turn mode a] is the initial state with the available 
+    letter set [set], [num] players, [turn] number of turns, and alphabet set 
+    [a] for the game mode [mode]. *)
 val init_state : Game.t -> int -> int -> string -> Game.all_letters_in_json -> t
 
 (** [turns state] is the turns left in game state [state]. *)
 val turns: t  -> int
 
-(** [current_player state] is the player_id whose turn is active in state 
-    [st].*)
+(** [current_player state] is the player_id whose turn is active in [state]. *)
 val current_player: t -> int
 
+(** [current_player_stolen state] is a list of stolen words and the id of the
+    player who stole that word for the current player in [state].*)
 val current_player_stolen: t -> (player_id * Command.word) list
 
-(** [current_player_wordlist state] is the current word-points list of the 
-    current player.*)
+(** [current_player_wordlist state] is the word-points list of the current 
+    player in [state]. *)
 val current_player_wordlist: t -> (Command.word * Game.points) list
 
 (** [current_player_points state] is the total points of the current player in
     [state]. *)
 val current_player_points: t -> Game.points
 
-(** [current_player_letter_set state] is the current player's letter set. *)
+(** [current_player_letter_set state] is the current player's letter set
+    in [state]. *)
 val current_player_letter_set: t -> Game.t
 
-(** [get_pool st] is the current pool. *)
+(** [player_count state] is the number of players in [state].*)
+val player_count: t -> int
+
+(** [get_pool state] is the current pool of letters in [state]. *)
 val get_pool: t -> Game.t
 
-(** [next_player state] gives the [id] of the player whose turn is next. *)
+(** [next_player state] gives the [id] of the player whose turn is next in 
+    [state]. *)
 val next_player: t -> player_id
-
-(** [create_pl_combo_word g] make the combo list a string. *)
-val create_pl_combo_word : (Command.word * Game.points) list -> string
 
 (** [calculate_word_points word set] is the points of [word] based on point
     values in [set]. *)
 val calculate_word_points: Command.word ->t -> Game.points
 
-(** [start_message st] prints available messages for the current player. *)
+(** [start_message st] prints available messages for the current player in
+    [state]. *)
 val start_message: t -> unit
+
+(** [create_pl_combo_word g] make the combo list [g] a string. *)
+val create_pl_combo_word : (Command.word * Game.points) list -> string
 
 (** [create word state s] is the result after the player in [game] attempts
     to create the [word]. [s] is whether or not the word was stolen. *)
 val create: Command.word -> t -> bool -> result
 
-(** [pass state] is the result after the player in [game] passes their turn.*)
+(** [pass state] is the result after the player in [state] passes their turn.*)
 val pass: t -> result
 
-(** [swap game state] is the result after the player in [game] swaps their 
-    letter [l]. *)
+(** [swap l state json] is the result after the player in [state] swaps their 
+    letter [l] based on [json]. *)
 val swap: Game.letter -> t -> Yojson.Basic.t -> result
 
 (** [steal w nw p st] is the result after the current player steals word [w] 
-    from player [p] to construct word [nw]. *)
+    from player [p] to construct word [nw] in [state]. *)
 val steal: Command.word -> Command.word -> player_id -> t -> result
-
-(** [player_count state] is the number of players in the game.*)
-val player_count: t -> int
-
-(** [player_count st] prints the players current letter. *)
-val print_player_letter: t -> unit
 
 (** [winner_check state] is the list of winners in game of state [state] and
     the highest number of point achieved by a player in that game.*)
@@ -99,6 +100,9 @@ val next_player_state : Game.t -> t -> t
 
 (** [print_player_word_list state id] prints player[id]'s word list.*)
 val print_player_word_list: t -> player_id -> unit
+
+(** [player_count st] prints the players current letter. *)
+val print_player_letter: t -> unit
 
 (** [print_all_player_word_list state id] prints all player[id]'s word list.*)
 val print_all_player_word_list: t -> unit

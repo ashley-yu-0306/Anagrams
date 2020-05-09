@@ -144,8 +144,6 @@ let game_info st rep mode =
                     'quit'.\n"));) in begin
       if not (current_player_stolen st = []) then start_message st else () end
 
-
-
 (** [loopgame2 game st json rep] is the [game] with updating states [st] in pool 
     mode.*)
 let rec loopgame2 game st json rep: unit =  
@@ -157,6 +155,7 @@ let rec loopgame2 game st json rep: unit =
                     "Turns completed! Entering check phase... \n \n"); 
     check_phase game st)
   else (
+    let points = current_player_points st in
     each_turn_print st (get_pool st) rep;
     game_info st rep "pool";
     print_string "> ";
@@ -191,7 +190,9 @@ let rec loopgame2 game st json rep: unit =
             | Illegal s-> 
               (ANSITerminal.(print_string [red] s)); 
               loopgame2 (get_pool st) st json true
-            | Legal st' -> ignore(Unix.sleep 2);ignore(Sys.command "clear"); 
+            | Legal st' -> let points' = current_player_points st' in
+              action_message "create" w (points'-points);
+              ignore(Unix.sleep 2);ignore(Sys.command "clear"); 
               loopgame2 (get_pool st') st' json false
           end
         | Steal (id, old_word, new_word) -> begin
@@ -223,7 +224,8 @@ let rec loopgame game st json rep: unit =
                     "Turns completed! Entering check phase... \n \n"); 
     check_phase game st)
   else (
-    let set = State.current_player_letter_set st in 
+    let set = current_player_letter_set st in 
+    let points = current_player_points st in 
     print_list (set) 1 rep;
     game_info st rep "normal";
     print_string "> ";
@@ -256,7 +258,9 @@ let rec loopgame game st json rep: unit =
               | Illegal s-> 
                 (ANSITerminal.(print_string [red] s); 
                  loopgame game st json true)
-              | Legal st' -> ignore(Unix.sleep 2);ignore(Sys.command "clear"); 
+              | Legal st' -> let points' = current_player_points st' in
+                action_message "create" w (points'-points);
+                ignore(Unix.sleep 2);ignore(Sys.command "clear"); 
                 loopgame game st' json false
             end
         | Swap l -> let target = String.uppercase_ascii l in 
@@ -264,6 +268,8 @@ let rec loopgame game st json rep: unit =
             match swap l st json with 
             | Illegal s-> print_endline s; loopgame game st json true;
             | Legal st' -> 
+              let points' = current_player_points st' in
+              action_message "swap" l (points-points');
               ignore(Unix.sleep 2);
               ignore(Sys.command "clear");
               loopgame game st' json false end

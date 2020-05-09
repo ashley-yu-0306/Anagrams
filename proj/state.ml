@@ -52,6 +52,7 @@ let init_state set num turn mode a = {
 let turns state = 
   state.turns_left
 
+(* [state_alpha state] is the list of the alphabet being used in [state]*)
 let state_alpha state = 
   state.alpha
 
@@ -71,19 +72,21 @@ let current_player_letter_set state =
   (List.assoc state.current_player state.player_list).player_letter_set
 
 (** [current_player_letter st] is the current player's letter at state [st]. *)
-let current_player_letter st = 
-  (List.assoc st.current_player st.player_list).current_letter
+let current_player_letter state = 
+  (List.assoc state.current_player state.player_list).current_letter
 
 let player_count state = 
   state.total_players
 
-let get_pool st = st.set
+let get_pool state = state.set
 
 let next_player state = 
   if (not (state.current_player >= state.total_players))
   then state.current_player + 1 
   else 1
 
+(* [remove_dupl lst acc] is [lst] with duplications removed. 
+   Requires: [acc] is the empty list. *)
 let rec remove_dupl lst acc = 
   match lst with
   | [] -> acc
@@ -108,7 +111,10 @@ let calculate_word_points word st : Game.points=
   then base |> float_of_int |> (fun x -> x*. 1.5) |> int_of_float
   else base
 
-let rec start_message_help st stolen it pt = 
+(* [start_message_help st stolen pt] prints information about (a) steal 
+   action(s) as recorded in [stolen]. Total [pt] lost and the player id(s) 
+   of the stealer(s) are printed. *)
+let rec start_message_help st stolen pt = 
   match stolen with 
   | [] -> 
     print_string ("You've lost a total of " ^ string_of_int pt ^ " points.\n")
@@ -116,13 +122,13 @@ let rec start_message_help st stolen it pt =
     print_string ("Player "^string_of_int id'^ " stole your word '" ^ 
                   word ^ "' last round! "); 
     let pt' = pt + calculate_word_points word st in 
-    start_message_help st t (it+1) pt'
+    start_message_help st t pt'
 
 let start_message st = 
   let id = st.current_player in 
   let p_l = st.player_list in
   let p = List.assoc id p_l in 
-  start_message_help st p.stolen 0 0
+  start_message_help st p.stolen 0
 
 (** [remove_invalid next_player inv_words state] is a player with all invalid 
     words removed from his words list*)
@@ -143,48 +149,16 @@ let rec remove_invalid next_player inv_words state =
                        t state)
                else remove_invalid next_player t state)
 
+(* [caculate_swap_points state] is the number of points lost from a swap in
+   [state].*)
 let calculate_swap_points state = 
   let id = state.current_player in 
   let player = List.assoc id state.player_list in 
   let swaps = player.swaps in 
   (-.(5. +. (1.5**swaps))) |> Float.round |> int_of_float
 
-(** [update_player_list state ns players word action id1 id2] is the player_list 
-    as a result of [action] being executed on the player with [id1] in [state]. 
-    If [id2] is not "", [action] was exected by [id2] and not [id1]. 
-    Player [id1] takes the letter set [ns]. 
-      If [action] = "steal" or "check", [word] is removed from [id]'s word list. 
-         [action] = "swap", [word] is the letter swapped out of [id]'s. 
-         [action] = "create", [word] is added to [id]'s word list. *)
-let rec update_player_list state ns players word action id1 id2 = 
-  match players with
-  | [] -> [] 
-  | (k,v)::t -> if k = id1 
-    then 
-      let raw_pts = calculate_word_points word state in 
-      let words = String.uppercase_ascii word in
-      let actual_pts = if action = "swap" then calculate_swap_points state
-        else if action = "check" || action = "steal" then -raw_pts 
-        else raw_pts in 
-      Main.action_message action words actual_pts; 
-      let player = {
-        player_words = if action = "steal" || action = "check" then 
-            let p = List.mem_assoc words v.player_words in 
-            if p = true then List.remove_assoc words v.player_words else 
-              List.remove_assoc words v.player_words
-          else if action = "create"
-          then v.player_words @ [(words,actual_pts)]
-          else v.player_words;
-        total_points = v.total_points + actual_pts;
-        player_letter_set = ns;
-        current_letter = if action = "check" then "" 
-          else random_letter (get_pool state);
-        swaps = if action = "swap" then v.swaps +. 1. else v.swaps;
-        stolen = if action = "steal" then v.stolen @ [id2, word] else []
-      } in (k,player)::(update_player_list state ns t word action id1 id2)
-    else (k,v)::(update_player_list state ns t word action id1 id2)
-
-
+(* [update_swap state newset v] is the player [v] after a swap has been 
+   performed. [v] takes set [newset]. *)
 let update_swap state newset v =  {
   player_words = v.player_words;
   total_points = v.total_points + (calculate_swap_points state);
@@ -194,6 +168,8 @@ let update_swap state newset v =  {
   stolen = v.stolen
 }
 
+(* [update_steal state newset word v id2] is the player [v] after a steal has
+   been performed by player of id [id2] on [word]. [v] takes set [newset]. *)
 let update_steal state newset word v id2 =  {
   player_words = 
     (let words = String.uppercase_ascii word in
@@ -207,6 +183,8 @@ let update_steal state newset word v id2 =  {
   stolen = v.stolen @ [id2, word]
 }
 
+(* [update_create state newset word v] is the player [v] after creating [word].
+   [v] takes set [newset]. *)
 let update_create state newset word v =  {
   player_words = 
     (let words = String.uppercase_ascii word in 
@@ -218,6 +196,8 @@ let update_create state newset word v =  {
   stolen = v.stolen
 }
 
+(* [update_create state newset v] is the player [v] after passing. [v] takes set 
+   [newset]. *)
 let update_pass state newset v = {
   player_words = v.player_words;
   total_points = v.total_points;
@@ -227,7 +207,15 @@ let update_pass state newset v = {
   stolen = v.stolen
 }
 
-let rec update_player_list2 state newset players word action id1 id2 = 
+(** [update_player_list state newset players word action id1 id2] is the player_list 
+    as a result of [action] being executed on the player with [id1] in [state]. 
+    If [id2] is not "", [action] was exected by [id2] and not [id1]. 
+    Player [id1] takes the letter set [newset]. 
+      If [action] = "steal" or "check", [word] is removed from [id]'s word list. 
+         [action] = "swap", [word] is the letter swapped out of [id]'s. 
+         [action] = "create", [word] is added to [id]'s word list. 
+         [action] = "pass", [word] is "". *)
+let rec update_player_list state newset players word action id1 id2 = 
   match players with 
   | [] -> []
   | (k,v)::t -> if k = id1 then 
@@ -236,9 +224,8 @@ let rec update_player_list2 state newset players word action id1 id2 =
         else if action = "steal" then update_steal state newset word v id2
         else if action = "create" then update_create state newset word v
         else (* Pass *) update_pass state newset v)
-      in (k,player)::(update_player_list2 state newset t word action id1 id2)
-    else (k,v)::(update_player_list2 state newset t word action id1 id2)
-
+      in (k,player)::(update_player_list state newset t word action id1 id2)
+    else (k,v)::(update_player_list state newset t word action id1 id2)
 
 (**[remove x lst acc] is [lst] with the first occurance of [x] removed. *)
 let rec remove x lst acc = match lst with
@@ -246,7 +233,8 @@ let rec remove x lst acc = match lst with
   | h::t -> if h = x then acc @ t else remove x t (h::acc)
 
 (**[check_illegal ll combo_l] is [true] iff [ll] contains letter(s) that is not
-   in the combo or more occurances of some letter offered in the combo. *)
+   in the combo or more occurances of some letter than what is offered in the 
+   combo. *)
 let rec check_illegal ll combo_l = 
   match ll with 
   | [] -> false
@@ -271,7 +259,6 @@ let create_pl_combo_word playerwl =
   let without_dups = remove_dupl str_list [] in
   let finish = List.fold_left (fun a k -> k ^ a) "" (without_dups) in
   if String.length finish < 10 then finish else ""
-
 
 let create word state s = 
   let combo = (if state.mode = "pool" then 
