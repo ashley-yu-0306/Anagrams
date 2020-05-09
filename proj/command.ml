@@ -49,12 +49,11 @@ let parse str =
       raise Malformed 
 
 let parse_check str = 
-  match List.rev (String.split_on_char ' ' str |> remove "" [] 
-                  |> List.map String.uppercase_ascii) with
+  match List.rev (String.split_on_char ' ' str |> remove "" []) with
   | [] -> raise Empty 
   | h :: t -> 
     if h = "invalid" && t != []
-    then Invalid t
+    then Invalid (List.map String.uppercase_ascii t)
     else if h = "valid" && t = []
     then Valid
     else raise Malformed
