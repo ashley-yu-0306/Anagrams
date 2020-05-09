@@ -150,17 +150,6 @@ let calculate_swap_points state =
   let swaps = player.swaps in 
   (-.(5. +. (1.5**swaps))) |> Float.round |> int_of_float
 
-(* [action_message a w p] prints information about word [w] and the points [p]
-   gained or lost as a result of action [a]*)
-let action_message a w p = begin
-  let p' = string_of_int (abs p) in
-  let message = 
-    if a = "swap" then 
-      ("\n'"^w^"' has been swapped. You've lost "^p'^" points.")
-    else if a = "create" then  
-      ("\n'"^w^"' has been created. You've gained "^p'^" points.")
-    else "" in print_endline message; end
-
 (** [update_player_list state ns players word action id1 id2] is the player_list 
     as a result of [action] being executed on the player with [id1] in [state]. 
     If [id2] is not "", [action] was exected by [id2] and not [id1]. 
@@ -178,13 +167,13 @@ let rec update_player_list state ns players word action id1 id2 =
       let actual_pts = if action = "swap" then calculate_swap_points state
         else if action = "check" || action = "steal" then -raw_pts 
         else raw_pts in 
-      action_message action words actual_pts; 
+      Main.action_message action words actual_pts; 
       let player = {
         player_words = if action = "steal" || action = "check" then 
             let p = List.mem_assoc words v.player_words in 
             if p = true then List.remove_assoc words v.player_words else 
               List.remove_assoc words v.player_words
-          else if not (action = "swap") 
+          else if not (action = "swap") && not (word = "") 
           then List.append v.player_words [(words,actual_pts)]
           else v.player_words;
         total_points = v.total_points + actual_pts;
