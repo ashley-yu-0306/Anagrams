@@ -25,7 +25,7 @@ open Command
 open State
 open OUnit2
 
-(* Error is thrown when the state is Illegal. *)
+(** [Error] is thrown when the state is Illegal. *)
 exception Error 
 
 (*=============== Tests for Game ==============*)
@@ -154,8 +154,7 @@ let state_tests = [
 ]
 
 (*=============== Tests for Command ==============*)
-
-
+(** [make_parse_test name str expected_output] is the test for [parse].*)
 let make_parse_test
     (name: string)
     (str: string)
@@ -163,6 +162,7 @@ let make_parse_test
   name >:: (fun _ -> 
       assert_equal expected_output (parse str))
 
+(** [make_check_test name str expected_output] is the test for [parse_check].*)
 let make_check_test
     (name: string)
     (str: string)
@@ -203,6 +203,10 @@ let command_tests = [
   "Malformed: valid" >:: (fun _ -> 
       assert_raises Malformed (fun _ -> 
           parse_check "valid ok"));
+  "parse number" >:: (fun _ -> 
+      assert_equal (parse_number "2") 2); 
+  "parse not a number gives 0" >:: (fun _ -> 
+      assert_equal (parse_number "a") 0); 
 ]
 
 let suite =
