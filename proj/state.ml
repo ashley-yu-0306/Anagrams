@@ -207,6 +207,19 @@ let update_pass state newset v = {
   stolen = v.stolen
 }
 
+let update_check state newset word v = {
+  player_words = 
+    (let words = String.uppercase_ascii word in
+     let p = List.mem_assoc words v.player_words in 
+     if p then List.remove_assoc words v.player_words else 
+       List.remove_assoc words v.player_words);
+  total_points = v.total_points - (calculate_word_points word state);
+  player_letter_set = newset;
+  current_letter =  "";
+  swaps = v.swaps;
+  stolen = v.stolen;
+}
+
 (** [update_player_list state newset players word action id1 id2] is the player_list 
     as a result of [action] being executed on the player with [id1] in [state]. 
     If [id2] is not "", [action] was exected by [id2] and not [id1]. 
@@ -223,9 +236,11 @@ let rec update_player_list state newset players word action id1 id2 =
         if action = "swap" then update_swap state newset v
         else if action = "steal" then update_steal state newset word v id2
         else if action = "create" then update_create state newset word v
+        else if action = "check" then update_check state newset word v
         else (* Pass *) update_pass state newset v)
       in (k,player)::(update_player_list state newset t word action id1 id2)
     else (k,v)::(update_player_list state newset t word action id1 id2)
+
 
 (**[remove x lst acc] is [lst] with the first occurance of [x] removed. *)
 let rec remove x lst acc = match lst with

@@ -91,7 +91,7 @@ let rec check_phase game st : unit =
     let pp = make_a_lst gamescramble in
     let listcomp = Lwt_main.run (pp) in
     print_endline
-      ("\nPlayer " ^ (State.current_player st |> string_of_int) ^ "'s Words: ");
+      ("\n\nPlayer " ^ (State.current_player st |> string_of_int) ^ "'s Words: ");
     State.print_player_word_list st (current_player st);
     let player_words = List.map (fun (k,v) -> k) (current_player_wordlist st) in
     print_endline "Their invalid words according to the dictionary: ";
@@ -315,7 +315,7 @@ let rec ask_num_letters() =
   match parse_number (read_line()) with
   | 0 -> print_endline "ERROR. Enter a valid number: "; 
     ask_num_letters()
-  | x -> if x > 10 then 
+  | x -> if x > 6 then 
       ask_num_letters() else x
 
 (** [ask_turns()] prompts the player for the number of turns, and returns that 

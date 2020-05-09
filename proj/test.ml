@@ -103,6 +103,10 @@ let game_tests = [
    increasing length of set by 1" >:: 
   (fun _ -> assert_equal 7 (set_length (add_in_pool set "A" all)));
 
+  "add_in_pool test 2: adds letter to pool,
+   increasing length of set by 1" >:: 
+  (fun _ -> assert_equal 7 (set_length (add_in_pool set "Z" all)));
+
   "make_a_lst: makes an API call to Anagramatica, generating a promise
     containing a string list of the possible words. " >::
   (fun _ -> assert_equal true 
