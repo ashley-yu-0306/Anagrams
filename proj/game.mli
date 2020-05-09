@@ -1,3 +1,11 @@
+(** 
+   Representation of static game data.
+
+   This module represents the data stored in alphabet files, including
+   letters and the points.  It handles loading of that data from JSON as well
+   as querying the data.
+*)
+
 (** The abstract type of values representing games. *)
 type t
 
