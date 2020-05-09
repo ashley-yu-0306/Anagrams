@@ -1,5 +1,4 @@
 open Yojson.Basic.Util
-open Yojson.Basic.Util
 open Lwt
 open Lwt.Infix
 open Cohttp
