@@ -36,17 +36,21 @@ let parse str =
   | [] -> raise(Empty)
   | h :: t -> 
     if h = "quit" && t = [] then Quit else 
-    if h = "create" && List.length t = 1 then Create (List.hd t) else 
+    if h = "create" && List.length t = 1 then 
+      Create (String.uppercase_ascii (List.hd t)) else 
     if h = "pass" && t = [] then Pass else
-    if h = "swap" && List.length t = 1 then Swap (List.hd t) else
+    if h = "swap" && List.length t = 1 then 
+      Swap (String.uppercase_ascii (List.hd t)) else
     if h = "steal" && List.length t = 3 && check_int (List.hd t) then 
       let id = int_of_string (List.hd t) in 
-      Steal (id, List.nth t 1, List.nth t 2)
+      Steal (id, List.nth t 1 |> String.uppercase_ascii, 
+             List.nth t 2 |> String.uppercase_ascii)
     else
       raise Malformed 
 
 let parse_check str = 
-  match List.rev (String.split_on_char ' ' str |> remove "" []) with
+  match List.rev (String.split_on_char ' ' str |> remove "" [] 
+                  |> List.map String.uppercase_ascii) with
   | [] -> raise Empty 
   | h :: t -> 
     if h = "invalid" && t != []
