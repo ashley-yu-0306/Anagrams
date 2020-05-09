@@ -121,16 +121,22 @@ let game_tests = [
 ]
 
 (*=============== Tests for State ==============*)
+(* the set of all letters in the json *)
 let set = all_to_t all
+(* the state with 1 player, 5 turns, and game mode = "normal" *)
 let st_norm = init_state set 1 5 "normal" all
+(* the state with 2 player, 5 turns, and game mode = "pool" *)
 let st_pool = init_state set 2 5 "pool" all 
-(*state after swapping "l" in normal*)
 
+(*state after swapping "l" in normal*)
 let swap_st_norm = match swap "a" st_norm json with 
     Legal st -> st | Illegal _ -> raise Error 
 
+(* the current letter of player 1 in st_pool *)
 let cur_letter1 = current_player_letter st_pool
+(* the point value of cur_letter1 *)
 let cur_letter1_p = calculate_word_points cur_letter1 st_pool
+(* the point value of "ab" ^ curr_letter *)
 let points = ((cur_letter1_p + 4) |> float_of_int)*. 1.2 |> int_of_float
 
 (*state after creating "ab"^curr_letter in pool*)
@@ -140,9 +146,12 @@ let create_ab_st_pool = match create ("ab"^cur_letter1) st_pool false with
 let create_ab_pass_st_pool = match pass create_ab_st_pool with 
     Legal st -> st | Illegal _ -> raise Error 
 
+(* the current letter of player 2 in st_pool *)
 let cur_letter2 = current_player_letter create_ab_st_pool
-let cur_player = current_player create_ab_st_pool
-let create_ab_steal_st_pool = match steal ("ab"^cur_letter1) ("abc"^cur_letter2)
+
+(*state after stealing "ab"^cur_letter1 to make "ab"^cur_letter1^cur_letter2*)
+let create_ab_steal_st_pool = match steal ("ab"^cur_letter1) 
+                                      ("ab"^cur_letter1^cur_letter2)
                                       1 create_ab_st_pool with 
   Legal st -> st | Illegal s -> raise Error
 
