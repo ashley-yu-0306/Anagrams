@@ -56,6 +56,10 @@ val get_pool: t -> Game.t
     [state]. *)
 val next_player: t -> player_id
 
+(** [prev_player_points state] gives the points of the player whose turn 
+    happened last in [state]. *)
+val prev_player_points: t -> player_id
+
 (** [calculate_word_points word set] is the points of [word] based on point
     values in [set]. *)
 val calculate_word_points: Command.word ->t -> Game.points

@@ -85,6 +85,14 @@ let next_player state =
   then state.current_player + 1 
   else 1
 
+let previous_player state = 
+  if not (state.current_player = 1)
+  then state.current_player - 1 
+  else state.total_players
+
+let prev_player_points state = 
+  (List.assoc (previous_player state) state.player_list).total_points
+
 (* [remove_dupl lst acc] is [lst] with duplications removed. 
    Requires: [acc] is the empty list. *)
 let rec remove_dupl lst acc = 

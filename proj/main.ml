@@ -191,7 +191,7 @@ let rec loopgame2 game st json rep: unit =
             | Illegal s-> 
               (ANSITerminal.(print_string [red] s)); 
               loopgame2 (get_pool st) st json true
-            | Legal st' -> let points' = current_player_points st' in
+            | Legal st' -> let points' = prev_player_points st' in
               action_message "create" w (points'-points);
               ignore(Unix.sleep 2);ignore(Sys.command "clear"); 
               loopgame2 (get_pool st') st' json false
@@ -259,7 +259,7 @@ let rec loopgame game st json rep: unit =
               | Illegal s-> 
                 (ANSITerminal.(print_string [red] s); 
                  loopgame game st json true)
-              | Legal st' -> let points' = current_player_points st' in
+              | Legal st' -> let points' = prev_player_points st' in
                 action_message "create" w (points'-points);
                 ignore(Unix.sleep 2);ignore(Sys.command "clear"); 
                 loopgame game st' json false
@@ -269,7 +269,7 @@ let rec loopgame game st json rep: unit =
             match swap l st json with 
             | Illegal s-> print_endline s; loopgame game st json true;
             | Legal st' -> 
-              let points' = current_player_points st' in
+              let points' = prev_player_points st' in
               action_message "swap" l (points-points');
               ignore(Unix.sleep 2);
               ignore(Sys.command "clear");
