@@ -125,16 +125,23 @@ let set = all_to_t all
 let st_norm = init_state set 1 5 "normal" all
 let st_pool = init_state set 2 5 "pool" all 
 (*state after swapping "l" in normal*)
+
 let swap_st_norm = match swap "a" st_norm json with 
     Legal st -> st | Illegal _ -> raise Error 
-(*state after creating "ab" in pool*)
-(* let create_ab_st_pool = match create "ab" st_pool false with 
-    Legal st -> st | Illegal _ -> raise Error *)
+
+let cur_letter1 = current_player_letter st_pool
+
+(*state after creating "ab"^curr_letter in pool*)
+let create_ab_st_pool = match create ("ab"^cur_letter1) st_pool false with 
+    Legal st -> st | Illegal s -> print_endline s; raise Error
 (*state after creating "ab" and passing in pool*)
-(* let create_ab_pass_st_pool = match pass create_ab_st_pool with 
-    Legal st -> st | Illegal _ -> raise Error  *)
-(* let create_ab_steal_st_pool = match steal "ab" "abc" 1 create_ab_st_pool with 
-    Legal st -> st | Illegal _ -> raise Error *)
+let create_ab_pass_st_pool = match pass create_ab_st_pool with 
+    Legal st -> st | Illegal _ -> raise Error 
+
+let cur_letter2 = current_player_letter create_ab_st_pool
+let cur_player = current_player create_ab_st_pool
+let create_ab_steal_st_pool = match steal ("ab"^cur_letter1) ("abc"^cur_letter2) 1 create_ab_st_pool with 
+    Legal st ->st | Illegal s -> raise Error
 
 let state_tests = [
   (*testing initializing of player*)

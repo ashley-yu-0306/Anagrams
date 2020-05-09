@@ -71,7 +71,6 @@ let current_player_points state =
 let current_player_letter_set state =
   (List.assoc state.current_player state.player_list).player_letter_set
 
-(** [current_player_letter st] is the current player's letter at state [st]. *)
 let current_player_letter state = 
   (List.assoc state.current_player state.player_list).current_letter
 
