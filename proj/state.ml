@@ -207,6 +207,8 @@ let update_pass state newset v = {
   stolen = v.stolen
 }
 
+(* [update_check state newset word v] is the player [v] after invalidating 
+   [word]. [v] takes set [newset]. *)
 let update_check state newset word v = {
   player_words = 
     (let words = String.uppercase_ascii word in
