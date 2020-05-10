@@ -115,12 +115,13 @@ let calculate_bonus_points word base =
   then base |> float_of_int |> (fun x -> x*. 1.5) |> int_of_float
   else base
 
-let calculate_word_points word st : Game.points= 
+let calculate_base_points word st = 
   let a = state_alpha st in
-  let base = List.fold_left 
-      (fun x y -> x + Game.get_points a y) 0 (word |> word_to_cl |> cl_to_ll) in
-  calculate_bonus_points word base
+  List.fold_left 
+    (fun x y -> x + Game.get_points a y) 0 (word |> word_to_cl |> cl_to_ll) 
 
+let calculate_word_points word st : Game.points = 
+  let base = calculate_base_points word st in calculate_bonus_points word base
 
 (* [start_message_help st stolen pt] prints information about (a) steal 
    action(s) as recorded in [stolen]. Total [pt] lost and the player id(s) 

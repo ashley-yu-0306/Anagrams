@@ -67,8 +67,12 @@ val prev_player_points: t -> player_id
    points depending on the length of [word]. *)
 val calculate_bonus_points: Command.word -> Game.points -> Game.points 
 
-(** [calculate_word_points word st] is the points of [word] based on point
+(** [calculate_base_points word st] is the points of [word] based on point
     values in [st]. *)
+val calculate_base_points: Command.word -> t -> Game.points
+
+(** [calculate_word_points word st] is the points of [word] based on point
+    values in [st] with bonus points added. *)
 val calculate_word_points: Command.word -> t -> Game.points
 
 (** [start_message st] prints available messages for the current player in
