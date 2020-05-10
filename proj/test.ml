@@ -25,18 +25,21 @@ open Command
 open State
 open OUnit2
 
-(* Error is thrown when the state is Illegal. *)
+(** [Error] is thrown when the state is Illegal. *)
 exception Error 
 
 (*=============== Tests for Game ==============*)
 let json = Yojson.Basic.from_file "alphabet1.json"
 let alp = from_json json
+(* set represents the game with 6 letters from the alphabet. *)
 let set = combo_set_var alp 6
 let full_subset_of_set = (get_letters set)
 let subset_of_set1 = 
   (List.nth (get_letters set) 0)::((List.nth (get_letters set) 3)::[])
 let all = all_letters alp
 let set_str = create_combo_word set
+(* set2 represents the game with all of the letters in the alphabet. *)
+let set2 = all_to_t all
 
 let game_tests = [
   "Set length = 6" >:: (fun _ -> 
@@ -53,6 +56,9 @@ let game_tests = [
 
   "create_combo_word produces string of set's size" >:: 
   (fun _ -> assert_equal 6 (String.length (create_combo_word set)));
+
+  "create_combo_word test 2: produces string of set's size" >:: 
+  (fun _ -> assert_equal 26 (String.length (create_combo_word set2)));
 
   "remove_letter test 1: removes all letters from game when
    list inputted is all the letters in the set" >:: 
@@ -91,7 +97,7 @@ let st_norm = init_state set 1 5 "normal" all
 (* the state with 2 player, 5 turns, and game mode = "pool" *)
 let st_pool = init_state set 2 5 "pool" all 
 
-(*state after swapping "l" in normal*)
+(* state after swapping "l" in normal. *)
 let swap_st_norm = match swap "a" st_norm json with 
     Legal st -> st | Illegal _ -> raise Error 
 
@@ -102,10 +108,10 @@ let cur_letter1_p = calculate_word_points cur_letter1 st_pool
 (* the point value of "ab" ^ curr_letter *)
 let points = ((cur_letter1_p + 4) |> float_of_int)*. 1.2 |> int_of_float
 
-(*state after creating "ab"^curr_letter in pool*)
+(* state after creating "ab"^curr_letter in pool. *)
 let create_ab_st_pool = match create ("ab"^cur_letter1) st_pool false with 
     Legal st -> st | Illegal s -> print_endline s; raise Error
-(*state after creating "ab" and passing in pool*)
+(* state after creating "ab" and passing in pool. *)
 let create_ab_pass_st_pool = match pass create_ab_st_pool with 
     Legal st -> st | Illegal _ -> raise Error 
 
@@ -119,7 +125,7 @@ let create_ab_steal_st_pool = match steal ("ab"^cur_letter1)
   Legal st -> st | Illegal s -> raise Error
 
 let state_tests = [
-  (*testing initializing of player*)
+  (* testing initializing of player. *)
   "init id" >:: (fun _ -> assert_equal (current_player st_pool) 1);
   "init pts">:: (fun _ -> assert_equal (current_player_points st_pool) 0);
   "init word" >:: (fun _ -> assert_equal (current_player_wordlist st_pool) []);
@@ -131,8 +137,8 @@ let state_tests = [
   (fun _ -> assert_equal (create "a" swap_st_norm false) 
       (Illegal 
          "This word cannot be constructed with the current letter set. \n"));
-  (*testing create updates appropriate points & updates player & turns left
-    while also testing that pass updates player*)
+  (* testing create updates appropriate points & updates player & turns left
+     while also testing that pass updates player. *)
   "create ''" >:: 
   (fun _ -> assert_equal (create "" st_pool false) 
       (Illegal "Please enter a word."));
@@ -147,15 +153,15 @@ let state_tests = [
   "create ab p1 pts" >:: (fun _ -> assert_equal 
                              (current_player_points create_ab_pass_st_pool) 
                              points); 
-  (*testing steal updates points of player whose word was stolen, updates 
-    player & turns left*)
+  (* testing steal updates points of player whose word was stolen, updates 
+     player & turns left. *)
   "steal 'bb'" >:: 
   (fun _ -> assert_equal (steal "bb" "bbc" 1 create_ab_st_pool)
       (Illegal ("The word 'BB' is not in player 1's word list."))); 
   "steal 'ab'" >:: 
   (fun _ -> assert_equal (current_player_points create_ab_steal_st_pool) 0);
   "steal turns" >:: (fun _ -> assert_equal (turns create_ab_steal_st_pool) 9); 
-  (*testing that point values of calculate_word_points adhere to multipliers*)
+  (* testing that pt values of calculate_word_points adhere to multipliers. *)
   "ab" >:: (fun _ -> assert_equal (calculate_word_points "ab" st_pool) 4);
   "abc" >:: (fun _ -> assert_equal (calculate_word_points "abc" st_pool) 7);
   "abcde" >:: (fun _ -> assert_equal 
@@ -163,8 +169,7 @@ let state_tests = [
 ]
 
 (*=============== Tests for Command ==============*)
-
-
+(** [make_parse_test name str expected_output] is the test for [parse].*)
 let make_parse_test
     (name: string)
     (str: string)
@@ -172,6 +177,7 @@ let make_parse_test
   name >:: (fun _ -> 
       assert_equal expected_output (parse str))
 
+(** [make_check_test name str expected_output] is the test for [parse_check].*)
 let make_check_test
     (name: string)
     (str: string)
@@ -212,6 +218,10 @@ let command_tests = [
   "Malformed: valid" >:: (fun _ -> 
       assert_raises Malformed (fun _ -> 
           parse_check "valid ok"));
+  "parse number" >:: (fun _ -> 
+      assert_equal (parse_number "2") 2); 
+  "parse not a number gives 0" >:: (fun _ -> 
+      assert_equal (parse_number "a") 0); 
 ]
 
 let suite =
