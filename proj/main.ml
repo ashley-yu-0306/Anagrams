@@ -115,7 +115,7 @@ let rec check_words_helper game st wl acc =
 let check_ph_inv game st wl = 
   let invalid_words = check_words_helper game st wl [] in
   stdprint_list invalid_words;
-  State.valid game (State.invalid invalid_words game st)
+  State.valid game st
 
 (** [check_phase game st] is the check phase of [game] with the final state 
     [st], where an API call returns a lookup of the word,
