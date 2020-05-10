@@ -107,7 +107,7 @@ let action_message a w p st = begin
       ("\n'"^w'^"' has been swapped. You've lost "^p'^" points.")
     else if a = "create" then  
       let length = String.length w in 
-      let base = calculate_word_points w st in 
+      let base = calculate_base_points w st in 
       let bonus = (calculate_bonus_points w base) - base in 
       let bonus_text = if length >= 3 then (" and "^ string_of_int bonus 
                                             ^ " bonus point" ^ 
