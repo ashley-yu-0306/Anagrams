@@ -92,7 +92,8 @@ let create_combo_word lst =
   List.fold_left (fun a k -> k ^ a) "" (get_letters lst)
 
 let json_lookup url = 
-  (Client.get (Uri.of_string ("http://www.anagramica.com/lookup/" ^ url ^ "?callback=<callback>")) >>=
+  (Client.get (Uri.of_string ("http://www.anagramica.com/lookup/" ^ url 
+                              ^ "?callback=<callback>")) >>=
    fun(resp,body) -> 
    body |> Cohttp_lwt.Body.to_string >|= Yojson.Basic.from_string)
 

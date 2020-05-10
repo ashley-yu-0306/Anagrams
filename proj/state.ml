@@ -311,7 +311,7 @@ let create word state s =
       player_list = new_player_l;
       current_player = next_player state;
       total_players = state.total_players;
-      set = if state.mode = "pool" 
+      set = if state.mode = "pool" && s=false
         then remove_letter state.set used_letters_l 
         else state.set
     } 

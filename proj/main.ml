@@ -126,7 +126,8 @@ let rec check_phase game st : unit =
     let player_words = List.map fst (current_player_wordlist st) in
 
     print_endline
-      ("\n\nPlayer " ^ (State.current_player st |> string_of_int) ^ "'s Words: ");
+      ("\n\nPlayer " ^ (State.current_player st |> string_of_int) 
+      ^ "'s Words: ");
     State.print_player_word_list st (current_player st);
     print_endline "Their invalid words according to the dictionary: ";
     (check_ph_inv game st player_words) |> check_phase game
@@ -145,10 +146,11 @@ let action_message a w p st = begin
       let base = calculate_base_points w st in 
       let bonus = (calculate_bonus_points w base) - base in 
       let bonus_text = if length >= 3 then (" and "^ string_of_int bonus 
-                                            ^ " bonus point" ^ 
+                                            ^ " bonus point " ^ 
                                             (if bonus > 1 then "s " else "") 
-                                            ^ "for making a word
-      with " ^ string_of_int length ^ " letters") else "" in
+                                            ^ "for making a word \
+                                            with " ^ string_of_int length ^
+                                            " letters") else "" in
       ("\n'"^w'^"' has been created. You've gained "^ string_of_int base ^
        " points" ^ bonus_text ^ ".")
     else "" in print_endline message; end
@@ -259,8 +261,8 @@ let rec loopgame2 game st json rep: unit =
                 | Legal st' -> ignore(Unix.sleep 2);ignore(Sys.command "clear");
                   loopgame2 (get_pool st') st' json false end
           end
-        |_ ->  ANSITerminal.(print_string [red] "Malformed command. 
-                             Please use available commands.\n"; 
+        |_ ->  ANSITerminal.(print_string [red] "Malformed command. \
+        Please use available commands.\n"; 
                              loopgame2 game st json true)
       )
 
