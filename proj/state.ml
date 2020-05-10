@@ -107,16 +107,21 @@ let word_to_cl n = List.init (String.length n) (String.get n)
 let cl_to_ll cl = List.map (fun x -> Char.escaped x) cl 
                   |> List.map String.uppercase_ascii
 
-let calculate_word_points word st : Game.points= 
-  let a = state_alpha st in
-  let base = List.fold_left 
-      (fun x y -> x + Game.get_points a y) 0 (word |> word_to_cl |> cl_to_ll) in 
+let calculate_bonus_points word base = 
   let length = String.length word in 
   if length >= 3 && length < 5 
   then base |> float_of_int |> (fun x -> x*. 1.2) |> int_of_float
   else if length >= 5 
   then base |> float_of_int |> (fun x -> x*. 1.5) |> int_of_float
   else base
+
+let calculate_base_points word st = 
+  let a = state_alpha st in
+  List.fold_left 
+    (fun x y -> x + Game.get_points a y) 0 (word |> word_to_cl |> cl_to_ll) 
+
+let calculate_word_points word st : Game.points = 
+  let base = calculate_base_points word st in calculate_bonus_points word base
 
 (* [start_message_help st stolen pt] prints information about (a) steal 
    action(s) as recorded in [stolen]. Total [pt] lost and the player id(s) 
@@ -128,7 +133,7 @@ let rec start_message_help st stolen pt =
   | (id',word)::t -> 
     print_string ("Player "^string_of_int id'^ " stole your word '" ^ 
                   word ^ "' last round! "); 
-    let pt' = pt + calculate_word_points word st in 
+    let pt' = pt + (calculate_word_points word st) in 
     start_message_help st t pt'
 
 let start_message st = 

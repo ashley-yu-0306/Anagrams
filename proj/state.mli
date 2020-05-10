@@ -63,9 +63,17 @@ val next_player: t -> player_id
     happened last in [state]. *)
 val prev_player_points: t -> player_id
 
-(** [calculate_word_points word set] is the points of [word] based on point
-    values in [set]. *)
-val calculate_word_points: Command.word ->t -> Game.points
+(* [calculate_bonus_points base word] is [base] points added with bonus
+   points depending on the length of [word]. *)
+val calculate_bonus_points: Command.word -> Game.points -> Game.points 
+
+(** [calculate_base_points word st] is the points of [word] based on point
+    values in [st]. *)
+val calculate_base_points: Command.word -> t -> Game.points
+
+(** [calculate_word_points word st] is the points of [word] based on point
+    values in [st] with bonus points added. *)
+val calculate_word_points: Command.word -> t -> Game.points
 
 (** [start_message st] prints available messages for the current player in
     [state]. *)
