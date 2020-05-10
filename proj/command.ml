@@ -11,6 +11,8 @@ exception Empty
 
 exception Malformed
 
+exception SingleChar
+
 type check =
   | Valid
   | Invalid of word list
@@ -36,8 +38,10 @@ let parse str =
   | [] -> raise(Empty)
   | h :: t -> 
     if h = "quit" && t = [] then Quit else 
-    if h = "create" && List.length t = 1 then 
-      Create (String.uppercase_ascii (List.hd t)) else 
+    if h = "create" && List.length t = 1 then begin
+      if String.length (List.hd t) > 1 then 
+        Create (String.uppercase_ascii (List.hd t)) else raise SingleChar end
+    else 
     if h = "pass" && t = [] then Pass else
     if h = "swap" && List.length t = 1 then 
       Swap (String.uppercase_ascii (List.hd t)) else

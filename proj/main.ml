@@ -181,6 +181,10 @@ let rec loopgame2 game st json rep: unit =
       ANSITerminal.(print_string [red] 
                       "Malformed command. Please use available commands.\n"); 
       loopgame2 game st json true
+    |exception SingleChar -> ANSITerminal.(print_string [red] 
+                                             "Your word is too short. \
+                                             Please input a valid word.\n"); 
+      loopgame2 game st json true
     | your_command ->  (match your_command with
         | Quit -> print_endline "Bye!"; exit 0
         | Pass -> 
