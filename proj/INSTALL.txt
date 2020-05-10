@@ -12,6 +12,6 @@ opam install lwt
 
 2. Type 'make play' to build and start the game.
 
-3. When prompted, enter filename 'alphabet1.json'.
+3. When prompted, enter filename 'easy.json', or 'medium.json', or 'hard.json'
 
 4. Follow the instructions prompted throughout the game.
