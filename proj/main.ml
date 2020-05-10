@@ -106,7 +106,7 @@ let rec check_words_helper game st wl acc =
   match wl with
   | [] -> acc
   | h::t -> (let l_h = String.lowercase_ascii h in
-             if Lwt_main.run(make_found(l_h)) = 1
+             if Lwt_main.run(make_found(l_h)) = 1 
              then check_words_helper game st t acc
              else check_words_helper game st t (h::acc))
 
@@ -147,9 +147,9 @@ let action_message a w p st = begin
       let base = calculate_base_points w st in 
       let bonus = (calculate_bonus_points w base) - base in 
       let bonus_text = if length >= 3 then (" and "^ string_of_int bonus 
-                                            ^ " bonus point " ^ 
+                                            ^ " bonus point" ^ 
                                             (if bonus > 1 then "s " else "") 
-                                            ^ "for making a word \
+                                            ^ " for making a word \
                                             with " ^ string_of_int length ^
                                             " letters") else "" in
       ("\n'"^w'^"' has been created. You've gained "^ string_of_int base ^
@@ -419,14 +419,21 @@ let play_game j =
     let initst = init_state our_game num_players num_turns game_mode alpha in 
     if game_mode = "normal" then begin
       ignore(Sys.command "clear");
-      ANSITerminal.(print_string [red] 
-                      "GAME MODE: NORMAL \n \n"); 
+      ANSITerminal.(print_string [red;Underlined; Bold] 
+                      "GAME MODE: NORMAL\n\n"); 
       loopgame our_game initst json false
     end
     else begin
       ignore(Sys.command "clear");
-      ANSITerminal.(print_string [red] 
-                      "GAME MODE: POOL \n \n"); 
+      ANSITerminal.(print_string [red;Underlined; Bold] 
+                      "GAME MODE: POOL\n\n"); 
+      ANSITerminal.(print_string [black;Bold] 
+                      "The rules for POOL: \n"); 
+      print_endline ("Players create words using their selected letter, \
+      and if not possible, they pass their turn, such that \
+      their letter is put into the pool. \
+      Players can also steal from others, using their \
+      letter to create a word using another player's word. ");
       loopgame2 our_game initst json false
     end
   else begin
