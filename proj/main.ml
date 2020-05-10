@@ -64,26 +64,26 @@ let rec check_phase2 game st =
          | Invalid wl -> State.invalid wl game st |> check_phase2 game))
   )
 
-(** [check_words_helper game st alst wl acc] checks if the words the player
+(** [check_words_helper2 game st alst wl acc] checks if the words the player
     created [wl] are in the anagrams list from the API [alst]. *)
-let rec check_words_helper game st alst wl acc = 
+let rec check_words_helper2 game st alst wl acc = 
   match wl with
   | [] -> acc
   | h::t -> if (List.mem (String.lowercase_ascii h) alst) 
-    then check_words_helper game st alst t (acc)
-    else check_words_helper game st alst t (h::acc)
+    then check_words_helper2 game st alst t (acc)
+    else check_words_helper2 game st alst t (h::acc)
 
-(** [check_ph_inv game st alst wl] creates the new state after
+(** [check_ph_inv2 game st alst wl] creates the new state after
     the invalid words are found fron checking [wl] against [alst]. *)
-let check_ph_inv game st alst wl = 
-  let invalid_words = check_words_helper game st alst wl [] in
+let check_ph_inv2 game st alst wl = 
+  let invalid_words = check_words_helper2 game st alst wl [] in
   stdprint_list invalid_words;
   State.valid game (State.invalid invalid_words game st)
 
-(** [check_phase game st] is the check phase of [game] with the final state 
+(** [check_phase3 game st] is the check phase of [game] with the final state 
     [st], where an API call returns the possible set of anagrams,
     and the player's word lists are compared to that set. *)
-let rec check_phase game st : unit = 
+let rec check_phase3 game st : unit = 
   if current_player st > State.player_count st 
   then check_phase2 game (State.next_player_state game st)
   else
@@ -95,7 +95,41 @@ let rec check_phase game st : unit =
     State.print_player_word_list st (current_player st);
     let player_words = List.map (fun (k,v) -> k) (current_player_wordlist st) in
     print_endline "Their invalid words according to the dictionary: ";
-    (check_ph_inv game st listcomp player_words) |> check_phase game
+    (check_ph_inv2 game st listcomp player_words) |> check_phase3 game
+
+
+(** [check_words_helper game st alst wl acc] checks if the words the player
+    created [wl] are in the anagrams list from the API [alst]. *)
+let rec check_words_helper game st wl acc = 
+  match wl with
+  | [] -> acc
+  | h::t -> (let l_h = String.lowercase_ascii h in
+             if Lwt_main.run(make_found(l_h)) = 1
+             then check_words_helper game st t acc
+             else check_words_helper game st t (h::acc))
+
+(** [check_ph_inv game st alst wl] creates the new state after
+    the invalid words are found fron checking [wl] against [alst]. *)
+let check_ph_inv game st wl = 
+  let invalid_words = check_words_helper game st wl [] in
+  stdprint_list invalid_words;
+  State.valid game (State.invalid invalid_words game st)
+
+(** [check_phase game st] is the check phase of [game] with the final state 
+    [st], where an API call returns a lookup of the word,
+    checking whether the word exists in a dictionary. *)
+let rec check_phase game st : unit = 
+  if current_player st > State.player_count st 
+  then check_phase2 game (State.next_player_state game st)
+  else
+    let player_words = List.map fst (current_player_wordlist st) in
+
+    print_endline
+      ("\n\nPlayer " ^ (State.current_player st |> string_of_int) ^ "'s Words: ");
+    State.print_player_word_list st (current_player st);
+    print_endline "Their invalid words according to the dictionary: ";
+    (check_ph_inv game st player_words) |> check_phase game
+
 
 (* [action_message a w p] prints information about word [w] and the points [p]
    gained or lost as a result of action [a]*)

@@ -29,15 +29,29 @@ open OUnit2
 exception Error 
 
 (*=============== Tests for Game ==============*)
+
+(* json is the json file. *)
 let json = Yojson.Basic.from_file "alphabet1.json"
+
+(* alp is the alphabet read from the json. *)
 let alp = from_json json
+
 (* set represents the game with 6 letters from the alphabet. *)
 let set = combo_set_var alp 6
+
+(* full_subset_of_set is a letter list of all letters from set. *)
 let full_subset_of_set = (get_letters set)
+
+(* subset_of_set1 is a letter list of 2 letters from set. *)
 let subset_of_set1 = 
   (List.nth (get_letters set) 0)::((List.nth (get_letters set) 3)::[])
+
+(* all represents all the letters in the alphabet. *)
 let all = all_letters alp
+
+(* set_str represents the string made from the letters in set. *)
 let set_str = create_combo_word set
+
 (* set2 represents the game with all of the letters in the alphabet. *)
 let set2 = all_to_t all
 

@@ -91,6 +91,11 @@ let get_letters game = List.map fst game
 let create_combo_word lst = 
   List.fold_left (fun a k -> k ^ a) "" (get_letters lst)
 
+let json_lookup url = 
+  (Client.get (Uri.of_string ("http://www.anagramica.com/lookup/" ^ url ^ "?callback=<callback>")) >>=
+   fun(resp,body) -> 
+   body |> Cohttp_lwt.Body.to_string >|= Yojson.Basic.from_string)
+
 (** [json_anagram url] makes an API call and returns a promise of the Yojson. *)
 let json_anagram url = 
   (Client.get (Uri.of_string ("http://www.anagramica.com/all/:" ^ url)) >>=
@@ -101,6 +106,11 @@ let json_anagram url =
     of the combo set. *)
 let all_anagrams json = 
   json |> member "all" |> Yojson.Basic.Util.to_list |> List.map(to_string)
+
+let all_found json = 
+  json |> member "found" |> Yojson.Basic.Util.to_int
+
+let make_found url = json_lookup url >>= fun y -> all_found y |> Lwt.return
 
 let make_a_lst url = json_anagram url >>= fun y -> all_anagrams y |> Lwt.return
 
