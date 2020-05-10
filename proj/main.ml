@@ -91,14 +91,15 @@ let rec check_phase game st : unit =
     let pp = make_a_lst gamescramble in
     let listcomp = Lwt_main.run (pp) in
     print_endline
-      ("\n\nPlayer " ^ (State.current_player st |> string_of_int) ^ "'s Words: ");
+      ("\n\nPlayer " ^ (State.current_player st |> string_of_int) ^ 
+       "'s Words: ");
     State.print_player_word_list st (current_player st);
     let player_words = List.map (fun (k,v) -> k) (current_player_wordlist st) in
     print_endline "Their invalid words according to the dictionary: ";
     (check_ph_inv game st listcomp player_words) |> check_phase game
 
-(* [action_message a w p st] prints information about word [w] and the points [p]
-   gained or lost as a result of action [a] for state [st]. *)
+(* [action_message a w p st] prints information about word [w] and the points 
+   [p] gained or lost as a result of action [a] for state [st]. *)
 let action_message a w p st = begin
   let w' = String.uppercase_ascii w in 
   let p' = string_of_int (abs p) in
@@ -221,7 +222,7 @@ let rec loopgame2 game st json rep: unit =
                   loopgame2 (get_pool st') st' json false end
           end
         |_ ->  ANSITerminal.(print_string [red] "Malformed command. 
-                                                                                                                   Please use available commands.\n"; 
+                             Please use available commands.\n"; 
                              loopgame2 game st json true)
       )
 
@@ -289,12 +290,11 @@ let rec loopgame game st json rep: unit =
               loopgame game st' json false end
           else begin
             (ANSITerminal.(print_string [red]  
-                             "This letter is not in your letter set. \
-                                                                                                                                                                             Please try again.\n"); 
+                             "This letter is not in your letter set. \n"); 
              loopgame game st json true)
           end
         |_ -> ANSITerminal.(print_string [red] "Malformed command. 
-                                                                                                                                                                                                            Please use available commands.\n"; 
+                            Please use available commands.\n"; 
                             loopgame2 game st json true)
       )
 
