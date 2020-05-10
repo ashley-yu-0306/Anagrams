@@ -82,7 +82,8 @@ let check_ph_inv2 game st alst wl =
 
 (** [check_phase3 game st] is the check phase of [game] with the final state 
     [st], where an API call returns the possible set of anagrams,
-    and the player's word lists are compared to that set. *)
+    and the player's word lists are compared to that set.
+    Created for future version of game.  *)
 let rec check_phase3 game st : unit = 
   if current_player st > State.player_count st 
   then check_phase2 game (State.next_player_state game st)
@@ -127,7 +128,7 @@ let rec check_phase game st : unit =
 
     print_endline
       ("\n\nPlayer " ^ (State.current_player st |> string_of_int) 
-      ^ "'s Words: ");
+       ^ "'s Words: ");
     State.print_player_word_list st (current_player st);
     print_endline "Their invalid words according to the dictionary: ";
     (check_ph_inv game st player_words) |> check_phase game

@@ -108,6 +108,9 @@ let json_anagram url =
 let all_anagrams json = 
   json |> member "all" |> Yojson.Basic.Util.to_list |> List.map(to_string)
 
+(** [all_found json] is the int 1 or 0, 
+    returning 1 if the word looked up is in the dictionary,
+    returning 0 if the word looked up does not exist. *)
 let all_found json = 
   json |> member "found" |> Yojson.Basic.Util.to_int
 
