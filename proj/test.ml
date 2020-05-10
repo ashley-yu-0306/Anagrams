@@ -206,6 +206,9 @@ let command_tests = [
   "Malformed: pass" >:: (fun _ -> 
       assert_raises Malformed (fun _ -> 
           parse "pass a"));
+  "SingleChar" >:: (fun _ -> 
+      assert_raises SingleChar (fun _ -> 
+          parse "create i"));
   make_check_test "valid" "valid" Valid;
   make_check_test "invalid" "invalid this is invalid" 
     (Invalid ["THIS";"IS";"INVALID"]);
