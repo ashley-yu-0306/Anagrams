@@ -99,13 +99,11 @@ let rec remove_dupl lst acc =
   | [] -> acc
   | h::t -> if List.mem h acc then remove_dupl t acc else remove_dupl t (h::acc)
 
-(**[word_to_cl n] is a char list of the input [word].*)
-let word_to_cl n = List.init (String.length n) (String.get n)
-
-(**[cl_to_ll cl] is a string list of char list [cl], with all letters in 
-   uppercase.*)
-let cl_to_ll cl = List.map (fun x -> Char.escaped x) cl 
-                  |> List.map String.uppercase_ascii
+(** [string_to_sl s i] is the string list of [s].
+    Required: [s] is all in uppercase. [acc] is [[]]. *)
+let rec string_to_sl s acc = let i = List.length acc in
+  if i = String.length s then List.rev acc 
+  else string_to_sl s (String.make 1 (String.get s i) :: acc)
 
 let calculate_bonus_points word base = 
   let length = String.length word in 
@@ -118,7 +116,7 @@ let calculate_bonus_points word base =
 let calculate_base_points word st = 
   let a = state_alpha st in
   List.fold_left 
-    (fun x y -> x + Game.get_points a y) 0 (word |> word_to_cl |> cl_to_ll) 
+    (fun x y -> x + Game.get_points a y) 0 (string_to_sl word []) 
 
 let calculate_word_points word st : Game.points = 
   let base = calculate_base_points word st in calculate_bonus_points word base
@@ -188,7 +186,7 @@ let update_steal state newset word v id2 =  {
      let p = List.mem_assoc words v.player_words in 
      if p then List.remove_assoc words v.player_words else 
        List.remove_assoc words v.player_words);
-  total_points = v.total_points + (calculate_word_points word state);
+  total_points = v.total_points - (calculate_word_points word state);
   player_letter_set = newset;
   current_letter = random_letter (get_pool state);
   swaps =  v.swaps;
@@ -274,16 +272,11 @@ let rec check_illegal ll combo_l =
 let check_letter_used st word = String.contains (String.uppercase_ascii word)
     (String.get (current_player_letter st) 0) 
 
-(** [string_to_sl s i] is the string list of [s], where [i] is the
-    length of the string subtracted by 1. All in uppercase. *)
-let rec string_to_sl s i = let ups = String.uppercase_ascii s in
-  if i>(-1) then 
-    String.make 1 (String.get ups i) ::string_to_sl ups (i-1) else [] 
 
 let create_pl_combo_word playerwl = 
   let pwlkey = List.map fst playerwl in
   let str = List.fold_left (fun a k -> k ^ a) "" (pwlkey) in
-  let str_list = string_to_sl str (String.length str - 1) in 
+  let str_list = string_to_sl str [] in 
   let without_dups = remove_dupl str_list [] in
   let finish = List.fold_left (fun a k -> k ^ a) "" (without_dups) in
   if String.length finish < 10 then finish else ""
@@ -294,7 +287,7 @@ let create word state s =
                  (Game.get_letters (get_pool state))
                else Game.get_letters (current_player_letter_set state)) in
   if word = "" then Illegal "Please enter a word."
-  else if (s=false) && (check_illegal (word |> word_to_cl |> cl_to_ll) combo) 
+  else if (s=false) && (check_illegal (string_to_sl word []) combo) 
   then Illegal "This word cannot be constructed with the current letter set. \n"
   else if state.mode = "pool" && not(check_letter_used state word)
   then Illegal ("The word '" ^ word ^ "' does not contain your letter.\n")
@@ -304,7 +297,7 @@ let create word state s =
     let new_set = (List.assoc player player_l).player_letter_set in
     let new_player_l = 
       update_player_list state new_set player_l word "create" player (-1) in
-    let used_letters_l = string_to_sl word ((String.length word)-1) in
+    let used_letters_l = string_to_sl word [] in
     Legal {
       state with 
       turns_left = state.turns_left - 1;
@@ -348,24 +341,39 @@ let swap l state json =
           current_player = next_player state;
         }
 
+(** [check_steal_illegal_helper wl nwl st] is the error message if the steal 
+    contains anything other than letters in the stolen word and the current 
+    player's own letter.*)
+let rec check_steal_illegal_helper wl nwl st =  
+  let cletter = current_player_letter st in
+  match wl with 
+  | [] -> if nwl = [cletter] then "ok" else begin
+  if List.length nwl > 1 then "Your word can only contain the letters in the \
+  stolen word and your own letter.\n" else
+  "Your word does not contain your letter.\n" end
+  | h :: t -> if not (List.mem h nwl) then 
+      "You must use letters from the stolen word.\n"
+    else check_steal_illegal_helper t (remove h nwl []) st
+
+(** [check_steal_illegal w nw st] is [false] iff [nw] only contains [w] and the 
+    current player's current letter.*)
+let check_steal_illegal w nw st = let wl = string_to_sl w [] in 
+  let nwl = string_to_sl nw [] in check_steal_illegal_helper wl nwl st
+
 let steal w nw p st = 
-  let wup = String.uppercase_ascii w in
-  let nwup = String.uppercase_ascii nw in 
   let p' = current_player st in
   let player_l = st.player_list in 
   let player = List.assoc p player_l in
   let words = player.player_words in 
   let new_set = player.player_letter_set in
-  if not (List.mem_assoc wup words) then 
-    Illegal ("The word '" ^ wup ^ "' is not in player " ^ string_of_int p ^ 
-             "'s word list.")
-  else if not (check_letter_used st nw) 
-  then Illegal ("The word '" ^ nwup ^ "' does not contain your letter.")
-  else if not ((String.length nwup) = ((String.length wup) + 1)) 
-  then Illegal ("You cannot use letters in the pool to steal a word.")
+  if not (List.mem_assoc w words) then 
+    Illegal ("The word '" ^ w ^ "' is not in player " ^ string_of_int p ^ 
+             "'s word list.\n")
+  else (let s = check_steal_illegal w nw st in
+  if s <> "ok" then Illegal s
   else 
     Legal {st with player_list = 
-                     update_player_list st new_set player_l wup "steal" p p'}
+                     update_player_list st new_set player_l w "steal" p p'})
 
 (** [winner_check_helper players winners winner_p] is the list of winners in 
     game of state [state] and the highest number of point achieved by a player 
@@ -420,7 +428,7 @@ let print_player_letter st =
 let rec print_all_player_word_list_helper st acc : unit = 
   if (acc > List.length st.player_list) 
   then () 
-  else begin print_string ("Player " ^ string_of_int acc ^ ": "); 
+  else begin print_endline ("Player " ^ string_of_int acc ^ ": "); 
     print_player_word_list st acc;
     print_all_player_word_list_helper st (acc + 1) end
 

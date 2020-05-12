@@ -252,15 +252,23 @@ let rec loopgame2 game st json rep: unit =
               loopgame2 (get_pool st') st' json false
           end
         | Steal (id, old_word, new_word) -> begin
-            match steal old_word new_word id st with 
-            | Illegal s-> print_endline s; 
-              loopgame2 game st json true;
-            | Legal st' ->  
-              begin match create new_word st' true with 
-                | Illegal s -> (ANSITerminal.(print_string [red] s));
-                  loopgame2 game st json true
-                | Legal st' -> ignore(Unix.sleep 2);ignore(Sys.command "clear");
-                  loopgame2 (get_pool st') st' json false end
+            if id = current_player st then begin
+              (ANSITerminal.(print_string [red] 
+                               "You can't steal your own word.\n")); 
+              loopgame2 game st json true end
+            else begin
+              match steal old_word new_word id st with 
+              | Illegal s-> (ANSITerminal.(print_string [red] s)); 
+                loopgame2 game st json true;
+              | Legal st' ->  
+                begin match create new_word st' true with 
+                  | Illegal s -> (ANSITerminal.(print_string [red] s));
+                    loopgame2 game st json true
+                  | Legal st' -> let points' = prev_player_points st' in
+                    action_message "create" new_word (points'-points) st;
+                    ignore(Unix.sleep 2);ignore(Sys.command "clear");
+                    loopgame2 (get_pool st') st' json false end
+            end
           end
         |_ ->  ANSITerminal.(print_string [red] "Malformed command. \
         Please use available commands.\n"; 
